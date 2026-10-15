@@ -1,0 +1,19 @@
+# Production overlay. Example:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Expected additions in prod:
+#   - mount TLS certs into nginx and enable the :443 server block
+#   - set DJANGO_DEBUG=false, strong DJANGO_SECRET_KEY, SECURE_SSL_REDIRECT=true
+#   - swap daphne for a supervised deployment behind nginx on 443
+services:
+  nginx:
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/certs:/etc/nginx/certs:ro
+    ports:
+      - "80:80"
+      # - "443:443"
+  backend:
+    environment:
+      DJANGO_DEBUG: "false"
+      SECURE_SSL_REDIRECT: "true"

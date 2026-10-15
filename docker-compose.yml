@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-officeping}
+      POSTGRES_USER: ${POSTGRES_USER:-officeping}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-officeping}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose: ["5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-officeping}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    expose: ["6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    command: >
+      sh -c "python manage.py makemigrations accounts groups message_templates notifications audit --noinput &&
+             python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 config.asgi:application"
+    expose: ["8000"]
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ""
+    depends_on:
+      - backend
+    expose: ["3000"]
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on: [backend, frontend]
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  postgres_data:

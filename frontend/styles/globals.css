@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { height: 100%; }
+body {
+  @apply bg-paper text-ink antialiased;
+  font-feature-settings: 'ss01', 'cv02', 'cv11';
+}
+
+:focus-visible {
+  @apply outline-none ring-2 ring-indigo/40 ring-offset-2 ring-offset-paper rounded-sm;
+}
+
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { @apply bg-hairline rounded-full; }
+*::-webkit-scrollbar-thumb:hover { background: #d9cfbb; }
+
+@layer components {
+  /* Display headlines use the serif at optical sizing / tighter tracking */
+  .display {
+    font-family: var(--font-fraunces), serif;
+    font-feature-settings: 'ss01';
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+  }
+
+  .surface { @apply bg-card border border-hairline rounded-xl2 shadow-paper; }
+  .surface-sunken { @apply bg-paper border border-hairline rounded-xl2; }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2
+           rounded-tool px-3.5 py-2 text-sm font-medium
+           transition-all disabled:opacity-60 disabled:cursor-not-allowed
+           select-none;
+  }
+  /* Primary institutional CTA — the muted deep blue */
+  .btn-primary { @apply btn bg-indigo text-white hover:bg-indigo-600 shadow-paper; }
+  /* The signature button for sending a ping */
+  .btn-ember   { @apply btn bg-ember text-white hover:bg-ember-600 shadow-ember; }
+  .btn-ghost   { @apply btn text-ink hover:bg-ink/5; }
+  .btn-outline { @apply btn border border-hairline bg-card text-ink hover:bg-paper; }
+  .btn-dark    { @apply btn bg-ink text-white hover:bg-slab-900; }
+
+  .input {
+    @apply block w-full rounded-tool border border-hairline bg-card
+           px-3.5 py-2.5 text-sm text-ink
+           placeholder:text-inkmute/70
+           focus:border-indigo focus:outline-none focus:ring-2 focus:ring-indigo/15;
+  }
+  .label { @apply text-xs font-medium uppercase tracking-wider text-inkmute; }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs
+           border border-hairline bg-card text-ink;
+  }
+  .eyebrow {
+    @apply text-[11px] uppercase tracking-[0.2em] text-inkmute font-medium;
+  }
+
+  /* Hairline bar below headers (editorial feel) */
+  .hairline {
+    @apply bg-hairline;
+    height: 1px;
+  }
+}
