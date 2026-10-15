@@ -33,6 +33,8 @@ module.exports = {
           600:     '#1C3253',
           700:     '#172744',
         },
+        /* Legacy alias still used by history/groups/templates/admin pages */
+        brand: '#1E3A5F',
         /* Presence */
         jade: {
           50:  '#ECFDF4',

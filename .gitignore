@@ -9,3 +9,6 @@ node_modules/
 .next/
 *.tsbuildinfo
 .DS_Store
+
+# Local browser-automation output
+.playwright-mcp/
