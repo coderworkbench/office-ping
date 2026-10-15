@@ -1,7 +1,10 @@
 'use client';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Guard } from '../../../components/Guard';
 import { apiFetch } from '../../../lib/api';
+import { useAuth } from '../../../lib/auth';
+import { ResetPasswordDialog } from '../../../components/ResetPasswordDialog';
 import { Avatar, Empty, Icon, Section, Skeleton } from '../../../components/ui';
 
 type User = {
@@ -14,6 +17,8 @@ export default function AdminUsersPage() {
 }
 
 function Inner() {
+  const { user: me } = useAuth();
+  const [resetFor, setResetFor] = useState<User | null>(null);
   const [users, setUsers] = useState<User[] | null>(null);
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState(false);
@@ -181,11 +186,23 @@ function Inner() {
                         {u.is_active ? 'Active' : 'Disabled'}
                       </span>
                     </td>
-                    <td className="py-2 px-3 text-right">
-                      <button onClick={() => toggle(u)}
-                              className="text-sm text-red-600 hover:underline">
-                        {u.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
+                    <td className="py-2 px-3 text-right whitespace-nowrap">
+                      {u.id === me?.id ? (
+                        <Link href="/account" className="text-sm text-inkmute hover:text-ink hover:underline">
+                          Change my password
+                        </Link>
+                      ) : (
+                        <>
+                          <button onClick={() => setResetFor(u)}
+                                  className="text-sm text-ink hover:underline mr-4">
+                            Reset password
+                          </button>
+                          <button onClick={() => toggle(u)}
+                                  className="text-sm text-red-600 hover:underline">
+                            {u.is_active ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -194,6 +211,8 @@ function Inner() {
           </div>
         )}
       </Section>
+
+      <ResetPasswordDialog user={resetFor} onClose={() => setResetFor(null)} />
     </div>
   );
 }

@@ -114,12 +114,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t border-white/5 p-3 flex items-center gap-2.5">
-          <Avatar name={user.full_name || user.username} size={30} />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{user.full_name}</div>
-            <div className="text-[11px] text-white/50 uppercase tracking-wider">{user.role}</div>
-          </div>
+        <div className="border-t border-white/5 p-3 flex items-center gap-1.5">
+          <Link href="/account" title="Your account"
+                className="flex-1 min-w-0 flex items-center gap-2.5 rounded-tool p-1 -m-1 hover:bg-white/5">
+            <Avatar name={user.full_name || user.username} size={30} />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium truncate">{user.full_name}</div>
+              <div className="text-[11px] text-white/50 uppercase tracking-wider">{user.role}</div>
+            </div>
+          </Link>
+          <Link href="/account" title="Change password" aria-label="Change password"
+                className={'h-8 w-8 rounded-tool grid place-items-center hover:text-white hover:bg-white/10 ' +
+                  (pathname === '/account' ? 'text-white bg-white/10' : 'text-white/60')}>
+            <Icon name="key" size={16} />
+          </Link>
           <button title="Sign out"
                   className="h-8 w-8 rounded-tool text-white/60 hover:text-white hover:bg-white/10 grid place-items-center"
                   onClick={async () => { await signOut(); router.replace('/login'); }}>
@@ -135,6 +143,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link href="/notifications" className="ml-auto h-9 w-9 rounded-tool grid place-items-center hover:bg-white/10 relative">
           <Icon name="inbox" size={16} />
           {unread > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-ember" />}
+        </Link>
+        <Link href="/account" aria-label="Change password"
+              className="h-9 w-9 rounded-tool grid place-items-center hover:bg-white/10">
+          <Icon name="key" size={16} />
         </Link>
         <button className="h-9 w-9 rounded-tool grid place-items-center hover:bg-white/10"
           onClick={async () => { await signOut(); router.replace('/login'); }}>

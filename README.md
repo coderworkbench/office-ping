@@ -30,8 +30,9 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 **Administration**
 - **Roles**: *Admin*, *HR* and *Member*, with permissions enforced on the server.
 - **User management**: create, deactivate and change the role of users from the UI.
+- **Passwords**: everyone can change their own password (key icon in the sidebar), and admins can reset a forgotten one with a generated, easy-to-read password.
 - **Groups and templates** management.
-- **Audit log** of logins, password changes, user/group/template changes, and every ping sent or acknowledged, with actor and IP.
+- **Audit log** of logins, password changes and resets, user/group/template changes, and every ping sent or acknowledged, with actor and IP.
 - **Ping history** with filters for *My sent*, *My received* and *All* (HR and admins).
 
 **Deployment**

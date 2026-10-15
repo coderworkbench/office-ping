@@ -124,6 +124,10 @@ const paths: Record<string, ReactNode> = {
     <path d="M6 10c0-3.3 2.7-6 6-6s6 2.7 6 6v4l1.5 2H4.5L6 14v-4Z" />
     <path d="M10 20a2 2 0 0 0 4 0" />
   </>,
+  key: <>
+    <circle cx="7.5" cy="15.5" r="4.5" />
+    <path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2" />
+  </>,
 };
 
 export function Icon({ name, size = 18, className = '' }:

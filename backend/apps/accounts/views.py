@@ -11,6 +11,7 @@ from .serializers import (
     UserSerializer,
     UserCreateSerializer,
     PasswordChangeSerializer,
+    AdminSetPasswordSerializer,
     DeviceSerializer,
 )
 from apps.common.permissions import IsAdmin, IsHROrAdmin
@@ -73,12 +74,27 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         return Response(UserSerializer(request.user).data)
 
+    @action(detail=True, methods=["post"], url_path="set-password",
+            permission_classes=[IsAdmin])
+    def set_password(self, request, pk=None):
+        """Admin resets a user's password (e.g. they forgot it)."""
+        user = self.get_object()
+        serializer = AdminSetPasswordSerializer(data=request.data,
+                                                context={"user": user})
+        serializer.is_valid(raise_exception=True)
+        user.set_password(serializer.validated_data["new_password"])
+        user.save(update_fields=["password"])
+        record_audit(request, "PASSWORD_RESET", target=str(user.id),
+                     metadata={"username": user.username})
+        return Response({"detail": f"Password reset for {user.username}"})
+
 
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = PasswordChangeSerializer(data=request.data)
+        serializer = PasswordChangeSerializer(data=request.data,
+                                              context={"user": request.user})
         serializer.is_valid(raise_exception=True)
         user = request.user
         if not user.check_password(serializer.validated_data["current_password"]):

@@ -84,6 +84,19 @@ export class ApiError extends Error {
   }
 }
 
+// Turn a DRF error body ({"detail": ...} or {"field": ["msg", ...]}) into one readable line.
+export function apiErrorMessage(e: unknown, fallback = 'Something went wrong. Try again.'): string {
+  if (!(e instanceof ApiError)) return fallback;
+  try {
+    const body = JSON.parse(e.message);
+    if (typeof body === 'string') return body;
+    if (body.detail) return String(body.detail);
+    const msgs = Object.values(body).flat().filter(Boolean).map(String);
+    if (msgs.length) return msgs.join(' ');
+  } catch {}
+  return fallback;
+}
+
 export async function login(username: string, password: string) {
   const r = await fetch(`${API_BASE}/api/auth/login/`, {
     method: 'POST',

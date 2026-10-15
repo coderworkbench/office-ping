@@ -7,6 +7,7 @@ class AuditLog(models.Model):
         LOGIN = "LOGIN"
         LOGOUT = "LOGOUT"
         PASSWORD_CHANGED = "PASSWORD_CHANGED"
+        PASSWORD_RESET = "PASSWORD_RESET"
         USER_CREATED = "USER_CREATED"
         USER_UPDATED = "USER_UPDATED"
         GROUP_CREATED = "GROUP_CREATED"

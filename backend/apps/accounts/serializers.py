@@ -76,7 +76,16 @@ class PasswordChangeSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=8)
 
     def validate_new_password(self, value):
-        password_validation.validate_password(value)
+        password_validation.validate_password(value, user=self.context.get("user"))
+        return value
+
+
+class AdminSetPasswordSerializer(serializers.Serializer):
+    """Admin sets a new password for another user (no current password)."""
+    new_password = serializers.CharField(min_length=8, write_only=True)
+
+    def validate_new_password(self, value):
+        password_validation.validate_password(value, user=self.context.get("user"))
         return value
 
 
