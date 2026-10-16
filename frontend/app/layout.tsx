@@ -4,7 +4,7 @@ import { Inter, Fraunces, JetBrains_Mono } from 'next/font/google';
 import { AuthProvider } from '../lib/auth';
 import { NotificationsRuntime } from '../components/NotificationsRuntime';
 import { ServiceWorkerBoot } from '../components/ServiceWorkerBoot';
-import { PingToast } from '../components/PingToast';
+import { PingAlert } from '../components/PingAlert';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const fraunces = Fraunces({
@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ServiceWorkerBoot />
         <AuthProvider>
           <NotificationsRuntime />
-          <PingToast />
+          <PingAlert />
           {children}
         </AuthProvider>
       </body>

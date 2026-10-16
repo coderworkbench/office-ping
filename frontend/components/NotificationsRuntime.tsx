@@ -38,6 +38,7 @@ export function NotificationsRuntime() {
           tag: `ping-${payload.ping_id}`,
           url: '/notifications',
           priority: payload.priority,
+          pingId: payload.ping_id,
         });
         window.dispatchEvent(new CustomEvent('op:ping', { detail: payload }));
       } else if (msg.type === 'ping_status') {

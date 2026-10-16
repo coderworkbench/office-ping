@@ -34,7 +34,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 export async function showNotification(
   title: string,
   body: string,
-  opts: { tag?: string; url?: string; priority?: 'NORMAL' | 'URGENT' } = {}
+  opts: { tag?: string; url?: string; priority?: 'NORMAL' | 'URGENT'; pingId?: number } = {}
 ) {
   if (typeof window === 'undefined') return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -48,8 +48,9 @@ export async function showNotification(
         tag: opts.tag || 'office-ping',
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',
-        requireInteraction: opts.priority === 'URGENT',
-        data: { url: opts.url || '/notifications' },
+        // Stay on screen until clicked; closed by closeNotification() once handled in-app.
+        requireInteraction: true,
+        data: { url: opts.url || '/notifications', ping_id: opts.pingId },
       });
       return;
     } catch (e) {
@@ -57,6 +58,16 @@ export async function showNotification(
     }
   }
   try {
-    new Notification(title, { body, tag: opts.tag || 'office-ping' });
+    new Notification(title, { body, tag: opts.tag || 'office-ping', requireInteraction: true });
+  } catch {}
+}
+
+// Close the OS notification for a ping once it has been handled in the app.
+export async function closeNotification(tag: string) {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const open = await reg?.getNotifications({ tag });
+    open?.forEach(n => n.close());
   } catch {}
 }

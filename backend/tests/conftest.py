@@ -1,8 +1,18 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from rest_framework.test import APIClient
 
 User = get_user_model()
+
+
+@pytest.fixture(autouse=True)
+def _clear_rate_limits():
+    # Throttle counters live in the cache; don't let one test's sends
+    # count against the next test's users.
+    cache.clear()
+    yield
+    cache.clear()
 
 
 @pytest.fixture

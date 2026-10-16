@@ -51,8 +51,8 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
     async def connect(self):
         await super().connect()
         if self.channel_name:  # accepted
-            # Send any pending (undelivered) notifications on connect
-            pending = await self._fetch_pending()
+            # Send pings that arrived while this user had no browser connected
+            pending = await database_sync_to_async(pending_notifications)(self.user.id)
             for item in pending:
                 await self.send_json({"type": "notification", "payload": item})
 
@@ -77,28 +77,6 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
     async def ping_status(self, event):
         """Status updates for the sender (delivered/seen/ack)."""
         await self.send_json({"type": "ping_status", "payload": event["payload"]})
-
-    @database_sync_to_async
-    def _fetch_pending(self):
-        from .models import PingDelivery
-        qs = PingDelivery.objects.select_related("ping", "ping__sender",
-                                                  "ping__group").filter(
-            recipient_id=self.user.id,
-            acknowledged_at__isnull=True,
-            created_at__gte=timezone.now() - timedelta(days=1),
-        ).order_by("created_at")[:50]
-        return [
-            {
-                "ping_id": d.ping_id,
-                "delivery_id": d.id,
-                "sender_name": d.ping.sender.get_full_name() or d.ping.sender.username,
-                "message": d.ping.message,
-                "priority": d.ping.priority,
-                "group_name": d.ping.group.name if d.ping.group_id else None,
-                "created_at": d.ping.created_at.isoformat(),
-            }
-            for d in qs
-        ]
 
     @database_sync_to_async
     def _mark_delivered(self, delivery_id):
@@ -160,3 +138,33 @@ class PresenceConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
             await self._touch_user()
             await self.send_json({"type": "heartbeat_ack",
                                    "server_time": timezone.now().isoformat()})
+
+
+def pending_notifications(user_id):
+    """Pings to (re)send when a recipient's browser connects.
+
+    Only deliveries that never reached a browser (no ``delivered_at``) are
+    included. Delivered-but-unacknowledged pings live in the inbox; re-sending
+    them would re-open every pop-up the user put off with "Later" on each
+    reload or reconnect.
+    """
+    from .models import PingDelivery
+    qs = PingDelivery.objects.select_related("ping", "ping__sender",
+                                              "ping__group").filter(
+        recipient_id=user_id,
+        delivered_at__isnull=True,
+        acknowledged_at__isnull=True,
+        created_at__gte=timezone.now() - timedelta(days=1),
+    ).order_by("created_at")[:50]
+    return [
+        {
+            "ping_id": d.ping_id,
+            "delivery_id": d.id,
+            "sender_name": d.ping.sender.get_full_name() or d.ping.sender.username,
+            "message": d.ping.message,
+            "priority": d.ping.priority,
+            "group_name": d.ping.group.name if d.ping.group_id else None,
+            "created_at": d.ping.created_at.isoformat(),
+        }
+        for d in qs
+    ]

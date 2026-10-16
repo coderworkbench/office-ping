@@ -19,11 +19,25 @@
 Delivery states are tracked **per recipient** so group pings can honestly
 report `Delivered: 4 / Offline: 1 / Acknowledged: 3`.
 
+## How an incoming ping is shown
+
+- **In-app pop-up** (`components/PingAlert.tsx`): the page dims and a card
+  appears in the middle of the screen. It stays until the recipient clicks
+  **Acknowledge** or **Later** (Escape). Several pings queue up, with a
+  "N more waiting · Open inbox" shortcut. We deliberately avoid a
+  full-screen takeover.
+- **Tab title** flashes `🔔 <sender>` while any ping is waiting in the pop-up.
+- **OS notification**: every ping uses `requireInteraction: true`, so it stays
+  on screen until clicked. Clicking it focuses the open Office Ping window,
+  and the service worker posts `focus-ping` so that ping's pop-up comes first.
+  Once a ping is handled in-app, its OS notification (tag `ping-<id>`) is
+  closed automatically.
+
 ## Priority
 
-- `NORMAL` → OS notification, auto-dismissable.
-- `URGENT` → `requireInteraction: true` so the notification stays until
-  explicitly dismissed. We deliberately avoid full-screen takeover.
+- `NORMAL` → pop-up with a blue accent and a two-note chime.
+- `URGENT` → jumps to the front of the queue, red pulsing pop-up, and a
+  three-note chime.
 
 ## Service worker
 

@@ -16,12 +16,14 @@ from apps.audit.utils import record_audit
 
 
 class PingThrottleMixin:
-    """Elevated users get a higher ping-send rate."""
+    """Rate-limit sending pings (not reading them); elevated users get more."""
 
     throttle_scope = "ping_send"
 
     def get_throttles(self):
-        if self.action == "create" and getattr(self.request, "user", None):
+        if self.action != "create":
+            return []
+        if getattr(self.request, "user", None):
             if self.request.user.is_authenticated and self.request.user.role in (
                 "ADMIN",
                 "HR",

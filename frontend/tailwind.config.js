@@ -64,11 +64,28 @@ module.exports = {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(22, 163, 74, 0.55)' },
           '50%':      { boxShadow: '0 0 0 6px rgba(22, 163, 74, 0)' },
         },
+        popIn: {
+          from: { transform: 'scale(.92)', opacity: 0 },
+          to:   { transform: 'scale(1)',   opacity: 1 },
+        },
+        alertPulse: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(220, 38, 38, 0.55)' },
+          '50%':      { boxShadow: '0 0 0 18px rgba(220, 38, 38, 0)' },
+        },
+        ring: {
+          '0%, 60%, 100%': { transform: 'rotate(0)' },
+          '10%, 30%':      { transform: 'rotate(-14deg)' },
+          '20%, 40%':      { transform: 'rotate(14deg)' },
+        },
       },
       animation: {
         slideIn:  'slideIn 240ms cubic-bezier(.2,.6,.2,1)',
         fadeIn:   'fadeIn 220ms ease-out',
         pulseDot: 'pulseDot 1.9s ease-in-out infinite',
+        popIn:    'popIn 260ms cubic-bezier(.2,.8,.2,1.2)',
+        /* urgent pop-up: pop in, then keep pulsing a red halo */
+        alertPulse: 'popIn 260ms cubic-bezier(.2,.8,.2,1.2), alertPulse 1.6s ease-in-out 260ms infinite',
+        ring:     'ring 1.8s ease-in-out infinite',
       },
     },
   },
