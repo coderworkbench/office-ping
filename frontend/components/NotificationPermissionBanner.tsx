@@ -20,12 +20,12 @@ export function NotificationPermissionBanner() {
   return (
     <div className="mb-6 animate-slideIn">
       <div className={
-        'rounded-tool border px-3.5 py-2.5 text-sm flex items-center gap-3 ' +
-        (denied ? 'bg-ember/5 text-ember border-ember/30'
-                : 'bg-paper text-ink border-hairline')
+        'flex flex-wrap items-center gap-3 rounded-2xl border px-3.5 py-3 text-sm ' +
+        (denied ? 'border-rose/30 bg-rose-soft text-rose'
+                : 'border-gold-fill/50 bg-gold-soft text-ink')
       }>
-        <span className={'h-8 w-8 rounded-tool grid place-items-center shrink-0 ' +
-                         (denied ? 'bg-ember/10 text-ember' : 'bg-card border border-hairline')}
+        <span className={'grid h-9 w-9 shrink-0 place-items-center rounded-xl ' +
+                         (denied ? 'bg-surface/70' : 'bg-surface')}
               aria-hidden>🔔</span>
         {denied ? (
           <span>
@@ -33,7 +33,7 @@ export function NotificationPermissionBanner() {
             address bar → <b>Notifications → Allow</b>, then reload.
           </span>
         ) : (
-          <span>Enable desktop notifications so pings pop up even when this tab is in the background.</span>
+          <span className="min-w-0 flex-1 basis-56">Enable desktop notifications so pings pop up even when this tab is in the background.</span>
         )}
         {!denied && (
           <button
@@ -45,7 +45,7 @@ export function NotificationPermissionBanner() {
                   { tag: 'test', url: '/notifications' });
               }
             }}
-            className="ml-auto btn-dark !py-1"
+            className="btn-primary btn-sm w-full sm:ml-auto sm:w-auto"
           >Enable</button>
         )}
       </div>

@@ -37,7 +37,9 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 1. Open **https://ping.tejgyan.org** in Chrome or Edge.
 2. Sign in with the username and password your admin gave you. There is no sign-up page: an admin creates every account.
 3. When the banner at the top of the page asks, click **Enable**, then **Allow** in the browser's pop-up. This lets pings show as desktop notifications.
-4. Change the password your admin gave you: click the **key icon** at the bottom of the sidebar (see *Your password*).
+4. Change the password your admin gave you (see *Your password*).
+
+**Finding your way around.** On a computer, every page is in the dark sidebar on the left. On a phone or tablet, the main pages (Overview, People, Inbox, History) are in the bar at the bottom of the screen, and everything else, including Help, Change password and Sign out, is under **More**.
 
 > 💡 **Keep Office Ping open.** You only receive alerts while an Office Ping tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: right-click the tab and choose **Pin**, or install it as an app: in Chrome, menu → **Install Office Ping**; in Edge, menu → **Apps → Install Office Ping**.
 
@@ -89,7 +91,7 @@ If several pings arrive, they're shown one at a time. Click **N more waiting · 
 
 ## Inbox
 
-The Inbox lists every ping sent to you. The red number next to **Inbox** in the sidebar is how many you haven't read.
+The Inbox lists every ping sent to you. The number next to **Inbox** (in the sidebar, or on the bottom bar on a phone) is how many you haven't read.
 
 - **All / Unread** switches between everything and only unread pings.
 - **Acknowledge** on a ping tells the sender you've got it.
@@ -113,13 +115,13 @@ Pings to a group show progress such as **2/3 delivered · 1 ack**.
 
 ## Your password
 
-1. Click the **key icon** at the bottom of the sidebar.
+1. On a computer, click the **key icon** at the bottom of the sidebar. On a phone, tap **More → Change password**.
 2. Enter your current password, then your new password twice.
 3. Click **Change password**. Use the new password next time you sign in.
 
 Passwords need at least 8 characters and can't be a common password, only numbers, or too close to your name.
 
-**Forgot your password?** Ask an admin to reset it. They'll give you a temporary password; change it straight away with the key icon.
+**Forgot your password?** Ask an admin to reset it. They'll give you a temporary password; change it straight away under **Change password**.
 
 <a id="troubleshooting"></a>
 
@@ -173,7 +175,7 @@ Go to **Admin → Users**.
 
 1. Under **Create a new user**, fill in username, email, a starting password (8+ characters), name, department and role.
 2. Click **Create user**, then give the person their username and starting password privately.
-3. Ask them to change the password with the key icon after their first sign-in.
+3. Ask them to change the password under **Change password** after their first sign-in.
 
 | Role | Can do |
 |---|---|
@@ -194,7 +196,7 @@ Go to **Admin → Users**.
 1. On **Admin → Users**, click **Reset password** in the person's row.
 2. A strong, easy-to-read password is suggested (for example *Kp7m-Qx4z-Rt9w*). Click **Generate** for another, or type your own.
 3. Click **Copy**, then **Reset password**.
-4. Give the new password to the person privately (in person or by phone, not in a group chat), and ask them to change it with the key icon.
+4. Give the new password to the person privately (in person or by phone, not in a group chat), and ask them to change it under **Change password**.
 
 The old password stops working immediately, and the reset is recorded in the audit log (the password itself is never stored there).
 

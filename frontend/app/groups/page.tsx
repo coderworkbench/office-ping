@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Guard } from '../../components/Guard';
 import { apiFetch } from '../../lib/api';
-import { Avatar, Empty, Icon, Section, Skeleton } from '../../components/ui';
+import { Avatar, Empty, Icon, PageHeader, Section, Skeleton } from '../../components/ui';
 
 type Group = { id: number; name: string; description: string; member_count: number;
   members: { id: number; user: number; user_name: string }[] };
@@ -56,34 +56,33 @@ function Inner() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Groups</h1>
-        <p className="text-sm text-slate-500">
-          {groups ? `${groups.length} groups` : 'Loading…'} · Broadcast pings to teams at once.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Broadcast"
+        title="Groups"
+        lead={<>{groups ? `${groups.length} groups` : 'Loading…'} · Ping a whole team at once.</>}
+      />
 
       <Section title="Create a new group">
-        <form onSubmit={create} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-2">
-          <input value={name} onChange={e => setName(e.target.value)}
+        <form onSubmit={create} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_2fr_auto]">
+          <input value={name} onChange={e => setName(e.target.value)} aria-label="Group name"
                  placeholder="e.g. Backend Team" className="input" required />
-          <input value={desc} onChange={e => setDesc(e.target.value)}
+          <input value={desc} onChange={e => setDesc(e.target.value)} aria-label="Description"
                  placeholder="Short description (optional)" className="input" />
-          <button disabled={busy} className="btn-primary">
-            <Icon name="group" size={14} /> Create
+          <button disabled={busy} className="btn-primary min-h-[44px]">
+            <Icon name="group" size={16} /> Create
           </button>
         </form>
       </Section>
 
       {!groups && (
         <div className="space-y-2">
-          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
+          {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}
         </div>
       )}
 
       {groups && groups.length === 0 && (
         <Section>
-          <Empty icon={<Icon name="group" size={20} />}
+          <Empty icon={<Icon name="group" size={22} />}
                  title="No groups yet"
                  hint="Create one above to start broadcasting." />
         </Section>
@@ -92,42 +91,42 @@ function Inner() {
       {groups && groups.length > 0 && (
         <ul className="space-y-3">
           {groups.map(g => (
-            <li key={g.id} className="card p-4 animate-fadeIn">
+            <li key={g.id} className="surface p-4 sm:p-5 animate-fadeIn">
               <header className="flex items-start gap-3">
-                <span className="h-10 w-10 rounded-lg bg-brand/10 text-brand grid place-items-center">
-                  <Icon name="group" size={18} />
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-inset text-brand">
+                  <Icon name="group" size={20} />
                 </span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold">{g.name}</div>
-                  <div className="text-xs text-slate-500">
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate text-base font-bold text-ink">{g.name}</h2>
+                  <div className="text-[13px] text-ink-2">
                     {g.member_count} {g.member_count === 1 ? 'member' : 'members'}
                     {g.description ? ` · ${g.description}` : ''}
                   </div>
                 </div>
-                <button onClick={() => del(g.id)}
-                        className="text-sm text-red-600 hover:underline">Delete</button>
+                <button onClick={() => del(g.id)} className="btn-danger btn-sm -mr-2">Delete</button>
               </header>
 
-              <div className="mt-3 flex flex-wrap gap-1.5">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {g.members.map(m => (
-                  <span key={m.id} className="chip pr-1">
-                    <Avatar name={m.user_name} size={18} />
-                    <span>{m.user_name}</span>
+                  <span key={m.id} className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-full bg-inset py-0.5 pl-1 pr-0.5 text-[13px] font-semibold text-ink-2">
+                    <Avatar name={m.user_name} size={22} />
+                    <span className="truncate">{m.user_name}</span>
                     <button onClick={() => removeMember(g.id, m.user)}
-                            className="ml-0.5 h-5 w-5 rounded-full hover:bg-red-100 text-red-500 grid place-items-center"
-                            aria-label={`Remove ${m.user_name}`}>×</button>
+                            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base text-ink-3 hover:bg-rose-soft hover:text-rose [@media(pointer:coarse)]:h-10 [@media(pointer:coarse)]:w-10"
+                            aria-label={`Remove ${m.user_name} from ${g.name}`}>×</button>
                   </span>
                 ))}
                 {g.members.length === 0 && (
-                  <span className="text-xs text-slate-400">No members yet.</span>
+                  <span className="text-[13px] text-ink-3">No members yet.</span>
                 )}
               </div>
 
               <div className="mt-3">
                 <select
                   defaultValue=""
+                  aria-label={`Add a member to ${g.name}`}
                   onChange={e => { if (e.target.value) { addMember(g.id, Number(e.target.value)); e.target.value = ''; } }}
-                  className="input md:w-72">
+                  className="input sm:w-72">
                   <option value="">+ Add member…</option>
                   {users.filter(u => !g.members.some(m => m.user === u.id))
                     .map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}

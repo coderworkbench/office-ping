@@ -35,6 +35,10 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 - **Audit log** of logins, password changes and resets, user/group/template changes, and every ping sent or acknowledged, with actor and IP.
 - **Ping history** with filters for *My sent*, *My received* and *All* (HR and admins).
 
+**Design**
+- **Sunbeam theme**: the TGF design system (warm cream, gold accent, Noto Sans), shared with Khoji Connect.
+- **Responsive**: a navigation rail on desktop; on phones and tablets a bottom tab bar, bottom-sheet dialogs and card layouts instead of wide tables. Large tap targets, keyboard focus rings and reduced-motion support.
+
 **Deployment**
 - **One `docker compose` stack**: Postgres, Redis, Django/Daphne, Next.js and nginx.
 - **Built for a LAN**: no external services or cloud accounts needed. See [deployment-lan.md](docs/deployment-lan.md).
@@ -50,12 +54,18 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 | **User management (admin)**<br>![Users](docs/screenshots/09-users.png) | **Audit log (admin)**<br>![Audit log](docs/screenshots/10-audit.png) |
 | **Sign in**<br>![Login](docs/screenshots/01-login.png) | |
 
+**On a phone**
+
+| | |
+|---|---|
+| ![Dashboard on a phone](docs/screenshots/12-mobile-dashboard.png) | ![Inbox on a phone](docs/screenshots/13-mobile-inbox.png) |
+
 *All screenshots use the seeded demo data from `make seed`.*
 
 ## Stack
 
 - **Backend:** Django 5, Django REST Framework, Django Channels, PostgreSQL, Redis
-- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS, PWA (service worker)
+- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS with the Sunbeam design tokens, PWA (service worker)
 - **Transport:** REST for CRUD + history, WebSocket (`/ws/notifications/`, `/ws/presence/`) for real-time
 - **Infra:** Docker Compose, nginx reverse proxy
 

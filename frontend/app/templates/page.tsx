@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Guard } from '../../components/Guard';
 import { apiFetch } from '../../lib/api';
-import { Empty, Icon, Section, Skeleton } from '../../components/ui';
+import { Empty, Icon, PageHeader, Section, Skeleton } from '../../components/ui';
 
 type T = { id: number; title: string; message: string };
 
@@ -39,23 +39,21 @@ function Inner() {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Templates</h1>
-        <p className="text-sm text-slate-500">
-          {items ? `${items.length} templates` : 'Loading…'} ·
-          {' '}Reusable messages your team can send with one click.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Broadcast"
+        title="Templates"
+        lead={<>{items ? `${items.length} templates` : 'Loading…'} · Ready-made messages everyone can send with one click.</>}
+      />
 
       <Section title="Add a template">
-        <form onSubmit={create} className="grid grid-cols-1 md:grid-cols-[1fr_2fr_auto] gap-2">
-          <input value={title} onChange={e => setTitle(e.target.value)}
+        <form onSubmit={create} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_2fr_auto]">
+          <input value={title} onChange={e => setTitle(e.target.value)} aria-label="Short title"
                  placeholder="Short title" className="input" required />
-          <input value={msg} onChange={e => setMsg(e.target.value)}
+          <input value={msg} onChange={e => setMsg(e.target.value)} aria-label="Message"
                  placeholder="Message body (what the recipient will see)"
                  className="input" required />
-          <button disabled={busy} className="btn-primary">
-            <Icon name="send" size={14} /> Add
+          <button disabled={busy} className="btn-primary min-h-[44px]">
+            <Icon name="send" size={16} /> Add
           </button>
         </form>
       </Section>
@@ -63,7 +61,7 @@ function Inner() {
       {!items && (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) =>
-            <Skeleton key={i} className="h-14 rounded-xl" />)}
+            <Skeleton key={i} className="h-14 rounded-2xl" />)}
         </div>
       )}
 
@@ -76,18 +74,17 @@ function Inner() {
 
       {items && items.length > 0 && (
         <Section title={`${items.length} templates`}>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-line-2">
             {items.map(t => (
-              <li key={t.id} className="py-3 flex items-start gap-3">
-                <span className="h-9 w-9 rounded-lg bg-brand/10 text-brand grid place-items-center shrink-0">
+              <li key={t.id} className="flex items-start gap-3 py-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-inset text-brand">
                   <Icon name="send" size={16} />
                 </span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium">{t.title}</div>
-                  <div className="text-sm text-slate-600 break-words">{t.message}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-ink">{t.title}</div>
+                  <div className="break-words text-[13px] text-ink-2">{t.message}</div>
                 </div>
-                <button onClick={() => del(t.id)}
-                        className="text-sm text-red-600 hover:underline">Delete</button>
+                <button onClick={() => del(t.id)} className="btn-danger btn-sm -mr-2">Delete</button>
               </li>
             ))}
           </ul>

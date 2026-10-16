@@ -1,21 +1,21 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 
-// ---------- Page header (editorial) ----------
+// ---------- Page header (Sunbeam page scale: H1 36px/800, 28px on phones) ----------
 export function PageHeader({ eyebrow, title, lead, actions }: {
   eyebrow?: string; title: ReactNode; lead?: ReactNode; actions?: ReactNode;
 }) {
   return (
-    <header className="mb-8 flex items-end gap-6 flex-wrap">
-      <div className="flex-1 min-w-0">
-        {eyebrow && <div className="eyebrow mb-2">{eyebrow}</div>}
-        <h1 className="display text-[clamp(2rem,4vw,2.75rem)] font-medium">
+    <header className="mb-6 flex flex-wrap items-end gap-4 lg:mb-8">
+      <div className="min-w-0 flex-1 basis-64">
+        {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
+        <h1 className="display text-[28px] text-ink sm:text-[32px] lg:text-[36px]">
           {title}
         </h1>
-        {lead && <p className="mt-2 text-inkmute max-w-2xl">{lead}</p>}
+        {lead && <p className="mt-2 max-w-2xl text-[15px] text-ink-2 sm:text-base">{lead}</p>}
       </div>
-      {actions && <div className="shrink-0 flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }
@@ -28,8 +28,8 @@ export function Section({ title, actions, children, className = '', surface = tr
   const inner = (
     <>
       {(title || actions) && (
-        <header className="flex items-center justify-between mb-4">
-          {title && <h2 className="display text-xl font-medium">{title}</h2>}
+        <header className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          {title && <h2 className="text-lg font-bold text-ink">{title}</h2>}
           {actions}
         </header>
       )}
@@ -37,21 +37,25 @@ export function Section({ title, actions, children, className = '', surface = tr
     </>
   );
   return surface
-    ? <section className={'surface p-5 lg:p-6 animate-fadeIn ' + className}>{inner}</section>
+    ? <section className={'surface p-4 sm:p-5 lg:p-6 animate-fadeIn ' + className}>{inner}</section>
     : <section className={'animate-fadeIn ' + className}>{inner}</section>;
 }
 
 // ---------- Avatar ----------
-export function Avatar({ name, size = 36, online }: { name: string; size?: number; online?: boolean }) {
+export function Avatar({ name, size = 36, online, tone }: {
+  name: string; size?: number; online?: boolean;
+  /** 'gold' = Sunbeam account avatar (--gold-fill with --on-gold initials). */
+  tone?: 'gold';
+}) {
   const initials = name
     .split(' ').filter(Boolean).slice(0, 2)
     .map(w => w[0]?.toUpperCase() || '').join('') || '?';
-  // Warm, muted palette — low saturation so they live well on paper
-  const palette = ['#C9BFA7', '#D7B88B', '#B7C2A3', '#A7BCCB', '#C7A7BF', '#E0B4A1', '#B8A79A'];
-  const bg = palette[Math.abs(hash(name)) % palette.length];
-  const fg = '#0F172A';
+  // Warm tints from the Sunbeam family so avatars sit calmly on cream.
+  const palette = ['#FBF1C6', '#F3E1C7', '#E9E2C3', '#F0E4B8', '#EADBB0', '#F5E6CF', '#E6DCC4'];
+  const bg = tone === 'gold' ? '#F6C62C' : palette[Math.abs(hash(name)) % palette.length];
+  const fg = '#3A2F05';
   return (
-    <span className="relative inline-flex items-center justify-center shrink-0 select-none font-medium"
+    <span className="relative inline-flex items-center justify-center shrink-0 select-none font-bold"
       style={{ width: size, height: size, borderRadius: size / 2,
                background: bg, color: fg, fontSize: size * 0.38 }}
       aria-hidden>
@@ -66,8 +70,8 @@ export function PresenceDot({ online }: { online: boolean }) {
     <span
       aria-label={online ? 'Online' : 'Offline'}
       className={
-        'absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-card ' +
-        (online ? 'bg-jade animate-pulseDot' : 'bg-inkmute/50')
+        'absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-surface ' +
+        (online ? 'bg-success animate-pulseDot' : 'bg-ink-3/60')
       }
     />
   );
@@ -129,6 +133,11 @@ const paths: Record<string, ReactNode> = {
     <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.5v.4" />
     <path d="M12 17h.01" />
   </>,
+  more: <>
+    <circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+    <circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none" />
+  </>,
   key: <>
     <circle cx="7.5" cy="15.5" r="4.5" />
     <path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2" />
@@ -149,18 +158,105 @@ export function Icon({ name, size = 18, className = '' }:
 
 // ---------- Skeleton ----------
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={'animate-pulse rounded-md bg-hairline/80 ' + className} />;
+  return <div className={'animate-pulse rounded-md bg-inset ' + className} />;
 }
 
 // ---------- Empty state ----------
 export function Empty({ icon, title, hint }: { icon?: ReactNode; title: string; hint?: ReactNode }) {
   return (
-    <div className="text-center py-12">
-      <div className="mx-auto h-11 w-11 rounded-full bg-paper border border-hairline flex items-center justify-center text-inkmute">
-        {icon || <Icon name="inbox" size={20} />}
+    <div className="py-12 text-center">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border border-line bg-surface-2 text-ink-3">
+        {icon || <Icon name="inbox" size={22} />}
       </div>
-      <p className="mt-3 display text-lg">{title}</p>
-      {hint && <p className="mt-1 text-sm text-inkmute">{hint}</p>}
+      <p className="mt-3 text-base font-bold text-ink">{title}</p>
+      {hint && <p className="mt-1 text-sm text-ink-2">{hint}</p>}
+    </div>
+  );
+}
+
+// ---------- Modal frame (Sunbeam §17) ----------
+// A bottom sheet on phones, a centred panel from 640px up. Scrim click and
+// Escape are handled by the caller (onClose); body scroll is locked while open.
+export function ModalFrame({ onClose, labelledBy, bar = 'gold', role = 'dialog', children }: {
+  onClose: () => void;
+  labelledBy: string;
+  /** 6px brand bar across the top (§17.1). */
+  bar?: 'gold' | 'none';
+  role?: 'dialog' | 'alertdialog';
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 animate-fadeIn sm:items-center sm:p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        role={role} aria-modal="true" aria-labelledby={labelledBy}
+        className="flex max-h-[92vh] max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl border border-line
+                   bg-surface shadow-2xl animate-sheetUp sm:max-w-lg sm:rounded-2xl sm:animate-popIn"
+      >
+        {bar === 'gold' && <div className="h-1.5 shrink-0 bg-gold-fill" aria-hidden />}
+        <div className="overflow-y-auto overscroll-contain p-5 sm:p-6"
+             style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Close (×) button for a modal header — 44px hit area (§17.1, §22).
+export function CloseButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label="Close"
+      className="-mr-2 -mt-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-xl leading-none text-ink-3 hover:bg-line-2 hover:text-ink-2">
+      ×
+    </button>
+  );
+}
+
+// ---------- Status pill (§10.5): soft fill + text + leading dot ----------
+const STATUS: Record<string, { label: string; cls: string; dot: string }> = {
+  SENT:         { label: 'Sent',         cls: 'bg-inset text-ink-2',          dot: 'bg-ink-3' },
+  DELIVERED:    { label: 'Delivered',    cls: 'bg-brand-soft text-brand',     dot: 'bg-gold' },
+  SEEN:         { label: 'Seen',         cls: 'bg-brand-soft text-brand',     dot: 'bg-gold' },
+  ACKNOWLEDGED: { label: 'Acknowledged', cls: 'bg-success-soft text-success', dot: 'bg-success' },
+};
+export function StatusPill({ status }: { status: string }) {
+  const s = STATUS[status] || { label: status, cls: 'bg-inset text-ink-2', dot: 'bg-ink-3' };
+  return (
+    <span className={'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold ' + s.cls}>
+      <span className={'h-1.5 w-1.5 rounded-full ' + s.dot} aria-hidden />{s.label}
+    </span>
+  );
+}
+// Urgent is a status, so it stays red (live), never gold.
+export function UrgentPill() {
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-live-soft px-2 py-0.5 text-xs font-bold text-live">
+      <span className="h-1.5 w-1.5 rounded-full bg-live" aria-hidden />Urgent
+    </span>
+  );
+}
+
+// ---------- Segmented control (§15.4) ----------
+export function Segmented<T extends string>({ value, options, onChange, label }: {
+  value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; label: string;
+}) {
+  return (
+    <div role="group" aria-label={label} className="inline-flex gap-1 rounded-lg border border-line bg-surface-2 p-1">
+      {options.map(o => (
+        <button key={o.value} type="button" onClick={() => onChange(o.value)} aria-pressed={value === o.value}
+          className={'min-h-[36px] rounded-md px-3.5 text-sm font-semibold transition-colors duration-150 ' +
+            (value === o.value ? 'bg-gold-soft text-brand shadow-sm' : 'text-ink-2 hover:text-ink')}>
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }

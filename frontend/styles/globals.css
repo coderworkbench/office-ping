@@ -2,65 +2,168 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body { height: 100%; }
-body {
-  @apply bg-paper text-ink antialiased;
-  font-feature-settings: 'ss01', 'cv02', 'cv11';
+/* Sunbeam design system (TGF) — see w-lms-platform UI_DESIGN_SYSTEM.md.
+ * Values match khoji-connect styles/sunbeam.css, including its 2026-08 AA
+ * contrast fixes (--ink-3, --success, --warn, --rose).
+ * RGB triples so Tailwind can add alpha: bg-gold-fill/40. */
+:root {
+  /* surfaces */
+  --bg:           255 251 234;   /* #FFFBEA warm cream — never white  */
+  --surface:      255 255 255;
+  --surface-2:    255 253 242;
+  --inset:        251 241 198;
+
+  /* ink and lines */
+  --ink:           36  27   4;
+  --ink-2:        110  90  30;
+  --ink-3:        125 109  53;
+  --line:         240 228 184;
+  --line-2:       248 240 212;
+
+  /* brand */
+  --brand:         58  47   5;
+  --brand-deep:    42  34   3;
+  --brand-soft:   252 239 190;
+  --on-gold:       58  47   5;
+
+  /* the accent is a FILL, never text on a light surface (§2.3) */
+  --gold-fill:    246 198  44;
+  --gold-bright:  250 212  92;
+  --gold-soft:    255 244 205;
+  --gold:         150 108   4;   /* the only gold allowed as text */
+
+  /* navigation rail */
+  --sidebar:       51  35  10;
+  --sidebar-2:     74  52  16;
+  --sidebar-active:150 108  4;
+
+  /* status — deliberately outside the gold family */
+  --success:       17 120  77;   --success-soft: 219 243 232;
+  --warn:         150  96   6;   --warn-soft:    251 237 212;
+  --rose:         196  30  78;   --rose-soft:    251 224 231;
+  --rose-deep:    150  18  56;
+  --live:         220  31  83;   --live-soft:    252 225 232;
+
+  /* §2.6 — gold as LIGHT for room-sized bands: a glow over near-white,
+     never a solid --gold-fill. The -stack variant re-centres it for phones. */
+  --hero-aura:
+    radial-gradient(circle at 30% 10%, rgba(255, 207, 48, .65) 0%, rgba(255, 215, 75, .30) 30%,
+                    rgba(255, 250, 232, .08) 65%, transparent 72%),
+    linear-gradient(#FFFAF0, #FFFAF0);
+  --hero-aura-stack:
+    radial-gradient(circle at 50% 0%, rgba(255, 207, 48, .58) 0%, rgba(255, 215, 75, .26) 32%,
+                    rgba(255, 250, 232, .06) 68%, transparent 74%),
+    linear-gradient(#FFFAF0, #FFFAF0);
+
+  --ring: 0 0 0 2px rgb(58 47 5 / .30), 0 0 0 4px rgb(246 198 44 / .60);
+
+  color-scheme: light;   /* §1.1 — there is no dark mode */
 }
 
-:focus-visible {
-  @apply outline-none ring-2 ring-indigo/40 ring-offset-2 ring-offset-paper rounded-sm;
+html, body { height: 100%; }
+body {
+  @apply bg-page text-ink font-sans antialiased;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* §7.4 — one focus ring everywhere: dark edge + gold halo, keyboard only. */
+:where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 *::-webkit-scrollbar { width: 10px; height: 10px; }
-*::-webkit-scrollbar-thumb { @apply bg-hairline rounded-full; }
-*::-webkit-scrollbar-thumb:hover { background: #d9cfbb; }
+*::-webkit-scrollbar-thumb { background: rgb(var(--line)); border-radius: 9999px; }
+*::-webkit-scrollbar-thumb:hover { background: rgb(var(--ink-3) / .5); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
 
 @layer components {
-  /* Display headlines use the serif at optical sizing / tighter tracking */
+  /* Headings: Noto Sans extrabold. Sunbeam ships no italic and no serif. */
   .display {
-    font-family: var(--font-fraunces), serif;
-    font-feature-settings: 'ss01';
-    letter-spacing: -0.015em;
-    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    text-wrap: balance;
   }
 
-  .surface { @apply bg-card border border-hairline rounded-xl2 shadow-paper; }
-  .surface-sunken { @apply bg-paper border border-hairline rounded-xl2; }
+  .hero-aura { background-image: var(--hero-aura-stack); }
+  @media (min-width: 768px) { .hero-aura { background-image: var(--hero-aura); } }
 
+  /* §5.2 — every surface has a 1px line border; shadow alone vanishes on cream. */
+  .surface        { @apply bg-surface border border-line rounded-2xl shadow-sm; }
+  .surface-sunken { @apply bg-surface-2 border border-line rounded-2xl; }
+
+  /* §9 — md buttons: 40px (44px on touch), radius 14px, 14/600, never wrap. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2
-           rounded-tool px-3.5 py-2 text-sm font-medium
-           transition-all disabled:opacity-60 disabled:cursor-not-allowed
-           select-none;
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap select-none
+           min-h-[40px] px-4 py-2 rounded-btn border text-sm font-semibold
+           transition-colors duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  /* Primary institutional CTA — the muted deep blue */
-  .btn-primary { @apply btn bg-indigo text-white hover:bg-indigo-600 shadow-paper; }
-  /* The signature button for sending a ping */
-  .btn-ember   { @apply btn bg-ember text-white hover:bg-ember-600 shadow-ember; }
-  .btn-ghost   { @apply btn text-ink hover:bg-ink/5; }
-  .btn-outline { @apply btn border border-hairline bg-card text-ink hover:bg-paper; }
-  .btn-dark    { @apply btn bg-ink text-white hover:bg-slab-900; }
+  @media (pointer: coarse) { .btn { min-height: 44px; } }
+  .btn-sm { @apply min-h-[36px] px-3.5 py-1.5 rounded-lg text-[13.5px]; }
 
+  /* Primary: gold fill + dark label; inverts on hover (pointer only) and press. */
+  .btn-primary {
+    @apply btn bg-gold-fill text-on-gold border-gold-fill
+           hover:bg-brand hover:text-gold-fill hover:border-brand
+           active:bg-brand active:text-gold-fill active:border-brand;
+  }
+  /* Secondary / outline: gold border, brand label. */
+  .btn-secondary {
+    @apply btn bg-transparent text-brand border-gold-fill
+           hover:bg-gold-soft hover:border-gold active:bg-gold-soft active:border-gold;
+  }
+  /* Neutral: in-card secondary on a white surface. */
+  .btn-neutral {
+    @apply btn bg-surface text-ink border-line hover:bg-inset active:bg-inset;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink-2 border-transparent
+           hover:bg-inset hover:text-ink active:bg-inset;
+  }
+  .btn-danger {
+    @apply btn bg-transparent text-rose border-transparent
+           hover:bg-rose-soft active:bg-rose-soft;
+  }
+
+  /* §11.1 — 44px inputs, radius 12px. 16px text on phones stops iOS zooming in. */
   .input {
-    @apply block w-full rounded-tool border border-hairline bg-card
-           px-3.5 py-2.5 text-sm text-ink
-           placeholder:text-inkmute/70
-           focus:border-indigo focus:outline-none focus:ring-2 focus:ring-indigo/15;
+    @apply block w-full min-h-[44px] rounded-xl border border-line bg-surface
+           px-3 py-2.5 text-base sm:text-sm text-ink
+           placeholder:text-ink-3
+           focus:border-brand focus:outline-none focus:shadow-ring
+           disabled:bg-surface-2 disabled:text-ink-3 disabled:cursor-not-allowed;
   }
-  .label { @apply text-xs font-medium uppercase tracking-wider text-inkmute; }
+  .label { @apply block text-[13px] font-semibold text-ink-2; }
 
+  /* §10.2 meta pill (non-interactive). */
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs
-           border border-hairline bg-card text-ink;
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full
+           px-2 py-0.5 text-[11px] font-semibold bg-inset text-ink-2;
   }
-  .eyebrow {
-    @apply text-[11px] uppercase tracking-[0.2em] text-inkmute font-medium;
+  /* §10.1 filter chip (interactive). Add .is-active for the selected state. */
+  .chip-btn {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border
+           min-h-[36px] px-3.5 py-1.5 text-[13px] font-bold
+           border-line bg-surface text-ink-2 transition-colors duration-150
+           hover:border-gold-fill hover:text-ink;
   }
+  .chip-btn.is-active { @apply bg-gold-fill border-gold-fill text-on-gold; }
+  @media (pointer: coarse) { .chip-btn { min-height: 44px; } }
 
-  /* Hairline bar below headers (editorial feel) */
-  .hairline {
-    @apply bg-hairline;
-    height: 1px;
+  /* Uppercase is reserved for eyebrows and table headers (§3.1). */
+  .eyebrow {
+    @apply text-[11px] font-extrabold uppercase tracking-wide text-gold;
+  }
+  .th {
+    @apply text-[12px] font-semibold uppercase tracking-wide text-ink-3;
   }
 }

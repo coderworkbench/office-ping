@@ -5,7 +5,7 @@ import { Guard } from '../../../components/Guard';
 import { apiFetch } from '../../../lib/api';
 import { useAuth } from '../../../lib/auth';
 import { ResetPasswordDialog } from '../../../components/ResetPasswordDialog';
-import { Avatar, Empty, Icon, Section, Skeleton } from '../../../components/ui';
+import { Avatar, Empty, Icon, PageHeader, Section, Skeleton } from '../../../components/ui';
 
 type User = {
   id: number; username: string; email: string; full_name: string;
@@ -67,27 +67,55 @@ function Inner() {
     );
   }, [users, q]);
 
+  const RoleSelect = ({ u }: { u: User }) => (
+    <select value={u.role} onChange={e => changeRole(u, e.target.value as any)}
+            aria-label={`Role for ${u.full_name || u.username}`}
+            className="input !min-h-[40px] w-32 !py-1.5 !text-sm">
+      <option value="MEMBER">Member</option>
+      <option value="HR">HR</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+  );
+  const ActiveBadge = ({ u }: { u: User }) => (
+    <span className={'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold ' +
+      (u.is_active ? 'bg-success-soft text-success' : 'bg-inset text-ink-2')}>
+      <span className={'h-1.5 w-1.5 rounded-full ' + (u.is_active ? 'bg-success' : 'bg-ink-3')} aria-hidden />
+      {u.is_active ? 'Active' : 'Deactivated'}
+    </span>
+  );
+  const Actions = ({ u }: { u: User }) => u.id === me?.id ? (
+    <Link href="/account" className="btn-ghost btn-sm">Change my password</Link>
+  ) : (
+    <div className="flex flex-wrap gap-1">
+      <button onClick={() => setResetFor(u)} className="btn-neutral btn-sm">
+        <Icon name="key" size={14} /> Reset password
+      </button>
+      <button onClick={() => toggle(u)} className={u.is_active ? 'btn-danger btn-sm' : 'btn-secondary btn-sm'}>
+        {u.is_active ? 'Deactivate' : 'Activate'}
+      </button>
+    </div>
+  );
+
   return (
     <div className="space-y-6 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="text-sm text-slate-500">
-          {users ? `${users.length} total` : 'Loading…'} · Only admins can create users or change roles.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Admin"
+        title="Users"
+        lead={<>{users ? `${users.length} total` : 'Loading…'} · Only admins can create users or change roles.</>}
+      />
 
       <Section title="Create a new user">
-        <form onSubmit={create} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <form onSubmit={create} className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <Field label="Username">
-            <input className="input" placeholder="jsmith" value={form.username}
+            <input className="input" placeholder="jsmith" value={form.username} autoCapitalize="none"
                    onChange={e => setForm({ ...form, username: e.target.value })} required />
           </Field>
           <Field label="Email">
             <input className="input" type="email" placeholder="jsmith@example.com"
                    value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
           </Field>
-          <Field label="Password">
-            <input className="input" type="password" placeholder="min 8 chars"
+          <Field label="Starting password">
+            <input className="input" type="password" placeholder="At least 8 characters" autoComplete="new-password"
                    value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
           </Field>
           <Field label="First name">
@@ -110,13 +138,13 @@ function Inner() {
               <option value="ADMIN">Admin</option>
             </select>
           </Field>
-          <div className="md:col-span-3 flex items-center gap-3">
-            <button disabled={busy} className="btn-primary">
-              <Icon name="users" size={14} /> Create user
+          <div className="flex flex-wrap items-center gap-3 sm:col-span-2 xl:col-span-3">
+            <button disabled={busy} className="btn-primary w-full sm:w-auto">
+              <Icon name="users" size={16} /> Create user
             </button>
             {feedback && (
-              <span className={'text-sm ' +
-                (feedback.startsWith('✓') ? 'text-green-700' : 'text-red-700')}>
+              <span aria-live="polite" className={'text-sm font-semibold ' +
+                (feedback.startsWith('✓') ? 'text-success' : 'text-rose')}>
                 {feedback}
               </span>
             )}
@@ -127,89 +155,80 @@ function Inner() {
       <Section
         title="All users"
         actions={
-          <div className="relative w-56">
-            <Icon name="search" size={14}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input value={q} onChange={e => setQ(e.target.value)}
-                   placeholder="Search…" className="input pl-8 !py-1.5 text-sm" />
+          <div className="relative w-full sm:w-64">
+            <Icon name="search" size={18}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
+            <input value={q} onChange={e => setQ(e.target.value)} aria-label="Search users"
+                   placeholder="Search…" className="input pl-10" />
           </div>
         }
       >
         {!users && (
           <div className="space-y-2">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10" />)}
+            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
           </div>
         )}
         {users && list.length === 0 && (
-          <Empty icon={<Icon name="users" size={20} />} title="No matches" />
+          <Empty icon={<Icon name="users" size={22} />} title="No matches" hint="Try a different name or email." />
         )}
-        {users && list.length > 0 && (
-          <div className="overflow-x-auto">
+        {users && list.length > 0 && (<>
+          {/* Below 1280px: one card per person (§20) */}
+          <ul className="divide-y divide-line-2 xl:hidden">
+            {list.map(u => (
+              <li key={u.id} className="py-4 first:pt-1">
+                <div className="flex items-start gap-3">
+                  <Avatar name={u.full_name || u.username} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="truncate font-bold text-ink">{u.full_name || u.username}</span>
+                      <ActiveBadge u={u} />
+                    </div>
+                    <div className="truncate text-[13px] text-ink-2">@{u.username} · {u.email}</div>
+                    <div className="text-[13px] text-ink-3">{u.department || 'No department'}</div>
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 pl-12">
+                  <RoleSelect u={u} />
+                  <Actions u={u} />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* 1280px and up: a table */}
+          <div className="-mx-6 hidden xl:block">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-100">
-                  <th className="py-2 px-3">Name</th>
-                  <th className="py-2 px-3">Email</th>
-                  <th className="py-2 px-3">Dept</th>
-                  <th className="py-2 px-3">Role</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3"></th>
+              <thead className="bg-surface-2">
+                <tr className="text-left">
+                  <th className="th px-6 py-3">Name</th>
+                  <th className="th px-3 py-3">Department</th>
+                  <th className="th px-3 py-3">Role</th>
+                  <th className="th px-3 py-3">Status</th>
+                  <th className="th px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-line-2">
                 {list.map(u => (
-                  <tr key={u.id} className="border-b border-slate-50">
-                    <td className="py-2 px-3">
-                      <div className="flex items-center gap-2">
-                        <Avatar name={u.full_name || u.username} size={26} />
-                        <div>
-                          <div className="font-medium">{u.full_name || u.username}</div>
-                          <div className="text-xs text-slate-500">@{u.username}</div>
+                  <tr key={u.id} className="hover:bg-surface-2">
+                    <td className="px-6 py-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={u.full_name || u.username} size={32} />
+                        <div className="min-w-0">
+                          <div className="font-bold text-ink">{u.full_name || u.username}</div>
+                          <div className="text-[13px] text-ink-2">@{u.username} · {u.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-2 px-3 text-slate-600">{u.email}</td>
-                    <td className="py-2 px-3 text-slate-600">{u.department || '—'}</td>
-                    <td className="py-2 px-3">
-                      <select value={u.role} onChange={e => changeRole(u, e.target.value as any)}
-                              className="input !py-1 text-xs w-28">
-                        <option value="MEMBER">MEMBER</option>
-                        <option value="HR">HR</option>
-                        <option value="ADMIN">ADMIN</option>
-                      </select>
-                    </td>
-                    <td className="py-2 px-3">
-                      <span className={'chip ' + (u.is_active
-                        ? 'text-green-700 border-green-200 bg-green-50'
-                        : 'text-slate-500')}>
-                        <span className={'h-1.5 w-1.5 rounded-full ' + (u.is_active ? 'bg-green-500' : 'bg-slate-400')} />
-                        {u.is_active ? 'Active' : 'Disabled'}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 text-right whitespace-nowrap">
-                      {u.id === me?.id ? (
-                        <Link href="/account" className="text-sm text-inkmute hover:text-ink hover:underline">
-                          Change my password
-                        </Link>
-                      ) : (
-                        <>
-                          <button onClick={() => setResetFor(u)}
-                                  className="text-sm text-ink hover:underline mr-4">
-                            Reset password
-                          </button>
-                          <button onClick={() => toggle(u)}
-                                  className="text-sm text-red-600 hover:underline">
-                            {u.is_active ? 'Deactivate' : 'Activate'}
-                          </button>
-                        </>
-                      )}
-                    </td>
+                    <td className="px-3 py-3 text-ink-2">{u.department || '—'}</td>
+                    <td className="px-3 py-3"><RoleSelect u={u} /></td>
+                    <td className="px-3 py-3"><ActiveBadge u={u} /></td>
+                    <td className="px-6 py-3"><div className="flex justify-end [&>div]:flex-nowrap"><Actions u={u} /></div></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
+        </>)}
       </Section>
 
       <ResetPasswordDialog user={resetFor} onClose={() => setResetFor(null)} />
@@ -219,8 +238,8 @@ function Inner() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="space-y-1 block">
-      <span className="label text-xs">{label}</span>
+    <label className="block space-y-1">
+      <span className="label">{label}</span>
       {children}
     </label>
   );

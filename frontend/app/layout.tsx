@@ -1,20 +1,20 @@
 import '../styles/globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Inter, Fraunces, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import { AuthProvider } from '../lib/auth';
 import { NotificationsRuntime } from '../components/NotificationsRuntime';
 import { ServiceWorkerBoot } from '../components/ServiceWorkerBoot';
 import { PingAlert } from '../components/PingAlert';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-fraunces',
-  axes: ['opsz'],
+// Sunbeam §3.1 — Noto Sans, self-hosted (no third-party font CDN), one
+// variable Latin file covering every weight. Non-Latin scripts fall back to
+// the OS font on purpose.
+const noto = localFont({
+  src: './fonts/noto-sans-latin.woff2',
+  variable: '--font-noto',
+  weight: '100 900',
+  style: 'normal',
   display: 'swap',
-});
-const mono = JetBrains_Mono({
-  subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['400', '500'],
 });
 
 export const metadata: Metadata = {
@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: '#0F1322' };
+export const viewport: Viewport = { themeColor: '#FFFBEA', viewportFit: 'cover' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable} ${mono.variable}`}>
+    <html lang="en" className={noto.variable}>
       <body className="font-sans">
         <ServiceWorkerBoot />
         <AuthProvider>

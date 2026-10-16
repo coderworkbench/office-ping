@@ -21,19 +21,18 @@ from PIL import Image, ImageDraw, ImageFilter
 import os
 import pathlib
 
-ROOT = pathlib.Path("/home/it-dev/Documents/TGF/OPS/office-ping/frontend/public")
+ROOT = pathlib.Path(__file__).resolve().parent.parent / "frontend" / "public"
 ICONS = ROOT / "icons"
 ICONS.mkdir(parents=True, exist_ok=True)
 
-# Palette
-SLAB   = (15, 19, 34)       # #0F1322
-EMBER  = (220, 38, 38)      # #DC2626
-CREAM  = (243, 232, 211)    # #F3E8D3
-INK    = (15, 23, 42)
+# Palette — Sunbeam (TGF design system): a --gold-fill tile, mark in --on-gold.
+GOLD        = (246, 198, 44)   # #F6C62C  --gold-fill
+GOLD_BRIGHT = (250, 212, 92)   # #FAD45C  --gold-bright
+BRAND       = (58, 47, 5)      # #3A2F05  --brand / --on-gold
 
 # ----------- Core raster mark ------------------------------------------------
 
-def draw_mark(size: int, bg=SLAB, masked: bool = False) -> Image.Image:
+def draw_mark(size: int, bg=GOLD, masked: bool = False) -> Image.Image:
     """Draw the Office Ping mark at `size` pixels.
 
     masked=True produces a full-bleed design (for maskable PWA icons where
@@ -53,11 +52,11 @@ def draw_mark(size: int, bg=SLAB, masked: bool = False) -> Image.Image:
         # iOS-ish rounded square
         r = int(s * 0.22)
         d.rounded_rectangle([0, 0, s, s], radius=r, fill=bg + (255,))
-        # subtle inner glow near center (ember @ low alpha, blurred)
+        # subtle inner glow near center (bright gold, blurred) — gold as light
         glow = Image.new("RGBA", (s, s), (0, 0, 0, 0))
         gd = ImageDraw.Draw(glow)
         gd.ellipse([int(s*0.18), int(s*0.18), int(s*0.82), int(s*0.82)],
-                   fill=EMBER + (50,))
+                   fill=GOLD_BRIGHT + (140,))
         glow = glow.filter(ImageFilter.GaussianBlur(radius=s * 0.06))
         img.alpha_composite(glow)
 
@@ -80,18 +79,18 @@ def draw_mark(size: int, bg=SLAB, masked: bool = False) -> Image.Image:
             fill=color + (alpha,), width=stroke,
         )
 
-    draw_arc(outer_r, stroke_outer, CREAM, alpha=180)
-    draw_arc(inner_r, stroke_inner, CREAM, alpha=255)
+    draw_arc(outer_r, stroke_outer, BRAND, alpha=200)
+    draw_arc(inner_r, stroke_inner, BRAND, alpha=255)
 
-    # The pinging dot — solid ember
+    # The pinging dot — solid brand
     dot_r = int(s * 0.075)
     d.ellipse([cx - dot_r, cy - dot_r, cx + dot_r, cy + dot_r],
-              fill=EMBER + (255,))
+              fill=BRAND + (255,))
     # tiny highlight to give the dot "lit" quality
     hr = int(dot_r * 0.4)
     d.ellipse([cx - int(dot_r * 0.35), cy - int(dot_r * 0.6),
                cx - int(dot_r * 0.35) + hr, cy - int(dot_r * 0.6) + hr],
-              fill=(255, 255, 255, 90))
+              fill=GOLD + (150,))
 
     return img.resize((size, size), Image.LANCZOS)
 
@@ -132,28 +131,27 @@ LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" widt
     <clipPath id="rc"><rect width="100" height="100" rx="22" ry="22"/></clipPath>
   </defs>
   <g clip-path="url(#rc)">
-    <rect width="100" height="100" fill="#0F1322"/>
-    <circle cx="50" cy="50" r="32" fill="#DC2626" opacity="0.18" filter="blur(6)"/>
+    <rect width="100" height="100" fill="#F6C62C"/>
     <!-- outer arc -->
-    <path d="M 55.5 23 A 30 30 0 0 1 55.5 77" stroke="#F3E8D3" stroke-opacity="0.65"
+    <path d="M 55.5 23 A 30 30 0 0 1 55.5 77" stroke="#3A2F05" stroke-opacity="0.55"
           stroke-width="4" fill="none" stroke-linecap="round"/>
     <!-- inner arc -->
-    <path d="M 51.5 31 A 19 19 0 0 1 51.5 69" stroke="#F3E8D3"
+    <path d="M 51.5 31 A 19 19 0 0 1 51.5 69" stroke="#3A2F05"
           stroke-width="5" fill="none" stroke-linecap="round"/>
     <!-- dot -->
-    <circle cx="44" cy="50" r="7.5" fill="#DC2626"/>
-    <circle cx="42" cy="47" r="2.2" fill="#ffffff" fill-opacity="0.45"/>
+    <circle cx="44" cy="50" r="7.5" fill="#3A2F05"/>
+    <circle cx="42" cy="47" r="2.2" fill="#F6C62C" fill-opacity="0.6"/>
   </g>
 </svg>
 """
 
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <rect width="100" height="100" rx="22" ry="22" fill="#0F1322"/>
-  <path d="M 55.5 23 A 30 30 0 0 1 55.5 77" stroke="#F3E8D3" stroke-opacity="0.65"
+  <rect width="100" height="100" rx="22" ry="22" fill="#F6C62C"/>
+  <path d="M 55.5 23 A 30 30 0 0 1 55.5 77" stroke="#3A2F05" stroke-opacity="0.55"
         stroke-width="5" fill="none" stroke-linecap="round"/>
-  <path d="M 51.5 31 A 19 19 0 0 1 51.5 69" stroke="#F3E8D3"
+  <path d="M 51.5 31 A 19 19 0 0 1 51.5 69" stroke="#3A2F05"
         stroke-width="6" fill="none" stroke-linecap="round"/>
-  <circle cx="44" cy="50" r="8" fill="#DC2626"/>
+  <circle cx="44" cy="50" r="8" fill="#3A2F05"/>
 </svg>
 """
 

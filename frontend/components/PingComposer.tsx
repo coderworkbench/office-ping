@@ -67,19 +67,18 @@ export function PingComposer() {
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      {/* Mode toggle — segmented, understated */}
-      <div className="inline-flex rounded-tool border border-hairline overflow-hidden text-sm">
-        <button type="button" onClick={() => setMode('user')}
-          className={'px-3 py-1.5 ' + (mode === 'user' ? 'bg-ink text-white' : 'bg-card text-ink hover:bg-paper')}>
-          A person
-        </button>
-        {canGroup && (
-          <button type="button" onClick={() => setMode('group')}
-            className={'px-3 py-1.5 border-l border-hairline ' + (mode === 'group' ? 'bg-ink text-white' : 'bg-card text-ink hover:bg-paper')}>
-            A group
-          </button>
-        )}
-      </div>
+      {/* Mode toggle — Sunbeam segmented control (§15.4) */}
+      {canGroup && (
+        <div role="group" aria-label="Send to" className="inline-flex gap-1 rounded-lg border border-line bg-surface-2 p-1">
+          {(['user', 'group'] as const).map(m => (
+            <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m}
+              className={'min-h-[36px] rounded-md px-3.5 text-sm font-semibold transition-colors duration-150 ' +
+                (mode === m ? 'bg-gold-soft text-brand shadow-sm' : 'text-ink-2 hover:text-ink')}>
+              {m === 'user' ? 'A person' : 'A group'}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* WHO */}
       {mode === 'user' ? (
@@ -92,7 +91,7 @@ export function PingComposer() {
             placeholder="Type a name, team, or email…"
           />
           {selectedPerson && !selectedPerson.is_online && (
-            <div className="text-sm text-ember">
+            <div className="text-sm text-warn">
               {selectedPerson.full_name} is offline — they'll see it when they return.
             </div>
           )}
@@ -107,8 +106,8 @@ export function PingComposer() {
             )}
           </select>
           {selectedGroup && (
-            <div className="text-sm text-inkmute">
-              Broadcasting to <span className="font-medium text-ink">{selectedGroup.member_count} people</span> in “{selectedGroup.name}”.
+            <div className="text-sm text-ink-2">
+              Broadcasting to <span className="font-semibold text-ink">{selectedGroup.member_count} people</span> in “{selectedGroup.name}”.
             </div>
           )}
         </div>
@@ -116,11 +115,11 @@ export function PingComposer() {
 
       {/* QUICK TEMPLATES */}
       {templates.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Quick templates">
           {templates.map(t => (
             <button key={t.id} type="button" onClick={() => applyTemplate(t.id)}
-              className={'chip cursor-pointer hover:border-ink/30 ' +
-                (templateId === t.id ? 'border-ink bg-ink text-white' : '')}>
+              aria-pressed={templateId === t.id}
+              className={'chip-btn ' + (templateId === t.id ? 'is-active' : '')}>
               {t.title}
             </button>
           ))}
@@ -131,30 +130,30 @@ export function PingComposer() {
       <div>
         <textarea rows={3} value={message} onChange={e => setMessage(e.target.value)}
           placeholder="A short message. “Please come here.”"
-          className="input resize-none text-base" />
-        <div className="mt-1 flex items-center justify-between text-xs text-inkmute">
-          <label className="inline-flex items-center gap-2">
+          className="input resize-none" />
+        <div className="mt-1.5 flex items-center justify-between text-xs text-ink-3">
+          <label className="-ml-1 inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg px-1 text-sm sm:min-h-0">
             <input type="checkbox" checked={priority === 'URGENT'}
                    onChange={e => setPriority(e.target.checked ? 'URGENT' : 'NORMAL')}
-                   className="h-4 w-4 rounded border-hairline text-ember focus:ring-ember/30" />
-            <span className={priority === 'URGENT' ? 'text-ember font-medium' : ''}>
+                   className="h-4 w-4 accent-[rgb(var(--live))]" />
+            <span className={priority === 'URGENT' ? 'font-semibold text-live' : 'text-ink-2'}>
               Mark urgent
             </span>
           </label>
-          <span className="font-mono">{message.length}/500</span>
+          <span className="tabular-nums">{message.length}/500</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-hairline pt-5">
-        <div className="text-xs text-inkmute">
+      <div className="flex flex-col-reverse gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 text-sm" aria-live="polite">
           {feedback && (
-            <span className={feedback.startsWith('Sent') ? 'text-jade-500' : 'text-ember'}>
+            <span className={feedback.startsWith('Sent') ? 'text-success' : 'text-rose'}>
               {feedback}
             </span>
           )}
         </div>
-        <button disabled={busy} className="btn-ember">
-          <Icon name="send" size={15} />
+        <button disabled={busy} className="btn-primary w-full sm:w-auto">
+          <Icon name="send" size={16} />
           {busy ? 'Sending…' : 'Send ping'}
         </button>
       </div>

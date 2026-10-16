@@ -42,19 +42,19 @@ function Inner() {
     <div className="animate-fadeIn">
       <PageHeader
         eyebrow="Help"
-        title={<>How Office Ping <em>works</em></>}
+        title="How Office Ping works"
         lead={<Inline text={manual.intro} />}
       />
 
-      <nav aria-label="Contents" className="surface p-5 mb-8">
-        <div className="grid gap-5 sm:grid-cols-3">
+      <nav aria-label="Contents" className="surface mb-6 p-4 sm:p-5 lg:mb-8">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {groups.map(g => (
             <div key={g.audience}>
-              <div className="label mb-2">{AUDIENCE_LABEL[g.audience]}</div>
-              <ol className="space-y-1 text-sm">
+              <div className="eyebrow mb-1.5">{AUDIENCE_LABEL[g.audience]}</div>
+              <ol className="text-sm">
                 {g.items.map(s => (
                   <li key={s.id}>
-                    <a href={`#${s.id}`} className="text-ink hover:text-ember hover:underline underline-offset-2">
+                    <a href={`#${s.id}`} className="inline-block py-1.5 font-semibold text-ink underline-offset-2 hover:text-brand hover:underline">
                       {s.title}
                     </a>
                   </li>
@@ -65,25 +65,25 @@ function Inner() {
         </div>
       </nav>
 
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         {sections.map(s => (
-          <section key={s.id} id={s.id} className="surface p-5 lg:p-7 scroll-mt-6">
-            <header className="mb-4 flex items-baseline gap-3 flex-wrap">
-              <h2 className="display text-2xl font-medium">{s.title}</h2>
+          <section key={s.id} id={s.id} className="surface scroll-mt-20 p-4 sm:p-6 lg:scroll-mt-6 lg:p-7">
+            <header className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <h2 className="text-xl font-bold text-ink">{s.title}</h2>
               {s.audience !== 'all' && (
-                <span className="chip border-indigo/20 bg-indigo/5 text-indigo">
+                <span className="chip bg-brand-soft text-brand">
                   {s.audience === 'hr' ? 'HR & admins' : 'Admins'}
                 </span>
               )}
             </header>
-            <div className="space-y-4 text-[15px] leading-relaxed text-ink max-w-3xl">
+            <div className="max-w-3xl space-y-4 text-[15px] leading-relaxed text-ink-2">
               {s.blocks.map((b, i) => <BlockView key={i} block={b} />)}
             </div>
           </section>
         ))}
       </div>
 
-      <p className="mt-8 text-sm text-inkmute">
+      <p className="mt-8 text-sm text-ink-2">
         Still stuck? Ask your Office Ping admin.
       </p>
     </div>
@@ -96,7 +96,7 @@ function BlockView({ block }: { block: Block }) {
     <ol className="space-y-2">
       {block.steps.map((t, i) => (
         <li key={i} className="flex gap-3">
-          <span className="shrink-0 h-6 w-6 rounded-full bg-ink text-white text-xs font-medium grid place-items-center mt-0.5">
+          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gold-fill text-xs font-bold text-on-gold">
             {i + 1}
           </span>
           <span><Inline text={t} /></span>
@@ -105,12 +105,12 @@ function BlockView({ block }: { block: Block }) {
     </ol>
   );
   if ('list' in block) return (
-    <ul className="space-y-1.5 list-disc pl-5 marker:text-inkmute">
+    <ul className="list-disc space-y-1.5 pl-5 marker:text-gold">
       {block.list.map((t, i) => <li key={i}><Inline text={t} /></li>)}
     </ul>
   );
   if ('tip' in block) return (
-    <div className="rounded-tool border border-hairline bg-paper px-4 py-3 text-sm flex gap-3">
+    <div className="flex gap-3 rounded-xl border border-gold-fill/40 bg-gold-soft px-4 py-3 text-sm text-ink">
       <span aria-hidden>💡</span>
       <p><Inline text={block.tip} /></p>
     </div>
@@ -121,7 +121,7 @@ function BlockView({ block }: { block: Block }) {
         <thead>
           <tr className="text-left">
             {block.table.head.map(h => (
-              <th key={h} className="label py-2 pr-4 border-b border-hairline">{h}</th>
+              <th key={h} className="th border-b border-line py-2 pr-4">{h}</th>
             ))}
           </tr>
         </thead>
@@ -129,7 +129,7 @@ function BlockView({ block }: { block: Block }) {
           {block.table.rows.map((row, i) => (
             <tr key={i} className="align-top">
               {row.map((cell, j) => (
-                <td key={j} className={'py-2.5 pr-4 border-b border-hairline/70 ' + (j === 0 ? 'whitespace-nowrap' : '')}>
+                <td key={j} className={'border-b border-line-2 py-2.5 pr-4 ' + (j === 0 ? 'font-semibold text-ink sm:whitespace-nowrap' : '')}>
                   <Inline text={cell} />
                 </td>
               ))}
@@ -147,8 +147,9 @@ function Inline({ text }: { text: string }): ReactNode {
   return (
     <>
       {parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
-        if (part.startsWith('*') && part.endsWith('*') && part.length > 2) return <em key={i}>{part.slice(1, -1)}</em>;
+        if (part.startsWith('**') && part.endsWith('**')) return <strong key={i} className="font-bold text-ink">{part.slice(2, -2)}</strong>;
+        // Sunbeam ships no italic face (§3.1), so *emphasis* is semibold brand ink.
+        if (part.startsWith('*') && part.endsWith('*') && part.length > 2) return <span key={i} className="font-semibold text-brand">{part.slice(1, -1)}</span>;
         return <Fragment key={i}>{part}</Fragment>;
       })}
     </>

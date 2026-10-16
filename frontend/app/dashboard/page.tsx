@@ -30,29 +30,27 @@ function Inner() {
   const firstName = user?.first_name || user?.username || '';
 
   return (
-    <div className="space-y-10 animate-slideIn">
-      {/* HERO — the composer IS the headline */}
-      <section className="surface p-6 lg:p-10 relative overflow-hidden">
-        {/* subtle ember tick in the corner */}
-        <div className="absolute top-6 right-6 flex items-center gap-2 eyebrow">
-          <span className="h-1.5 w-1.5 rounded-full bg-ember" />
-          <span>Live on LAN</span>
+    <div className="space-y-8 animate-slideIn lg:space-y-12">
+      {/* HERO — the composer IS the headline. Gold as light (§2.6), never a gold fill. */}
+      <section className="hero-aura relative rounded-2xl border border-line p-5 shadow-sm sm:p-8 lg:p-10">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="eyebrow">
+            {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-surface/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-live" aria-hidden />
+            Live on LAN
+          </div>
         </div>
 
-        <div className="eyebrow mb-4">
-          {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
-        </div>
-
-        <h1 className="display text-[clamp(2rem,4.6vw,3.4rem)] font-medium leading-[1.02] max-w-2xl">
-          Who do you need,
-          <br />
-          <span className="italic font-normal">{firstName}?</span>
+        <h1 className="display max-w-2xl text-[30px] text-ink sm:text-[40px] lg:text-[48px] lg:leading-[1.05]">
+          Who do you need, {firstName}?
         </h1>
-        <p className="mt-3 text-inkmute max-w-xl">
+        <p className="mt-3 max-w-xl text-[15px] text-ink-2 sm:text-lg">
           Send a tap on the shoulder — delivered to their desk, their phone, and their inbox at once.
         </p>
 
-        <div className="mt-7 border-t border-hairline pt-6">
+        <div className="mt-6 border-t border-line pt-5 sm:mt-7 sm:pt-6">
           <RecentRecipients />
           <PingComposer />
         </div>
@@ -61,10 +59,10 @@ function Inner() {
       {/* STATS — secondary row, numeric and quiet */}
       {elevated && (
         <section>
-          <div className="eyebrow mb-3">The office right now</div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <h2 className="mb-3 text-lg font-bold text-ink">The office right now</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
             {loading && Array.from({ length: 6 }).map((_, i) =>
-              <Skeleton key={i} className="h-20 rounded-xl2" />
+              <Skeleton key={i} className="h-20 rounded-2xl" />
             )}
             {!loading && dash && <>
               <Stat label="Employees"    value={dash.total_employees} />
@@ -81,23 +79,25 @@ function Inner() {
       {/* RECENT */}
       {elevated && dash && dash.recent_pings?.length > 0 && (
         <Section title="Recent pings" surface>
-          <ul className="divide-y divide-hairline">
+          <ul className="divide-y divide-line-2">
             {dash.recent_pings.map((p: any) => (
-              <li key={p.id} className="py-3 flex items-center gap-3">
+              <li key={p.id} className="flex items-center gap-3 py-3">
                 <Avatar name={p.sender} size={32} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm">
-                    <span className="font-medium">{p.sender}</span>
-                    <span className="text-inkmute"> → </span>
-                    <span className="font-medium">{p.recipient || p.group}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm text-ink">
+                    <span className="font-semibold">{p.sender}</span>
+                    <span className="text-ink-3"> → </span>
+                    <span className="font-semibold">{p.recipient || p.group}</span>
                   </div>
-                  <div className="text-xs text-inkmute truncate">{p.message}</div>
+                  <div className="truncate text-[13px] text-ink-2">{p.message}</div>
                 </div>
-                <StatusDot status={p.status} />
-                <time className="text-xs text-inkmute font-mono">
+                <div className="flex shrink-0 flex-col items-end gap-0.5 sm:flex-row sm:items-center sm:gap-3">
+                  <StatusDot status={p.status} />
+                  <time className="text-xs text-ink-3 tabular-nums">
                   {new Date(p.created_at).toLocaleTimeString([],
                     { hour: '2-digit', minute: '2-digit' })}
-                </time>
+                  </time>
+                </div>
               </li>
             ))}
           </ul>
@@ -111,27 +111,27 @@ function Stat({ label, value, tone }: {
   label: string; value: number; tone?: 'live' | 'warn' | 'muted';
 }) {
   const accent =
-    tone === 'live'  ? 'text-jade-500'
-    : tone === 'warn' ? 'text-ember'
-    : tone === 'muted' ? 'text-inkmute' : 'text-ink';
+    tone === 'live'  ? 'text-success'
+    : tone === 'warn' ? 'text-warn'
+    : tone === 'muted' ? 'text-ink-2' : 'text-ink';
   return (
     <div className="surface p-4">
-      <div className="eyebrow">{label}</div>
-      <div className={'display text-3xl font-medium mt-1 ' + accent}>{value}</div>
+      <div className="text-[12px] font-semibold text-ink-2">{label}</div>
+      <div className={'mt-1 text-2xl font-extrabold tabular-nums ' + accent}>{value}</div>
     </div>
   );
 }
 
 function StatusDot({ status }: { status: string }) {
   const map: Record<string, string> = {
-    SENT:         'bg-inkmute/40',
-    DELIVERED:    'bg-indigo',
-    SEEN:         'bg-indigo',
-    ACKNOWLEDGED: 'bg-jade-500',
+    SENT:         'bg-ink-3/60',
+    DELIVERED:    'bg-brand',
+    SEEN:         'bg-brand',
+    ACKNOWLEDGED: 'bg-success',
   };
   return (
-    <span className="flex items-center gap-1.5 text-[11px] text-inkmute uppercase tracking-wider">
-      <span className={'h-1.5 w-1.5 rounded-full ' + (map[status] || 'bg-inkmute/40')} />
+    <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-2">
+      <span className={'h-1.5 w-1.5 rounded-full ' + (map[status] || 'bg-ink-3/60')} />
       {status}
     </span>
   );

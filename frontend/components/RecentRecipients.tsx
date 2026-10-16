@@ -8,7 +8,7 @@
 // always see something to click.
 //
 // Each chip: click body → opens the PingDialog preselected to that person.
-//            click the ember bell → instant "👋 Nudge", no dialog.
+//            click "Nudge" → instant "👋 Nudge", no dialog.
 
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../lib/api';
@@ -99,33 +99,40 @@ export function RecentRecipients() {
   return (
     <>
       <div className="mb-6">
-        <div className="flex items-end justify-between mb-3">
-          <div className="eyebrow">Recent</div>
-          {flash && <span className="text-xs text-ember animate-fadeIn">{flash}</span>}
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <h2 className="eyebrow">Recent</h2>
+          {flash && (
+            <span aria-live="polite"
+                  className={'text-xs font-semibold animate-fadeIn ' + (flash.startsWith("Couldn't") ? 'text-rose' : 'text-success')}>
+              {flash}
+            </span>
+          )}
         </div>
 
-        <ul className="flex gap-2 flex-wrap">
+        {/* Chips wrap rather than scroll sideways (§10.1); each chip can shrink
+            (min-w-0 + truncated name) so a narrow phone never scrolls (§6.4). */}
+        <ul className="flex flex-wrap gap-2">
           {chips.map(p => (
             <li key={p.id}
-                className="flex items-center gap-2 p-1.5 pr-2
-                           border border-hairline bg-card rounded-full
-                           hover:border-ink/30 hover:shadow-paper transition
-                           whitespace-nowrap">
+                className="flex min-w-0 max-w-full items-center gap-1.5 rounded-full border border-line
+                           bg-surface p-1 pl-1.5 shadow-sm transition-colors duration-150 hover:border-gold-fill/60">
               <Avatar name={p.full_name} size={28} online={p.is_online} />
-              <span className="text-sm font-medium">{p.full_name}</span>
+              <span className="min-w-0 truncate pl-0.5 text-sm font-semibold text-ink">{p.full_name}</span>
               {p.last_sent_at && (
-                <span className="text-[11px] uppercase tracking-wider text-inkmute">
+                <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
                   {timeAgo(p.last_sent_at)}
                 </span>
               )}
-              <span className="mx-1 h-5 w-px bg-hairline" aria-hidden />
+              <span className="mx-0.5 h-5 w-px shrink-0 bg-line" aria-hidden />
               <button
                 type="button"
                 disabled={busyId === p.id}
                 onClick={() => nudge(p)}
                 title="Send a quick nudge — no message"
-                className="text-sm px-2.5 py-1 rounded-full text-ink hover:bg-paper
-                           disabled:opacity-50 transition"
+                aria-label={`Nudge ${p.full_name}`}
+                className="shrink-0 min-h-[34px] rounded-full px-3 text-[13.5px] font-semibold text-ink-2
+                           transition-colors duration-150 hover:bg-inset hover:text-ink active:bg-inset
+                           disabled:opacity-50 [@media(pointer:coarse)]:min-h-[40px]"
               >
                 Nudge
               </button>
@@ -133,8 +140,10 @@ export function RecentRecipients() {
                 type="button"
                 onClick={() => setDialogTarget(p)}
                 title={`Write a message to ${p.full_name}`}
-                className="text-sm px-3 py-1 rounded-full bg-ember text-white
-                           hover:bg-ember-600 transition"
+                aria-label={`Ping ${p.full_name}`}
+                className="shrink-0 min-h-[34px] rounded-full border border-gold-fill px-3.5 text-[13.5px] font-bold text-brand
+                           transition-colors duration-150 hover:bg-gold-soft hover:border-gold active:bg-gold-soft
+                           [@media(pointer:coarse)]:min-h-[40px]"
               >
                 Ping
               </button>

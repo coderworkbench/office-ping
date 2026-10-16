@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Guard } from '../../components/Guard';
 import { apiFetch } from '../../lib/api';
-import { Avatar, Empty, Icon, PageHeader, Section, Skeleton } from '../../components/ui';
+import { Avatar, Empty, Icon, PageHeader, Section, Segmented, Skeleton, StatusPill, UrgentPill } from '../../components/ui';
 
 type Item = {
   id: number; ping_id: number; message: string; priority: string;
@@ -46,30 +46,27 @@ function Inner() {
     <div className="animate-slideIn">
       <PageHeader
         eyebrow="Inbox"
-        title={<>Who's trying to <span className="italic font-normal">reach you</span></>}
+        title="Who's trying to reach you"
         lead={items ? `${items.length} total · ${items.filter(i => !i.is_read).length} unread` : 'Loading…'}
-        actions={
-          <div className="flex gap-2 items-center">
-            <div className="inline-flex rounded-tool border border-hairline overflow-hidden text-sm">
-              <button className={filterCls(filter === 'all')} onClick={() => setFilter('all')}>All</button>
-              <button className={filterCls(filter === 'unread')} onClick={() => setFilter('unread')}>Unread</button>
-            </div>
-            <button onClick={markAllRead} className="btn-ghost">
-              <Icon name="check" size={16} /> Mark all read
-            </button>
-          </div>
-        }
+        actions={<>
+          <Segmented label="Show" value={filter} onChange={setFilter}
+                     options={[{ value: 'all', label: 'All' }, { value: 'unread', label: 'Unread' }]} />
+          <button onClick={markAllRead} className="btn-ghost">
+            <Icon name="check" size={16} /> Mark all read
+          </button>
+        </>}
       />
 
       {!items && (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl2" />)}
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
         </div>
       )}
 
       {items && list.length === 0 && (
         <Section>
-          <Empty title="Nothing yet" hint="New pings land here immediately." />
+          <Empty title={filter === 'unread' ? 'No unread pings' : 'Nothing yet'}
+                 hint={filter === 'unread' ? 'You are all caught up.' : 'New pings land here immediately.'} />
         </Section>
       )}
 
@@ -80,36 +77,28 @@ function Inner() {
           return (
             <li key={it.id}
                 className={
-                  'surface p-4 flex items-start gap-3 transition ' +
-                  (urgent ? 'border-ember/40 ' : '') +
-                  (it.is_read ? '' : 'ring-1 ring-ink/5 ')
+                  'surface flex flex-col gap-3 p-4 sm:flex-row sm:items-start ' +
+                  (urgent ? 'border-l-4 border-l-live ' : !it.is_read ? 'border-l-4 border-l-gold-fill ' : '')
                 }>
-              <Avatar name={it.sender_name} size={44} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-xs text-inkmute">
-                  <span className="font-medium text-ink">{it.sender_name}</span>
-                  {it.group_name && <>· <span className="font-medium">{it.group_name}</span></>}
-                  <time className="ml-auto font-mono">
-                    {new Date(it.sent_at).toLocaleString()}
-                  </time>
-                </div>
-                <div className="font-medium break-words mt-1 text-[15px]">{it.message}</div>
-                <div className="mt-2 flex items-center gap-2 flex-wrap">
-                  {urgent && (
-                    <span className="chip text-ember border-ember/30 bg-ember/5">
-                      🚨 Urgent
-                    </span>
-                  )}
-                  <StatusChip status={it.status} />
-                  {ack && (
-                    <span className="chip text-jade-500 border-jade/30 bg-jade-50">
-                      <Icon name="check" size={12} /> Acknowledged
-                    </span>
-                  )}
+              <div className="flex min-w-0 flex-1 items-start gap-3">
+                <Avatar name={it.sender_name} size={40} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[13px] text-ink-2">
+                    <span className="font-bold text-ink">{it.sender_name}</span>
+                    {it.group_name && <span>→ {it.group_name}</span>}
+                    <time className="text-xs text-ink-3 tabular-nums sm:ml-auto">
+                      {new Date(it.sent_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    </time>
+                  </div>
+                  <div className="mt-1 break-words text-[15px] font-semibold text-ink">{it.message}</div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {urgent && <UrgentPill />}
+                    <StatusPill status={ack ? 'ACKNOWLEDGED' : it.status} />
+                  </div>
                 </div>
               </div>
               {!ack && (
-                <button onClick={() => acknowledge(it.ping_id)} className="btn-dark">
+                <button onClick={() => acknowledge(it.ping_id)} className="btn-secondary btn-sm w-full sm:w-auto">
                   <Icon name="check" size={14} /> Acknowledge
                 </button>
               )}
@@ -119,19 +108,4 @@ function Inner() {
       </ul>
     </div>
   );
-}
-
-function filterCls(active: boolean) {
-  return 'px-3 py-1.5 text-sm ' +
-    (active ? 'bg-ink text-white' : 'bg-card text-ink hover:bg-paper');
-}
-
-function StatusChip({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    SENT:         'text-inkmute',
-    DELIVERED:    'text-indigo',
-    SEEN:         'text-indigo',
-    ACKNOWLEDGED: 'text-jade-500',
-  };
-  return <span className={'chip ' + (map[status] || '')}>{status}</span>;
 }

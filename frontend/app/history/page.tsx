@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Guard } from '../../components/Guard';
 import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../lib/auth';
-import { Avatar, Empty, Icon, Section, Skeleton } from '../../components/ui';
+import { Avatar, Empty, Icon, PageHeader, Section, Segmented, Skeleton, StatusPill, UrgentPill } from '../../components/ui';
 
 type Ping = {
   id: number; sender_name: string; recipient_name: string | null;
@@ -27,118 +27,115 @@ function Inner() {
 
   const canSeeAll = user && user.role !== 'MEMBER';
 
+  const groupProgress = (p: Ping) => p.delivery_summary && p.group_name
+    ? `${p.delivery_summary.delivered}/${p.delivery_summary.total} delivered · ${p.delivery_summary.acknowledged} ack`
+    : null;
+  const when = (iso: string) =>
+    new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const To = ({ p }: { p: Ping }) => p.recipient_name ? (
+    <span className="inline-flex min-w-0 items-center gap-2">
+      <Avatar name={p.recipient_name} size={22} />
+      <span className="truncate">{p.recipient_name}</span>
+    </span>
+  ) : (
+    <span className="chip bg-brand-soft text-brand">
+      <Icon name="group" size={12} /> {p.group_name}
+    </span>
+  );
+
   return (
-    <div className="space-y-4 animate-fadeIn">
-      <div className="flex items-end justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Ping History</h1>
-          <p className="text-sm text-slate-500">
-            {items ? `${items.length} pings` : 'Loading…'} · See status, delivery and acknowledgements.
-          </p>
-        </div>
-        <div className="rounded-lg border border-slate-200 p-0.5 bg-white inline-flex text-sm">
-          <TabBtn active={scope === 'sent'}     onClick={() => setScope('sent')}>My Sent</TabBtn>
-          <TabBtn active={scope === 'received'} onClick={() => setScope('received')}>My Received</TabBtn>
-          {canSeeAll && <TabBtn active={scope === 'all'} onClick={() => setScope('all')}>All</TabBtn>}
-        </div>
-      </div>
+    <div className="animate-fadeIn">
+      <PageHeader
+        eyebrow="History"
+        title="Ping history"
+        lead={<>{items ? `${items.length} pings` : 'Loading…'} · See status, delivery and acknowledgements.</>}
+        actions={
+          <Segmented label="Show" value={scope} onChange={setScope}
+            options={[
+              { value: 'sent', label: 'Sent' },
+              { value: 'received', label: 'Received' },
+              ...(canSeeAll ? [{ value: 'all' as const, label: 'All' }] : []),
+            ]} />
+        }
+      />
 
       {!items && (
-        <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-2xl" />)}
         </div>
       )}
 
       {items && items.length === 0 && (
         <Section>
-          <Empty icon={<Icon name="clock" size={20} />} title="Nothing here yet"
+          <Empty icon={<Icon name="clock" size={22} />} title="Nothing here yet"
                  hint="Send or receive a ping to populate history." />
         </Section>
       )}
 
-      {items && items.length > 0 && (
-        <Section>
-          <div className="overflow-x-auto -mx-4 md:mx-0">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-100">
-                  <th className="py-2 px-3">When</th>
-                  <th className="py-2 px-3">From</th>
-                  <th className="py-2 px-3">To</th>
-                  <th className="py-2 px-3">Message</th>
-                  <th className="py-2 px-3">Priority</th>
-                  <th className="py-2 px-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map(p => (
-                  <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/60">
-                    <td className="py-2 px-3 whitespace-nowrap text-slate-600">
-                      {new Date(p.created_at).toLocaleString([], { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td className="py-2 px-3">
-                      <div className="flex items-center gap-2">
+      {items && items.length > 0 && (<>
+        {/* Phones: a stack of cards (§20 — never a sideways-scrolling table). */}
+        <ul className="space-y-3 md:hidden">
+          {items.map(p => (
+            <li key={p.id} className="surface p-4">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-ink-2">
+                <span className="inline-flex min-w-0 items-center gap-2 font-semibold text-ink">
+                  <Avatar name={p.sender_name} size={22} />
+                  <span className="truncate">{p.sender_name}</span>
+                </span>
+                <span className="text-ink-3" aria-hidden>→</span>
+                <span className="min-w-0 font-semibold text-ink"><To p={p} /></span>
+              </div>
+              <p className="mt-2 break-words font-semibold text-ink">{p.message}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {p.priority === 'URGENT' && <UrgentPill />}
+                <StatusPill status={p.status} />
+                <time className="ml-auto text-xs text-ink-3 tabular-nums">{when(p.created_at)}</time>
+              </div>
+              {groupProgress(p) && <div className="mt-1.5 text-xs text-ink-3">{groupProgress(p)}</div>}
+            </li>
+          ))}
+        </ul>
+
+        {/* Tablet and up: a table inside a bordered surface. */}
+        <div className="hidden overflow-hidden rounded-2xl border border-line bg-surface shadow-sm md:block">
+          <table className="w-full text-sm">
+            <thead className="bg-surface-2">
+              <tr className="text-left">
+                <th className="th px-4 py-3">When</th>
+                <th className="th px-4 py-3">From → To</th>
+                <th className="th px-4 py-3">Message</th>
+                <th className="th px-4 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line-2">
+              {items.map(p => (
+                <tr key={p.id} className="align-top hover:bg-surface-2">
+                  <td className="whitespace-nowrap px-4 py-3 text-ink-2 tabular-nums">{when(p.created_at)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex min-w-0 flex-col gap-1 text-ink">
+                      <span className="inline-flex items-center gap-2">
                         <Avatar name={p.sender_name} size={22} />
-                        <span>{p.sender_name}</span>
-                      </div>
-                    </td>
-                    <td className="py-2 px-3">
-                      {p.recipient_name ? (
-                        <div className="flex items-center gap-2">
-                          <Avatar name={p.recipient_name} size={22} />
-                          <span>{p.recipient_name}</span>
-                        </div>
-                      ) : (
-                        <span className="chip border-brand/20 text-brand bg-brand/5">
-                          <Icon name="group" size={12} /> {p.group_name}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-2 px-3 max-w-sm">
-                      <span className="line-clamp-1">{p.message}</span>
-                    </td>
-                    <td className="py-2 px-3">
-                      <span className={'chip ' + (p.priority === 'URGENT'
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : 'bg-slate-50 text-slate-600')}>
-                        {p.priority === 'URGENT' ? '🚨 Urgent' : '🔔 Normal'}
+                        <span className="truncate font-semibold">{p.sender_name}</span>
                       </span>
-                    </td>
-                    <td className="py-2 px-3">
-                      <span className={'chip ' + statusChip(p.status)}>{p.status}</span>
-                      {p.delivery_summary && p.group_name && (
-                        <div className="text-[11px] text-slate-500 mt-0.5">
-                          {p.delivery_summary.delivered}/{p.delivery_summary.total} delivered
-                          {' · '}{p.delivery_summary.acknowledged} ack
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Section>
-      )}
+                      <span className="inline-flex items-center gap-1.5 pl-1 text-ink-2">
+                        <span className="text-ink-3" aria-hidden>↳</span> <To p={p} />
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-ink">
+                    <span className="line-clamp-2">{p.message}</span>
+                    {p.priority === 'URGENT' && <span className="mt-1 block"><UrgentPill /></span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusPill status={p.status} />
+                    {groupProgress(p) && <div className="mt-1 whitespace-nowrap text-xs text-ink-3">{groupProgress(p)}</div>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>)}
     </div>
   );
-}
-
-function TabBtn({ active, onClick, children }: any) {
-  return (
-    <button onClick={onClick}
-      className={'px-3 py-1 rounded-md transition ' +
-        (active ? 'bg-brand text-white' : 'text-slate-600 hover:bg-slate-100')}>
-      {children}
-    </button>
-  );
-}
-
-function statusChip(status: string) {
-  switch (status) {
-    case 'ACKNOWLEDGED': return 'text-green-700 border-green-200 bg-green-50';
-    case 'SEEN':        return 'text-sky-700 border-sky-200 bg-sky-50';
-    case 'DELIVERED':   return 'text-brand border-brand/20 bg-brand/5';
-    default:            return 'text-slate-600';
-  }
 }

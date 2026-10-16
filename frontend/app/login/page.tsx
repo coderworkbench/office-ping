@@ -24,71 +24,62 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-paper">
-      {/* Left — the brand side */}
-      <div className="hidden lg:flex flex-col justify-between p-10 bg-slab-900 text-white relative overflow-hidden">
-        <div className="relative z-10 flex items-center gap-2.5">
-          <Logo size={34} />
-          <span className="font-display text-lg">Office Ping</span>
+    <div className="grid min-h-screen grid-rows-[auto_1fr] bg-page lg:grid-cols-2 lg:grid-rows-1">
+      {/* Brand side — gold as light (§2.6). A compact band on phones, a full panel on desktop. */}
+      <div className="hero-aura flex flex-col justify-between gap-6 border-b border-line px-5 py-6 sm:px-8 lg:min-h-screen lg:border-b-0 lg:border-r lg:p-12">
+        <div className="flex items-center gap-2.5">
+          <Logo size={36} />
+          <span className="text-[17px] font-bold text-ink">Office Ping</span>
         </div>
-        <div className="relative z-10 max-w-lg">
-          <div className="eyebrow text-white/50 mb-4">On the office LAN</div>
-          <p className="display text-5xl font-medium leading-[1.05]">
-            A digital
-            <span className="italic font-normal"> tap on the shoulder</span>
-            <br/> between desks.
+        <div className="max-w-lg">
+          <div className="eyebrow mb-3">On the office network</div>
+          <p className="display text-[28px] text-ink sm:text-[36px] lg:text-[48px] lg:leading-[1.05]">
+            A digital tap on the shoulder between desks.
           </p>
-          <p className="mt-5 text-white/60 max-w-md">
+          <p className="mt-3 max-w-md text-ink-2 sm:text-lg lg:mt-5">
             One quick ping. One acknowledgement. No calls, no walks across the office.
           </p>
         </div>
-        <div className="relative z-10 text-xs text-white/40 font-mono">
+        <div className="hidden text-xs text-ink-3 lg:block">
           v1 · built for internal networks
         </div>
-        {/* soft ember glow */}
-        <div className="pointer-events-none absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-ember/20 blur-3xl" />
-        <div className="pointer-events-none absolute right-10 top-10 h-40 w-40 rounded-full bg-ember/5 blur-2xl" />
       </div>
 
-      {/* Right — the form */}
-      <div className="grid place-items-center p-6">
-        <form onSubmit={submit} className="w-full max-w-sm space-y-5 animate-slideIn">
-          <div className="lg:hidden flex items-center gap-2.5 mb-6">
-            <Logo size={32} />
-            <span className="font-display text-lg">Office Ping</span>
-          </div>
-
+      {/* The form */}
+      <div className="grid items-start justify-items-center px-4 py-6 sm:px-6 sm:py-10 lg:place-items-center lg:p-12">
+        <form onSubmit={submit} className="surface w-full max-w-sm space-y-5 p-5 animate-slideIn sm:p-7">
           <div>
-            <div className="eyebrow mb-2">Sign in</div>
-            <h1 className="display text-3xl font-medium">Welcome back.</h1>
-            <p className="text-inkmute text-sm mt-1">Use your office credentials.</p>
+            <div className="eyebrow mb-1.5">Sign in</div>
+            <h1 className="display text-[26px] text-ink">Welcome back</h1>
+            <p className="mt-1 text-sm text-ink-2">Use the username and password from your admin.</p>
           </div>
 
           <label className="block space-y-1.5">
             <span className="label">Username</span>
             <input className="input" value={username} onChange={e => setU(e.target.value)}
-                   placeholder="e.g. mangesh" autoFocus required />
+                   placeholder="Your username" autoComplete="username" autoCapitalize="none"
+                   autoCorrect="off" spellCheck={false} autoFocus required />
           </label>
 
           <label className="block space-y-1.5">
             <span className="label">Password</span>
-            <input type="password" className="input" value={password}
+            <input type="password" className="input" value={password} autoComplete="current-password"
                    onChange={e => setP(e.target.value)} placeholder="••••••••" required />
           </label>
 
           {err && (
             <div role="alert"
-              className="text-sm text-ember border border-ember/30 bg-ember/5 rounded-tool px-3 py-2">
+              className="rounded-xl bg-rose-soft px-3 py-2 text-sm text-rose">
               {err}
             </div>
           )}
 
-          <button disabled={busy} className="btn-dark w-full">
+          <button disabled={busy} className="btn-primary w-full">
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
 
-          <p className="text-xs text-inkmute">
-            Internal tool — accounts are provisioned by your admin.
+          <p className="text-xs text-ink-3">
+            Internal tool — accounts are created by your admin. Forgot your password? Ask an admin to reset it.
           </p>
         </form>
       </div>

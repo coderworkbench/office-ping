@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { apiFetch } from '../lib/api';
-import { Avatar, Icon } from './ui';
+import { Avatar, CloseButton, Icon, ModalFrame } from './ui';
 
 type Template = { id: number; title: string; message: string };
 
@@ -78,36 +78,30 @@ export function PingDialog({
   }
 
   return (
-    <div
-      role="dialog" aria-modal="true" aria-labelledby="ping-dialog-title"
-      className="fixed inset-0 z-50 grid place-items-center p-4 bg-slab-900/40 backdrop-blur-sm animate-fadeIn"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="w-full max-w-lg surface p-6 shadow-pop animate-slideIn">
+    <ModalFrame onClose={onClose} labelledBy="ping-dialog-title">
         <div className="flex items-start gap-3">
           <Avatar name={recipientName} size={44} online={recipientIsOnline} />
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="eyebrow">Ping</div>
-            <h2 id="ping-dialog-title" className="display text-2xl font-medium leading-tight">
+            <h2 id="ping-dialog-title" className="truncate text-xl font-bold text-ink">
               {recipientName}
             </h2>
-            <p className="text-xs text-inkmute mt-1">
-              They'll see a desktop notification and an inbox entry.
-              {recipientIsOnline === false && ' Currently offline — they\'ll see it when they return.'}
+            <p className="mt-0.5 text-[13px] text-ink-2">
+              They'll see a pop-up, a desktop notification and an inbox entry.
+              {recipientIsOnline === false && <span className="text-warn"> Currently offline — they'll see it when they return.</span>}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Close"
-            className="text-inkmute hover:text-ink p-1 rounded-md hover:bg-paper">✕</button>
+          <CloseButton onClick={onClose} />
         </div>
 
         {templates.length > 0 && (
           <div className="mt-5">
             <div className="label mb-2">Quick templates</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Quick templates">
               {templates.map(t => (
                 <button key={t.id} type="button" onClick={() => applyTemplate(t.id)}
-                  className={'chip cursor-pointer hover:border-ink/30 ' +
-                    (templateId === t.id ? 'border-ink bg-ink text-white' : '')}>
+                  aria-pressed={templateId === t.id}
+                  className={'chip-btn ' + (templateId === t.id ? 'is-active' : '')}>
                   {t.title}
                 </button>
               ))}
@@ -116,47 +110,46 @@ export function PingDialog({
         )}
 
         <div className="mt-5">
-          <label htmlFor="ping-msg" className="label mb-2 block">Message</label>
+          <label htmlFor="ping-msg" className="label mb-2">Message</label>
           <textarea
             ref={textAreaRef} id="ping-msg" rows={3}
             value={message} onChange={e => setMessage(e.target.value)}
             maxLength={500}
-            className="input resize-none text-base"
+            className="input resize-none"
             placeholder="A short message. “Please come here.”"
           />
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <label className="inline-flex items-center gap-2 text-inkmute">
+          <div className="mt-1.5 flex items-center justify-between text-xs">
+            <label className="-ml-1 inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg px-1 text-sm sm:min-h-0">
               <input type="checkbox" checked={priority === 'URGENT'}
                      onChange={e => setPriority(e.target.checked ? 'URGENT' : 'NORMAL')}
-                     className="h-4 w-4 rounded border-hairline text-ember focus:ring-ember/30" />
-              <span className={priority === 'URGENT' ? 'text-ember font-medium' : ''}>
+                     className="h-4 w-4 accent-[rgb(var(--live))]" />
+              <span className={priority === 'URGENT' ? 'font-semibold text-live' : 'text-ink-2'}>
                 Mark urgent
               </span>
             </label>
-            <span className="font-mono text-inkmute">{message.length}/500</span>
+            <span className="tabular-nums text-ink-3">{message.length}/500</span>
           </div>
         </div>
 
         {error && (
           <div role="alert"
-            className="mt-4 text-sm text-ember border border-ember/30 bg-ember/5 rounded-tool px-3 py-2">
+            className="mt-4 rounded-xl bg-rose-soft px-3 py-2 text-sm text-rose">
             {error}
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-between gap-2">
-          <span className="hidden sm:inline text-xs text-inkmute font-mono">
-            ⌘/Ctrl + Enter to send
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+          <span className="hidden text-xs text-ink-3 sm:inline">
+            Ctrl + Enter to send
           </span>
-          <div className="ml-auto flex gap-2">
-            <button type="button" onClick={onClose} className="btn-outline">Cancel</button>
-            <button type="button" onClick={submit} disabled={busy} className="btn-ember">
-              <Icon name="send" size={14} />
+          <div className="flex w-full gap-2 sm:ml-auto sm:w-auto">
+            <button type="button" onClick={onClose} className="btn-neutral flex-1 sm:flex-none">Cancel</button>
+            <button type="button" onClick={submit} disabled={busy} className="btn-primary flex-1 sm:flex-none">
+              <Icon name="send" size={16} />
               {busy ? 'Sending…' : 'Send ping'}
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalFrame>
   );
 }

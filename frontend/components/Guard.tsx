@@ -21,7 +21,7 @@ export function Guard({
   }, [user, loading, requireRole, router]);
 
   if (loading || !user) return (
-    <div className="min-h-screen grid place-items-center text-inkmute bg-paper">Loading…</div>
+    <div className="grid min-h-screen place-items-center bg-page text-ink-3" role="status">Loading…</div>
   );
   if (requireRole && !requireRole.includes(user.role)) return null;
 

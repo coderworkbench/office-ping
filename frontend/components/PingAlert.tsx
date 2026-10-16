@@ -113,56 +113,54 @@ export function PingAlert() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[60] grid place-items-center p-4 bg-slab-900/55 backdrop-blur-sm animate-fadeIn"
-    >
+    <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 animate-fadeIn">
       <div
         role="alertdialog" aria-modal="true"
         aria-labelledby="ping-alert-from" aria-describedby="ping-alert-message"
         key={item.ping_id}
         className={
-          'w-full max-w-md rounded-xl2 bg-card shadow-pop overflow-hidden ' +
-          (urgent ? 'ring-4 ring-ember animate-alertPulse' : 'ring-1 ring-hairline animate-popIn')
+          'w-full max-w-md overflow-hidden rounded-2xl border bg-surface shadow-2xl ' +
+          (urgent ? 'border-live ring-4 ring-live animate-alertPulse' : 'border-line animate-popIn')
         }
       >
-        <div className={'h-1.5 ' + (urgent ? 'bg-ember' : 'bg-indigo')} />
-        <div className="p-6 sm:p-7 text-center">
-          <div className={'mx-auto h-14 w-14 rounded-full grid place-items-center text-3xl ' +
-            (urgent ? 'bg-ember-50' : 'bg-paper')} aria-hidden>
-            <span className="animate-ring inline-block">{urgent ? '🚨' : '🔔'}</span>
+        <div className={'h-1.5 ' + (urgent ? 'bg-live' : 'bg-gold-fill')} aria-hidden />
+        <div className="p-5 text-center sm:p-7">
+          <div className={'mx-auto grid h-14 w-14 place-items-center rounded-full text-3xl ' +
+            (urgent ? 'bg-live-soft' : 'bg-gold-soft')} aria-hidden>
+            <span className="inline-block animate-ring">{urgent ? '🚨' : '🔔'}</span>
           </div>
 
           {urgent && (
-            <div className="mt-3 inline-block chip border-ember/30 bg-ember-50 text-ember-600 font-semibold">
-              URGENT
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-live-soft px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-live">
+              <span className="h-1.5 w-1.5 rounded-full bg-live" aria-hidden /> Urgent
             </div>
           )}
 
-          <div id="ping-alert-from" className="mt-3 flex items-center justify-center gap-2">
+          <div id="ping-alert-from" className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
             <Avatar name={item.sender_name} size={26} />
-            <span className="font-medium">{item.sender_name}</span>
-            {item.group_name && <span className="text-inkmute text-sm">→ {item.group_name}</span>}
+            <span className="font-bold text-ink">{item.sender_name}</span>
+            {item.group_name && <span className="text-sm text-ink-2">→ {item.group_name}</span>}
           </div>
-          <div className="text-xs text-inkmute mt-1 font-mono">
+          <div className="mt-1 text-xs text-ink-3 tabular-nums">
             {item.received_at.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
           </div>
 
           <p id="ping-alert-message"
-             className="display mt-4 text-[clamp(1.4rem,4vw,1.9rem)] leading-snug break-words">
+             className="display mt-4 break-words text-[22px] text-ink sm:text-[26px]">
             {item.message}
           </p>
 
-          <div className="mt-7 flex gap-2 justify-center">
-            <button onClick={later} className="btn-outline">Later</button>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:mt-7 sm:flex-row sm:justify-center">
+            <button onClick={later} className="btn-neutral">Later</button>
             <button ref={ackRef} disabled={acking} onClick={acknowledge}
-                    className="btn-ember px-6">
+                    className="btn-primary sm:px-6">
               {acking ? 'Acknowledging…' : 'Acknowledge'}
             </button>
           </div>
 
           {waiting > 0 && (
             <button onClick={openInbox}
-                    className="mt-4 text-sm text-inkmute hover:text-ink underline underline-offset-2">
+                    className="mt-4 min-h-[44px] text-sm font-semibold text-brand underline-offset-2 hover:underline">
               {waiting} more waiting · Open inbox
             </button>
           )}

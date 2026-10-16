@@ -110,16 +110,17 @@ export function PersonSelect({
     <div ref={containerRef} className="relative">
       <div className="relative">
         {selected ? (
-          <span className="absolute left-2 top-1/2 -translate-y-1/2">
-            <Avatar name={selected.full_name} size={22} online={selected.is_online} />
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+            <Avatar name={selected.full_name} size={24} online={selected.is_online} />
           </span>
         ) : (
-          <Icon name="search" size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-inkmute" />
+          <Icon name="search" size={20}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
         )}
         <input
           ref={inputRef}
-          className={'input ' + (selected ? 'pl-9' : 'pl-9')}
+          aria-label="Who should get this?"
+          className="input pl-11 pr-11"
           placeholder={placeholder}
           value={inputValue}
           onFocus={() => setOpen(true)}
@@ -135,7 +136,7 @@ export function PersonSelect({
         />
         {(selected || query) && (
           <button type="button" aria-label="Clear" onClick={clear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 grid place-items-center rounded-full text-inkmute hover:text-ink hover:bg-paper">
+            className="absolute right-1.5 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-lg text-ink-3 hover:bg-inset hover:text-ink">
             ×
           </button>
         )}
@@ -146,11 +147,11 @@ export function PersonSelect({
           ref={panelRef}
           id="person-select-listbox"
           role="listbox"
-          className="absolute left-0 right-0 top-full mt-1 z-20 surface p-1 max-h-72 overflow-y-auto animate-fadeIn"
+          className="absolute left-0 right-0 top-full z-30 mt-1.5 max-h-72 overflow-y-auto overscroll-contain rounded-xl border border-line bg-surface p-1.5 shadow-lg animate-fadeIn"
         >
           {filtered.length === 0 ? (
-            <div className="px-3 py-3 text-sm text-inkmute">
-              Nobody matches “<span className="font-medium">{query}</span>”.
+            <div className="px-3 py-3 text-sm text-ink-2">
+              Nobody matches “<span className="font-semibold text-ink">{query}</span>”.
             </div>
           ) : (
             filtered.map((p, i) => {
@@ -164,20 +165,20 @@ export function PersonSelect({
                   onMouseEnter={() => setHighlight(i)}
                   onClick={() => pick(p)}
                   className={
-                    'w-full flex items-center gap-3 text-left px-2 py-2 rounded-tool ' +
-                    (active ? 'bg-paper' : 'hover:bg-paper')
+                    'flex w-full min-h-[44px] items-center gap-3 rounded-lg px-2.5 py-2 text-left ' +
+                    (active ? 'bg-gold-soft' : 'hover:bg-inset')
                   }
                 >
                   <Avatar name={p.full_name} size={28} online={p.is_online} />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{p.full_name}</div>
-                    <div className="text-xs text-inkmute truncate">
+                    <div className="truncate text-sm font-semibold text-ink">{p.full_name}</div>
+                    <div className="truncate text-xs text-ink-2">
                       {p.department || '—'}
                       {p.email ? ` · ${p.email}` : ''}
                     </div>
                   </div>
-                  <span className={'text-[11px] uppercase tracking-wider ' +
-                    (p.is_online ? 'text-jade-500' : 'text-inkmute/70')}>
+                  <span className={'shrink-0 text-[11px] font-semibold uppercase tracking-wide ' +
+                    (p.is_online ? 'text-success' : 'text-ink-3')}>
                     {p.is_online ? 'Online' : 'Offline'}
                   </span>
                 </button>

@@ -10,5 +10,5 @@ export default function Home() {
     if (loading) return;
     router.replace(user ? '/dashboard' : '/login');
   }, [user, loading, router]);
-  return <div className="p-8 text-gray-500">Loading…</div>;
+  return <div className="grid min-h-screen place-items-center bg-page text-ink-3" role="status">Loading…</div>;
 }

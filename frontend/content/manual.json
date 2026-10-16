@@ -11,8 +11,9 @@
           "Open **https://ping.tejgyan.org** in Chrome or Edge.",
           "Sign in with the username and password your admin gave you. There is no sign-up page: an admin creates every account.",
           "When the banner at the top of the page asks, click **Enable**, then **Allow** in the browser's pop-up. This lets pings show as desktop notifications.",
-          "Change the password your admin gave you: click the **key icon** at the bottom of the sidebar (see *Your password*)."
+          "Change the password your admin gave you (see *Your password*)."
         ] },
+        { "p": "**Finding your way around.** On a computer, every page is in the dark sidebar on the left. On a phone or tablet, the main pages (Overview, People, Inbox, History) are in the bar at the bottom of the screen, and everything else, including Help, Change password and Sign out, is under **More**." },
         { "tip": "**Keep Office Ping open.** You only receive alerts while an Office Ping tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: right-click the tab and choose **Pin**, or install it as an app: in Chrome, menu → **Install Office Ping**; in Edge, menu → **Apps → Install Office Ping**." }
       ]
     },
@@ -67,7 +68,7 @@
       "title": "Inbox",
       "audience": "all",
       "blocks": [
-        { "p": "The Inbox lists every ping sent to you. The red number next to **Inbox** in the sidebar is how many you haven't read." },
+        { "p": "The Inbox lists every ping sent to you. The number next to **Inbox** (in the sidebar, or on the bottom bar on a phone) is how many you haven't read." },
         { "list": [
           "**All / Unread** switches between everything and only unread pings.",
           "**Acknowledge** on a ping tells the sender you've got it.",
@@ -98,12 +99,12 @@
       "audience": "all",
       "blocks": [
         { "steps": [
-          "Click the **key icon** at the bottom of the sidebar.",
+          "On a computer, click the **key icon** at the bottom of the sidebar. On a phone, tap **More → Change password**.",
           "Enter your current password, then your new password twice.",
           "Click **Change password**. Use the new password next time you sign in."
         ] },
         { "p": "Passwords need at least 8 characters and can't be a common password, only numbers, or too close to your name." },
-        { "p": "**Forgot your password?** Ask an admin to reset it. They'll give you a temporary password; change it straight away with the key icon." }
+        { "p": "**Forgot your password?** Ask an admin to reset it. They'll give you a temporary password; change it straight away under **Change password**." }
       ]
     },
     {
@@ -162,7 +163,7 @@
         { "steps": [
           "Under **Create a new user**, fill in username, email, a starting password (8+ characters), name, department and role.",
           "Click **Create user**, then give the person their username and starting password privately.",
-          "Ask them to change the password with the key icon after their first sign-in."
+          "Ask them to change the password under **Change password** after their first sign-in."
         ] },
         { "table": {
           "head": ["Role", "Can do"],
@@ -188,7 +189,7 @@
           "On **Admin → Users**, click **Reset password** in the person's row.",
           "A strong, easy-to-read password is suggested (for example *Kp7m-Qx4z-Rt9w*). Click **Generate** for another, or type your own.",
           "Click **Copy**, then **Reset password**.",
-          "Give the new password to the person privately (in person or by phone, not in a group chat), and ask them to change it with the key icon."
+          "Give the new password to the person privately (in person or by phone, not in a group chat), and ask them to change it under **Change password**."
         ] },
         { "p": "The old password stops working immediately, and the reset is recorded in the audit log (the password itself is never stored there)." },
         { "tip": "A reset doesn't sign the person out of devices where they're already signed in; those sessions end on their own within 7 days. If you suspect someone else is using the account, deactivate it first." }

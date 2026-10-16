@@ -40,7 +40,7 @@ function Inner() {
     <div className="animate-fadeIn">
       <PageHeader
         eyebrow="Your account"
-        title={<>Change <em>password</em></>}
+        title="Change password"
         lead={<>Signed in as <strong>@{user?.username}</strong>. Use at least 8 characters, and avoid
           common words or anything close to your name.</>}
       />
@@ -60,20 +60,20 @@ function Inner() {
                    value={confirm} onChange={e => setConfirm(e.target.value)} required />
           </Field>
 
-          {error && <p role="alert" className="text-sm text-ember-600">{error}</p>}
+          {error && <p role="alert" className="rounded-xl bg-rose-soft px-3 py-2 text-sm text-rose">{error}</p>}
           {done && (
-            <p role="status" className="text-sm text-jade inline-flex items-center gap-1.5">
+            <p role="status" className="inline-flex items-center gap-1.5 rounded-xl bg-success-soft px-3 py-2 text-sm text-success">
               <Icon name="check" size={14} /> Password changed. Use it next time you sign in.
             </p>
           )}
 
-          <button disabled={busy} className="btn-primary">
+          <button disabled={busy} className="btn-primary w-full sm:w-auto">
             <Icon name="key" size={14} /> {busy ? 'Saving…' : 'Change password'}
           </button>
         </form>
       </Section>
 
-      <p className="mt-4 text-sm text-inkmute max-w-lg">
+      <p className="mt-4 text-sm text-ink-2 max-w-lg">
         Forgot your current password? Ask an admin to reset it for you.
       </p>
     </div>
