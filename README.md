@@ -111,6 +111,7 @@ Dev password for all seeded users is printed by `make seed`.
 
 See `docs/` for deeper topics:
 
+- [user-manual.md](docs/user-manual.md): how to use Office Ping, for staff, HR and admins (also in the app under **Help**)
 - [architecture.md](docs/architecture.md)
 - [installation.md](docs/installation.md)
 - [deployment-lan.md](docs/deployment-lan.md)

@@ -42,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         { href: '/people',        label: 'People',   icon: 'users',     show: true },
         { href: '/notifications', label: 'Inbox',    icon: 'inbox',     show: true, badge: unread },
         { href: '/history',       label: 'History',  icon: 'clock',     show: true },
+        { href: '/help',          label: 'Help',     icon: 'help',      show: true },
       ],
     },
     {
@@ -143,6 +144,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link href="/notifications" className="ml-auto h-9 w-9 rounded-tool grid place-items-center hover:bg-white/10 relative">
           <Icon name="inbox" size={16} />
           {unread > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-ember" />}
+        </Link>
+        <Link href="/help" aria-label="Help"
+              className="h-9 w-9 rounded-tool grid place-items-center hover:bg-white/10">
+          <Icon name="help" size={16} />
         </Link>
         <Link href="/account" aria-label="Change password"
               className="h-9 w-9 rounded-tool grid place-items-center hover:bg-white/10">

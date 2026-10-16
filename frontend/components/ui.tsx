@@ -124,6 +124,11 @@ const paths: Record<string, ReactNode> = {
     <path d="M6 10c0-3.3 2.7-6 6-6s6 2.7 6 6v4l1.5 2H4.5L6 14v-4Z" />
     <path d="M10 20a2 2 0 0 0 4 0" />
   </>,
+  help: <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.5v.4" />
+    <path d="M12 17h.01" />
+  </>,
   key: <>
     <circle cx="7.5" cy="15.5" r="4.5" />
     <path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2" />

@@ -1,0 +1,220 @@
+{
+  "title": "Office Ping user manual",
+  "intro": "Office Ping is a digital tap on the shoulder. Instead of walking over or calling, you send a short message (a **ping**) that pops up on the other person's screen. They click **Acknowledge** so you know they've seen it.",
+  "sections": [
+    {
+      "id": "getting-started",
+      "title": "Getting started",
+      "audience": "all",
+      "blocks": [
+        { "steps": [
+          "Open **https://ping.tejgyan.org** in Chrome or Edge.",
+          "Sign in with the username and password your admin gave you. There is no sign-up page: an admin creates every account.",
+          "When the banner at the top of the page asks, click **Enable**, then **Allow** in the browser's pop-up. This lets pings show as desktop notifications.",
+          "Change the password your admin gave you: click the **key icon** at the bottom of the sidebar (see *Your password*)."
+        ] },
+        { "tip": "**Keep Office Ping open.** You only receive alerts while an Office Ping tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: right-click the tab and choose **Pin**, or install it as an app: in Chrome, menu → **Install Office Ping**; in Edge, menu → **Apps → Install Office Ping**." }
+      ]
+    },
+    {
+      "id": "sending",
+      "title": "Sending a ping",
+      "audience": "all",
+      "blocks": [
+        { "p": "**From the Overview page** (the first page after signing in):" },
+        { "steps": [
+          "Start typing a name, team or email in the search box and pick the person.",
+          "Click a quick template (for example *Please come to my desk*), or type your own message (up to 500 characters).",
+          "Tick **Mark urgent** only if it really can't wait.",
+          "Click **Send ping**."
+        ] },
+        { "p": "**From the People page:** you see everyone, with who's online right now at the top." },
+        { "list": [
+          "**Ping** opens a small window with the quick templates. Press **Ctrl + Enter** to send.",
+          "**Nudge** sends \"👋 Nudge\" straight away, with no window. Use it when you just need their attention.",
+          "The **Recent** row on the Overview page lists people you pinged lately, with the same Nudge and Ping buttons."
+        ] },
+        { "p": "You can see whether they received and acknowledged it on the **History** page." },
+        { "tip": "**Urgent** pings appear in red and jump ahead of any other pings waiting for that person. Keep urgent for real emergencies so people keep taking it seriously." },
+        { "p": "To prevent spamming, members can send up to **10 pings a minute**. If you go over, wait a minute and try again." }
+      ]
+    },
+    {
+      "id": "receiving",
+      "title": "Receiving a ping",
+      "audience": "all",
+      "blocks": [
+        { "p": "When someone pings you, the page dims and a pop-up appears in the middle of the screen showing who sent it, when, and the message. At the same time:" },
+        { "list": [
+          "A short chime plays (three notes for urgent pings).",
+          "A desktop notification appears and **stays until you click it**, even if you're working in another program. Clicking it brings Office Ping to the front.",
+          "The browser tab title flashes **🔔 Sender's name** until you deal with the ping."
+        ] },
+        { "p": "In the pop-up, choose one:" },
+        { "table": {
+          "head": ["Button", "What it does"],
+          "rows": [
+            ["**Acknowledge**", "Tells the sender you've got it. The ping is done."],
+            ["**Later**", "Closes the pop-up. The ping stays unacknowledged in your Inbox. Pressing **Esc** does the same."]
+          ]
+        } },
+        { "p": "If several pings arrive, they're shown one at a time. Click **N more waiting · Open inbox** to see them all at once." },
+        { "tip": "Signed in on two computers, or in two tabs? Each one shows the ping, but once you acknowledge it on one, it disappears from the others." }
+      ]
+    },
+    {
+      "id": "inbox",
+      "title": "Inbox",
+      "audience": "all",
+      "blocks": [
+        { "p": "The Inbox lists every ping sent to you. The red number next to **Inbox** in the sidebar is how many you haven't read." },
+        { "list": [
+          "**All / Unread** switches between everything and only unread pings.",
+          "**Acknowledge** on a ping tells the sender you've got it.",
+          "**Mark all read** clears the unread count. It does **not** acknowledge the pings: senders still see them as not acknowledged."
+        ] }
+      ]
+    },
+    {
+      "id": "history",
+      "title": "History and ping status",
+      "audience": "all",
+      "blocks": [
+        { "p": "**History** shows pings you sent (**My sent**) and pings you received (**My received**), with their status:" },
+        { "table": {
+          "head": ["Status", "Meaning"],
+          "rows": [
+            ["**Sent**", "Not on their screen yet: they're offline or Office Ping isn't open. They'll get it when they open it (within 24 hours), and it's always in their Inbox."],
+            ["**Delivered**", "It reached their screen, but they haven't acknowledged it yet."],
+            ["**Acknowledged**", "They clicked Acknowledge."]
+          ]
+        } },
+        { "p": "Pings to a group show progress such as **2/3 delivered · 1 ack**." }
+      ]
+    },
+    {
+      "id": "password",
+      "title": "Your password",
+      "audience": "all",
+      "blocks": [
+        { "steps": [
+          "Click the **key icon** at the bottom of the sidebar.",
+          "Enter your current password, then your new password twice.",
+          "Click **Change password**. Use the new password next time you sign in."
+        ] },
+        { "p": "Passwords need at least 8 characters and can't be a common password, only numbers, or too close to your name." },
+        { "p": "**Forgot your password?** Ask an admin to reset it. They'll give you a temporary password; change it straight away with the key icon." }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting",
+      "audience": "all",
+      "blocks": [
+        { "table": {
+          "head": ["Problem", "What to do"],
+          "rows": [
+            ["I don't get pop-ups or notifications", "Make sure an Office Ping tab is open. Check notifications are allowed: click the lock icon left of the address → **Notifications → Allow**. Turn off Windows *Focus assist* / *Do not disturb* (or macOS *Focus*)."],
+            ["I hear no sound", "Check your computer's volume and that the browser tab isn't muted (right-click the tab)."],
+            ["I show as offline", "You're shown online while Office Ping is open. It updates within a minute."],
+            ["I can't sign in", "Check Caps Lock. If you've forgotten your password, ask an admin to reset it."],
+            ["\"This site can't be reached\"", "Check your internet connection and try again in a few minutes. If it continues, tell IT."],
+            ["\"Rate limit — give it a moment\" when sending", "You've sent more than the limit in one minute. Wait a minute."]
+          ]
+        } }
+      ]
+    },
+    {
+      "id": "groups",
+      "title": "Pinging groups and managing them",
+      "audience": "hr",
+      "blocks": [
+        { "p": "HR and admins can ping a whole team at once: on the Overview page, click **A group**, pick the group, write the message and click **Send ping**. Every member gets it, and History shows how many received and acknowledged it." },
+        { "p": "On the **Groups** page:" },
+        { "list": [
+          "**Create a new group:** enter a name (for example *Backend Team*) and an optional description, then click **Create**.",
+          "**Add a member:** choose a person from **+ Add member…** under the group.",
+          "**Remove a member:** click the **×** next to their name.",
+          "**Delete** removes the whole group. Past pings stay in History."
+        ] },
+        { "p": "HR and admins can send up to **60 pings a minute**." }
+      ]
+    },
+    {
+      "id": "templates",
+      "title": "Quick templates",
+      "audience": "hr",
+      "blocks": [
+        { "p": "Templates are the ready-made messages everyone sees as one-click buttons when sending a ping." },
+        { "list": [
+          "On the **Templates** page, enter a short title and the message, then click **Add**.",
+          "Click **Delete** to remove one.",
+          "Keep the list short (about 12–15) and the messages brief, so the buttons stay easy to scan."
+        ] }
+      ]
+    },
+    {
+      "id": "users",
+      "title": "Managing users",
+      "audience": "admin",
+      "blocks": [
+        { "p": "Go to **Admin → Users**." },
+        { "steps": [
+          "Under **Create a new user**, fill in username, email, a starting password (8+ characters), name, department and role.",
+          "Click **Create user**, then give the person their username and starting password privately.",
+          "Ask them to change the password with the key icon after their first sign-in."
+        ] },
+        { "table": {
+          "head": ["Role", "Can do"],
+          "rows": [
+            ["**Member**", "Send and receive pings to people, Inbox, own History, change own password."],
+            ["**HR**", "Everything a member can, plus ping groups, manage groups and templates, see **All** history."],
+            ["**Admin**", "Everything HR can, plus manage users, reset passwords and view the audit log."]
+          ]
+        } },
+        { "list": [
+          "**Change a role** with the dropdown in the user's row.",
+          "**Deactivate** blocks someone from signing in (for example when they leave). Their history is kept. **Activate** lets them back in.",
+          "Your own row shows **Change my password** instead, so you can't lock yourself out by accident."
+        ] }
+      ]
+    },
+    {
+      "id": "reset-password",
+      "title": "Resetting someone's password",
+      "audience": "admin",
+      "blocks": [
+        { "steps": [
+          "On **Admin → Users**, click **Reset password** in the person's row.",
+          "A strong, easy-to-read password is suggested (for example *Kp7m-Qx4z-Rt9w*). Click **Generate** for another, or type your own.",
+          "Click **Copy**, then **Reset password**.",
+          "Give the new password to the person privately (in person or by phone, not in a group chat), and ask them to change it with the key icon."
+        ] },
+        { "p": "The old password stops working immediately, and the reset is recorded in the audit log (the password itself is never stored there)." },
+        { "tip": "A reset doesn't sign the person out of devices where they're already signed in; those sessions end on their own within 7 days. If you suspect someone else is using the account, deactivate it first." }
+      ]
+    },
+    {
+      "id": "audit",
+      "title": "Audit log",
+      "audience": "admin",
+      "blocks": [
+        { "p": "**Admin → Audit log** records who did what and from which IP address: sign-outs, password changes and resets, user, group and template changes, and every ping sent and acknowledged." },
+        { "p": "Use the search box to filter by action (for example *PASSWORD_RESET*), person, target or IP address." }
+      ]
+    },
+    {
+      "id": "good-practice",
+      "title": "Good practice for admins",
+      "audience": "admin",
+      "blocks": [
+        { "list": [
+          "Keep at least two admin accounts, so one admin can reset the other.",
+          "Deactivate accounts on the day someone leaves.",
+          "Look through the audit log now and then for password resets or user changes you don't recognise.",
+          "Use your own account for daily pinging and keep admin work to admin tasks."
+        ] }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-.PHONY: setup dev down migrate seed test lint format logs shell
+.PHONY: setup dev down migrate seed test lint format logs shell manual
 
 setup:
 	cp -n .env.example .env || true
@@ -31,3 +31,7 @@ logs:
 
 shell:
 	docker compose exec backend python manage.py shell
+
+# Regenerate docs/user-manual.md from frontend/content/manual.json
+manual:
+	node scripts/export-manual.mjs
