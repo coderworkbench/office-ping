@@ -29,8 +29,8 @@
 
 ## Rate-limited pings
 
-- Members are capped at 10/min. If an HR account is rate-limited, verify
-  the user's role in admin.
+- Everyone is capped at 5 pings a minute by default (`PING_RATE`,
+  `PING_RATE_ELEVATED` in `.env`). The error says how many seconds to wait.
 
 ## Migrations fail with `relation does not exist`
 

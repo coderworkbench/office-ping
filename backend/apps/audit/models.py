@@ -5,6 +5,7 @@ from django.db import models
 class AuditLog(models.Model):
     class Action(models.TextChoices):
         LOGIN = "LOGIN"
+        LOGIN_FAILED = "LOGIN_FAILED"
         LOGOUT = "LOGOUT"
         PASSWORD_CHANGED = "PASSWORD_CHANGED"
         PASSWORD_RESET = "PASSWORD_RESET"
@@ -19,7 +20,10 @@ class AuditLog(models.Model):
         TEMPLATE_UPDATED = "TEMPLATE_UPDATED"
         TEMPLATE_DELETED = "TEMPLATE_DELETED"
         PING_SENT = "PING_SENT"
+        PING_BLOCKED = "PING_BLOCKED"
         PING_ACKNOWLEDGED = "PING_ACKNOWLEDGED"
+        PING_ESCALATED = "PING_ESCALATED"
+        PINGS_EXPORTED = "PINGS_EXPORTED"
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL,

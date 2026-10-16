@@ -46,7 +46,7 @@ class PingDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = PingDelivery
         fields = ("id", "recipient", "recipient_name", "status", "is_read",
-                  "delivered_at", "seen_at", "acknowledged_at", "created_at")
+                  "delivered_at", "seen_at", "acknowledged_at", "reply", "created_at")
 
     def get_recipient_name(self, obj):
         return obj.recipient.get_full_name() or obj.recipient.username
@@ -76,13 +76,12 @@ class PingSerializer(serializers.ModelSerializer):
         return obj.recipient.get_full_name() or obj.recipient.username
 
     def get_delivery_summary(self, obj):
-        qs = obj.deliveries.all()
-        total = qs.count()
+        ds = list(obj.deliveries.all())  # prefetched by the viewset
         return {
-            "total": total,
-            "delivered": qs.filter(delivered_at__isnull=False).count(),
-            "seen": qs.filter(seen_at__isnull=False).count(),
-            "acknowledged": qs.filter(acknowledged_at__isnull=False).count(),
+            "total": len(ds),
+            "delivered": sum(1 for d in ds if d.delivered_at),
+            "seen": sum(1 for d in ds if d.seen_at),
+            "acknowledged": sum(1 for d in ds if d.acknowledged_at),
         }
 
 
@@ -90,6 +89,7 @@ class NotificationFeedSerializer(serializers.ModelSerializer):
     """Notification-center view of a delivery row."""
 
     ping_id = serializers.IntegerField(source="ping.id", read_only=True)
+    sender_id = serializers.IntegerField(source="ping.sender_id", read_only=True)
     message = serializers.CharField(source="ping.message", read_only=True)
     priority = serializers.CharField(source="ping.priority", read_only=True)
     sender_name = serializers.SerializerMethodField()
@@ -99,9 +99,9 @@ class NotificationFeedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PingDelivery
-        fields = ("id", "ping_id", "message", "priority", "sender_name",
+        fields = ("id", "ping_id", "sender_id", "message", "priority", "sender_name",
                   "group_name", "sent_at", "status", "is_read",
-                  "delivered_at", "seen_at", "acknowledged_at")
+                  "delivered_at", "seen_at", "acknowledged_at", "reply")
 
     def get_sender_name(self, obj):
         return obj.ping.sender.get_full_name() or obj.ping.sender.username

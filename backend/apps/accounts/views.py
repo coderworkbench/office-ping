@@ -13,6 +13,7 @@ from .serializers import (
     PasswordChangeSerializer,
     AdminSetPasswordSerializer,
     DeviceSerializer,
+    StatusSerializer,
 )
 from apps.common.permissions import IsAdmin, IsHROrAdmin
 from apps.audit.utils import record_audit
@@ -27,12 +28,22 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ["username", "email", "first_name", "last_name",
                      "employee_code", "department", "designation"]
     ordering_fields = ["first_name", "last_name", "department", "last_seen_at"]
+    # The whole office in one response: People, the composer and Groups all
+    # need everyone, and an office directory stays small.
+    pagination_class = None
 
     def get_queryset(self):
         qs = User.objects.order_by("first_name", "last_name")
         user = self.request.user
-        if user.is_authenticated and user.role == "MEMBER":
-            # Members only see active users; limited fields enforced by serializer
+        # Deactivated accounts only appear on the admin Users page
+        # (?include_inactive=1); everywhere else lists people you can ping.
+        include_inactive = (
+            self.request.query_params.get("include_inactive") in ("1", "true")
+            and user.is_authenticated and user.role in ("ADMIN", "HR")
+        )
+        if self.action == "list" and not include_inactive:
+            qs = qs.filter(is_active=True)
+        elif user.is_authenticated and user.role == "MEMBER":
             qs = qs.filter(is_active=True)
         return qs
 
@@ -105,6 +116,22 @@ class PasswordChangeView(APIView):
         update_session_auth_hash(request, user)
         record_audit(request, "PASSWORD_CHANGED", target=str(user.id))
         return Response({"detail": "Password updated"})
+
+
+class MyStatusView(APIView):
+    """PUT /api/me/status/ {kind, text, until} sets your status; kind "" clears it."""
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        s = StatusSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        u = request.user
+        u.status_kind = s.validated_data["kind"]
+        u.status_text = s.validated_data["text"].strip()
+        u.status_until = s.validated_data["until"]
+        u.save(update_fields=["status_kind", "status_text", "status_until"])
+        return Response(UserSerializer(u).data)
 
 
 class DeviceViewSet(mixins.ListModelMixin,

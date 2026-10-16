@@ -9,9 +9,11 @@ logger = logging.getLogger(__name__)
 def _client_ip(request) -> Optional[str]:
     if request is None:
         return None
+    # nginx appends the address it saw, so the last entry is the real client;
+    # earlier entries come from the browser and can be forged.
     xff = request.META.get("HTTP_X_FORWARDED_FOR")
     if xff:
-        return xff.split(",")[0].strip()
+        return xff.split(",")[-1].strip()
     return request.META.get("REMOTE_ADDR")
 
 

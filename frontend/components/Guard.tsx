@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../lib/auth';
 import { AppShell } from './AppShell';
 import { NotificationPermissionBanner } from './NotificationPermissionBanner';
+import { StatusBanner } from './StatusBanner';
 
 export function Guard({
-  children, requireRole,
+  children, requireRole, phoneHome = false,
 }: {
   children: React.ReactNode;
   requireRole?: Array<'ADMIN' | 'HR' | 'MEMBER'>;
+  /** The page has its own phone layout that shows compact banners itself. */
+  phoneHome?: boolean;
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -27,7 +30,10 @@ export function Guard({
 
   return (
     <AppShell>
-      <NotificationPermissionBanner />
+      <div className={phoneHome ? 'hidden sm:block' : ''}>
+        <NotificationPermissionBanner />
+        <StatusBanner />
+      </div>
       {children}
     </AppShell>
   );

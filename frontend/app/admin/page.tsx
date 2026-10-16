@@ -11,10 +11,10 @@ export default function AdminPage() {
                     lead="Manage users, groups and templates, and review the audit log." />
 
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Card href="/admin/users"  icon="users"  title="Users"      desc="Create, deactivate, change roles, reset passwords" />
+          <Card href="/admin/users"  icon="userAdmin" title="Users"      desc="Create, deactivate, change roles, reset passwords" />
           <Card href="/groups"       icon="group"  title="Groups"     desc="Manage groups and memberships" />
           <Card href="/templates"    icon="send"   title="Templates"  desc="Ready-made messages for quick pings" />
-          <Card href="/admin/audit"  icon="shield" title="Audit log"  desc="Review security-relevant events" />
+          <Card href="/admin/audit"  icon="audit"  title="Audit log"  desc="Review security-relevant events" />
         </ul>
       </div>
     </Guard>

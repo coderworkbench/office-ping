@@ -36,11 +36,22 @@ services:
       postgres: { condition: service_healthy }
       redis:    { condition: service_healthy }
     command: >
-      sh -c "python manage.py makemigrations accounts groups message_templates notifications audit --noinput &&
-             python manage.py migrate --noinput &&
+      sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              daphne -b 0.0.0.0 -p 8000 config.asgi:application"
     expose: ["8000"]
+
+  # Re-alerts urgent pings nobody has acknowledged (URGENT_ESCALATE_AFTER_MINUTES).
+  escalator:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - backend
+    command: python manage.py escalate_urgent --loop
 
   frontend:
     build: ./frontend

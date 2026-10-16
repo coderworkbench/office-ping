@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { closeNotification } from '../lib/notify';
+import { QUICK_REPLIES } from '../lib/replies';
 import { Avatar } from './ui';
 
 type Payload = {
@@ -19,6 +20,8 @@ type Payload = {
   message: string;
   priority: 'NORMAL' | 'URGENT';
   group_name: string | null;
+  /** Urgent ping still not acknowledged after a few minutes. */
+  reminder?: boolean;
 };
 type Queued = Payload & { received_at: Date };
 
@@ -35,6 +38,11 @@ export function PingAlert() {
       const p = (ev as CustomEvent<Payload>).detail;
       const q: Queued = { ...p, received_at: new Date() };
       setQueue(prev => {
+        if (p.reminder) {
+          // Bring it back (or to the front), marked as a reminder.
+          const old = prev.find(x => x.ping_id === p.ping_id);
+          return [{ ...(old || q), reminder: true }, ...prev.filter(x => x.ping_id !== p.ping_id)];
+        }
         if (prev.some(x => x.ping_id === p.ping_id)) return prev;
         return p.priority === 'URGENT' ? [q, ...prev] : [...prev, q];
       });
@@ -97,10 +105,14 @@ export function PingAlert() {
   const urgent = item.priority === 'URGENT';
   const waiting = queue.length - 1;
 
-  async function acknowledge() {
+  async function acknowledge(reply?: string) {
     if (!item || acking) return;
     setAcking(true);
-    try { await apiFetch(`/api/pings/${item.ping_id}/acknowledge/`, { method: 'POST' }); } catch {}
+    try {
+      await apiFetch(`/api/pings/${item.ping_id}/acknowledge/`, {
+        method: 'POST', body: JSON.stringify(reply ? { reply } : {}),
+      });
+    } catch {}
     setAcking(false);
     remove(item);
     updateBadge();
@@ -130,8 +142,14 @@ export function PingAlert() {
             <span className="inline-block animate-ring">{urgent ? '🚨' : '🔔'}</span>
           </div>
 
+          {item.reminder && (
+            <div className="mt-3 rounded-xl bg-live-soft px-3 py-1.5 text-sm font-semibold text-rose-deep">
+              ⏰ Reminder: {item.sender_name} is still waiting for your answer
+            </div>
+          )}
+
           {urgent && (
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-live-soft px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-live">
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-live-soft px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-rose-deep">
               <span className="h-1.5 w-1.5 rounded-full bg-live" aria-hidden /> Urgent
             </div>
           )}
@@ -150,9 +168,20 @@ export function PingAlert() {
             {item.message}
           </p>
 
-          <div className="mt-6 flex flex-col-reverse gap-2 sm:mt-7 sm:flex-row sm:justify-center">
+          <div className="mt-6" role="group" aria-label="Reply and acknowledge">
+            <div className="mb-2 text-xs font-semibold text-ink-2">Reply in one tap</div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {QUICK_REPLIES.map(r => (
+                <button key={r} type="button" disabled={acking} onClick={() => acknowledge(r)} className="chip-btn">
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-center">
             <button onClick={later} className="btn-neutral">Later</button>
-            <button ref={ackRef} disabled={acking} onClick={acknowledge}
+            <button ref={ackRef} disabled={acking} onClick={() => acknowledge()}
                     className="btn-primary sm:px-6">
               {acking ? 'Acknowledging…' : 'Acknowledge'}
             </button>

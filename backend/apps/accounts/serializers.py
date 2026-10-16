@@ -8,6 +8,11 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     is_online = serializers.SerializerMethodField()
+    # {kind, label, text, until, quiet} while a status is set, else null.
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        return obj.current_status()
 
     class Meta:
         model = User
@@ -25,8 +30,9 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "last_seen_at",
             "is_online",
+            "status",
         )
-        read_only_fields = ("id", "last_seen_at", "is_online", "full_name")
+        read_only_fields = ("id", "last_seen_at", "is_online", "full_name", "status")
 
     def get_full_name(self, obj):
         return obj.get_full_name() or obj.username
@@ -87,6 +93,28 @@ class AdminSetPasswordSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         password_validation.validate_password(value, user=self.context.get("user"))
         return value
+
+
+class StatusSerializer(serializers.Serializer):
+    """Set or clear your own status. kind "" means available (clears it)."""
+
+    kind = serializers.ChoiceField(choices=[("", "Available")] + list(User.Status.choices),
+                                   allow_blank=True)
+    text = serializers.CharField(max_length=80, allow_blank=True, required=False, default="")
+    until = serializers.DateTimeField(allow_null=True, required=False, default=None)
+
+    def validate(self, attrs):
+        from datetime import timedelta
+        from django.utils import timezone
+        until = attrs.get("until")
+        if attrs["kind"] and until:
+            if until <= timezone.now():
+                raise serializers.ValidationError({"until": "Pick a time later than now."})
+            if until > timezone.now() + timedelta(days=7):
+                raise serializers.ValidationError({"until": "A status can last up to 7 days."})
+        if not attrs["kind"]:
+            attrs.update(text="", until=None)
+        return attrs
 
 
 class DeviceSerializer(serializers.ModelSerializer):

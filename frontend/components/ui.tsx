@@ -142,6 +142,40 @@ const paths: Record<string, ReactNode> = {
     <circle cx="7.5" cy="15.5" r="4.5" />
     <path d="m10.7 12.3 9.8-9.8M17 6l3 3M14.5 8.5l2 2" />
   </>,
+  // History: a clock turning back.
+  history: <>
+    <path d="M3 12a9 9 0 1 0 2.6-6.4L3 8" />
+    <path d="M3 3v5h5" />
+    <path d="M12 7v5l3 2" />
+  </>,
+  // Audit log: a clipboard with a checklist.
+  audit: <>
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <path d="M9 4V3h6v1" />
+    <path d="m8.5 10 1.2 1.2L12 9M8.5 15.5l1.2 1.2L12 14.5M14 10h2M14 15.5h2" />
+  </>,
+  // Settings: sliders.
+  settings: <>
+    <path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1" />
+    <circle cx="15" cy="6" r="2" />
+    <circle cx="9" cy="12" r="2" />
+    <circle cx="17" cy="18" r="2" />
+  </>,
+  // Users (admin): a person with a badge.
+  userAdmin: <>
+    <circle cx="10" cy="8" r="4" />
+    <path d="M3 20c0-3.3 2.7-6 6-6h2" />
+    <path d="m17.5 14 1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3 1-2.1Z" />
+  </>,
+  chevron: <path d="m9 6 6 6-6 6" />,
+  download: <>
+    <path d="M12 3v12M7 10l5 5 5-5" />
+    <path d="M4 21h16" />
+  </>,
+  reply: <>
+    <path d="M9 14 4 9l5-5" />
+    <path d="M4 9h10a6 6 0 0 1 6 6v5" />
+  </>,
 };
 
 export function Icon({ name, size = 18, className = '' }:
@@ -235,11 +269,22 @@ export function StatusPill({ status }: { status: string }) {
     </span>
   );
 }
-// Urgent is a status, so it stays red (live), never gold.
+// Urgent is a status, so it stays red (live), never gold. Text is the deeper
+// rose: --live on --live-soft is only 3.9:1.
 export function UrgentPill() {
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-live-soft px-2 py-0.5 text-xs font-bold text-live">
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-live-soft px-2 py-0.5 text-xs font-bold text-rose-deep">
       <span className="h-1.5 w-1.5 rounded-full bg-live" aria-hidden />Urgent
+    </span>
+  );
+}
+
+// "×8" after a message that was sent several times in a row.
+export function RepeatCount({ n }: { n: number }) {
+  return (
+    <span className="ml-1.5 inline-flex rounded-full bg-inset px-1.5 text-xs font-bold text-ink-2 tabular-nums"
+          title={`Sent ${n} times in a row`}>
+      ×{n}
     </span>
   );
 }

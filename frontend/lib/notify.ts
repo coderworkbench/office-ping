@@ -34,7 +34,13 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 export async function showNotification(
   title: string,
   body: string,
-  opts: { tag?: string; url?: string; priority?: 'NORMAL' | 'URGENT'; pingId?: number } = {}
+  opts: {
+    tag?: string; url?: string; priority?: 'NORMAL' | 'URGENT'; pingId?: number;
+    /** false: an informational notice that may go away by itself. */
+    sticky?: boolean;
+    /** Alert again even though a notification with this tag is showing. */
+    renotify?: boolean;
+  } = {}
 ) {
   if (typeof window === 'undefined') return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -48,17 +54,18 @@ export async function showNotification(
         tag: opts.tag || 'office-ping',
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',
-        // Stay on screen until clicked; closed by closeNotification() once handled in-app.
-        requireInteraction: true,
+        // Pings stay on screen until clicked; closed by closeNotification() once handled in-app.
+        requireInteraction: opts.sticky !== false,
+        renotify: !!opts.renotify,
         data: { url: opts.url || '/notifications', ping_id: opts.pingId },
-      });
+      } as NotificationOptions);
       return;
     } catch (e) {
       console.warn('SW showNotification failed, falling back', e);
     }
   }
   try {
-    new Notification(title, { body, tag: opts.tag || 'office-ping', requireInteraction: true });
+    new Notification(title, { body, tag: opts.tag || 'office-ping', requireInteraction: opts.sticky !== false });
   } catch {}
 }
 

@@ -11,20 +11,25 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 **Pinging**
 - **Ping a person or a whole group**: one message reaches every member at once.
 - **Nudge**: a one-click "👋 Nudge" for when you just need someone's attention.
+- **Quick ping from anywhere**: Ctrl+K (⌘K) or `/` opens the composer on any page.
 - **Quick templates**: canned messages like "Please come to the meeting room", managed by admins.
 - **Recent recipients**: the people you pinged last sit on the dashboard for one-tap re-pinging.
-- **Urgent priority**: urgent pings jump to the front, show as a pulsing red pop-up and play a distinct chime.
-- **Rate limiting**: 10 pings/min for members and 60/min for HR and admins, so nobody can spam the office.
+- **Urgent priority**: urgent pings jump to the front, show as a pulsing red pop-up and play a distinct chime. If nobody acknowledges within 5 minutes, the pop-up comes back as a reminder and the sender is told.
+- **Rate limiting**: 5 pings a minute per person (a group ping counts once), so nobody can spam the office. Configurable with `PING_RATE` / `PING_RATE_ELEVATED`.
+- **No bombarding**: at most 2 pings a minute to the same person, and the same message can't be sent to them twice within a minute (`PING_RATE_PER_RECIPIENT`). Blocked attempts appear in the audit log.
 
 **Delivery and acknowledgement**
 - **Hard-to-miss alerts**: an incoming ping opens a pop-up in the middle of the screen that stays until it's acknowledged or put off with *Later*. Several pings queue up, and the tab title keeps flashing while any are waiting.
 - **Desktop notifications** through the service worker, even when the tab is in the background. They stay on screen until clicked, clicking one brings Office Ping to the front, and they close by themselves once the ping is handled.
 - **Offline-safe**: pings sent while someone is away are delivered as soon as they reconnect.
 - **Per-recipient tracking**: every ping moves through *Sent → Delivered → Seen → Acknowledged*, per recipient for group pings.
+- **Quick replies**: answer with *On my way*, *Coming in 2 min*, *In a meeting* or *Can't right now*; the sender sees the reply instantly.
+- **Tidy inbox**: repeated pings collapse into one row (*👋 Nudge ×8*), and unanswered urgent pings are pinned to the top.
 - **Installable PWA** with its own icons and manifest.
 
 **People and presence**
 - **Live presence**: see who is online right now, with a heartbeat-based status.
+- **Status and Do Not Disturb**: *In a meeting*, *Do not disturb*, *Out for lunch* or *Away*, with an end time. Senders see it before they ping; in a meeting or DND, normal pings wait quietly in the inbox while urgent ones still break through.
 - **Searchable directory** by name, team or email.
 
 **Administration**
@@ -32,16 +37,17 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 - **User management**: create, deactivate and change the role of users from the UI.
 - **Passwords**: everyone can change their own password (key icon in the sidebar), and admins can reset a forgotten one with a generated, easy-to-read password.
 - **Groups and templates** management.
-- **Audit log** of logins, password changes and resets, user/group/template changes, and every ping sent or acknowledged, with actor and IP.
-- **Ping history** with filters for *My sent*, *My received* and *All* (HR and admins).
+- **Audit log** of sign-ins (and failed ones), password changes and resets, user/group/template changes, and every ping sent, acknowledged, escalated or exported, with actor and IP.
+- **Ping history** with search and filters (person, dates, status, urgent), *Sent*, *Received* and *All* (HR and admins), plus CSV export for admins.
+- **Sign-in protection**: a username locks for 15 minutes after 5 wrong passwords.
 
 **Design**
 - **Sunbeam theme**: the TGF design system (warm cream, gold accent, Noto Sans), shared with Khoji Connect.
 - **Built-in help**: a Help page with animated, step-by-step demos of each task, and a guided tour that spotlights the real controls (offered once on first sign-in, replayable from Help).
-- **Responsive**: a navigation rail on desktop; on phones and tablets a bottom tab bar, bottom-sheet dialogs and card layouts instead of wide tables. Large tap targets, keyboard focus rings and reduced-motion support.
+- **Responsive**: a navigation rail on desktop; on phones and tablets a bottom tab bar, bottom-sheet dialogs and card layouts instead of wide tables. On a phone the Overview is a one-screen composer (tap a face, pick a quick message, Send; press and hold to nudge) whose Send button stays above the keyboard. Large tap targets, keyboard focus rings and reduced-motion support.
 
 **Deployment**
-- **One `docker compose` stack**: Postgres, Redis, Django/Daphne, Next.js and nginx.
+- **One `docker compose` stack**: Postgres, Redis, Django/Daphne, Next.js, nginx and a small escalation worker.
 - **Built for a LAN**: no external services or cloud accounts needed. See [deployment-lan.md](docs/deployment-lan.md).
 
 ## Screenshots

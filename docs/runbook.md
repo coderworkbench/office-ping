@@ -153,7 +153,7 @@ Wait ~30 seconds for the backend to run migrations, then verify:
 
 ```bash
 docker compose -p officeping ps
-# Expect all 5 services up; postgres & redis "healthy"
+# Expect all 6 services up (incl. escalator); postgres & redis "healthy"
 ```
 
 Smoke-test the HTTP endpoints:
@@ -399,9 +399,7 @@ docker compose -p officeping up -d
 cd /opt/office-ping
 git fetch && git log --oneline HEAD..origin/main   # review what's coming
 git pull
-docker compose -p officeping build backend frontend
-docker compose -p officeping up -d
-docker compose -p officeping exec backend python manage.py migrate --noinput
+docker compose -p officeping up -d --build      # the backend runs migrate on start
 ```
 
 Confirm with the smoke tests from step 4.
@@ -411,8 +409,7 @@ Confirm with the smoke tests from step 4.
 ```bash
 cd /opt/office-ping
 git checkout <previous-good-tag-or-sha>
-docker compose -p officeping build backend frontend
-docker compose -p officeping up -d
+docker compose -p officeping up -d --build
 # If the bad release introduced a DB migration you want to undo:
 docker compose -p officeping exec backend python manage.py migrate <app_label> <previous_migration_name>
 ```
@@ -479,7 +476,7 @@ docker compose -p officeping up -d
 | Presence stuck on "Offline" | The `/ws/presence/` WebSocket isn't connecting from the client. See above. |
 | Permissions denied changing admin | HR can't modify admin accounts by design. Log in as ADMIN. |
 | Icons broken on install prompt | Hard-refresh (Ctrl+Shift+R), then DevTools → Application → Service Workers → Unregister. The SW cache is versioned so a rebuild usually fixes this automatically. |
-| 429 "Rate limit" | Members cap at 10 pings/min, Admin/HR at 60/min. Tune `REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']` in `backend/config/settings.py`. |
+| 429 "You can send 5 pings a minute" | Default cap for everyone. Tune `PING_RATE` / `PING_RATE_ELEVATED` in `.env` (e.g. `10/minute`) and restart the backend. |
 | Migrations fail on first boot | `docker compose -p officeping exec backend python manage.py migrate --run-syncdb`. For a totally fresh dev DB: `docker compose -p officeping down -v` and start again. |
 | CORS error in browser console | The URL the user is on isn't in `.env`'s `CORS_ALLOWED_ORIGINS` / `CSRF_TRUSTED_ORIGINS`. Add it and restart. |
 
@@ -491,7 +488,7 @@ Full issue list and WebSocket deep-dive in [`docs/troubleshooting.md`](troublesh
 
 Before you call the install done, confirm:
 
-- [ ] `docker compose -p officeping ps` — all 5 services `Up`, postgres + redis `healthy`
+- [ ] `docker compose -p officeping ps` — all 6 services `Up` (incl. escalator), postgres + redis `healthy`
 - [ ] HTTP smoke tests from step 4 pass
 - [ ] First admin created with role=ADMIN
 - [ ] At least one HR + one MEMBER user created manually (not via `seed_demo`)

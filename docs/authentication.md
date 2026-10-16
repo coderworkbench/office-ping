@@ -12,6 +12,13 @@ Endpoints:
 
 The access token lifetime defaults to 12 hours; refresh is 7 days.
 
+Sign-in is protected against password guessing: after 5 failed attempts a
+username is locked for 15 minutes (20 failures lock an IP address), and the
+response is `429` with `Retry-After`. Sign-ins and failures are audited as
+`LOGIN` and `LOGIN_FAILED`. Client IPs come from the last `X-Forwarded-For`
+entry (the one nginx adds), so a browser can't forge its address. See
+[administration.md](administration.md#sign-in-protection) for the settings.
+
 ## Server-side enforcement
 
 Every REST endpoint and both WebSocket consumers derive the authenticated

@@ -111,7 +111,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# The office's time zone: "today" on the dashboard starts at local midnight.
+TIME_ZONE = config("TIME_ZONE", default="Asia/Kolkata")
 USE_I18N = True
 USE_TZ = True
 
@@ -134,14 +135,31 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
+    # nginx sits in front and appends the real client to X-Forwarded-For.
+    "NUM_PROXIES": 1,
     "DEFAULT_THROTTLE_CLASSES": (
         "rest_framework.throttling.ScopedRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "ping_send": "10/minute",
-        "ping_send_elevated": "60/minute",
+        # Sending pings (a group ping counts once). Override in .env.
+        "ping_send": config("PING_RATE", default="5/minute"),
+        "ping_send_elevated": config("PING_RATE_ELEVATED", default="5/minute"),
     },
 }
+
+# Pings one person may send to the same person (direct pings, any role).
+# The same message can't go to the same person twice within this period.
+PING_RATE_PER_RECIPIENT = config("PING_RATE_PER_RECIPIENT", default="2/minute")
+
+# Urgent pings nobody has acknowledged after this many minutes pop up again
+# for the recipient and the sender is told. 0 turns it off.
+URGENT_ESCALATE_AFTER_MINUTES = config("URGENT_ESCALATE_AFTER_MINUTES", default=5, cast=int)
+
+# Sign-in protection: after this many failed attempts within the window, the
+# username (or the IP address, at the higher limit) is locked until it expires.
+LOGIN_MAX_FAILURES_PER_USER = config("LOGIN_MAX_FAILURES_PER_USER", default=5, cast=int)
+LOGIN_MAX_FAILURES_PER_IP = config("LOGIN_MAX_FAILURES_PER_IP", default=20, cast=int)
+LOGIN_LOCKOUT_SECONDS = config("LOGIN_LOCKOUT_SECONDS", default=900, cast=int)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),

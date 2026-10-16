@@ -1,4 +1,4 @@
-.PHONY: setup dev down migrate seed test lint format logs shell manual
+.PHONY: setup dev down migrate makemigrations seed test lint format logs shell manual
 
 setup:
 	cp -n .env.example .env || true
@@ -15,6 +15,10 @@ down:
 
 migrate:
 	docker compose exec backend python manage.py migrate
+
+# After changing a model: generate the migration, then commit it.
+makemigrations:
+	docker compose exec backend python manage.py makemigrations
 
 seed:
 	docker compose exec backend python manage.py seed_demo

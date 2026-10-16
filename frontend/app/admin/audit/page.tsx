@@ -23,7 +23,7 @@ function Inner() {
   const when = (iso: string) =>
     new Date(iso).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' });
   const ActionPill = ({ action }: { action: string }) => (
-    <span className={'inline-flex whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold tracking-wide ' + actionTone(action)}>
+    <span className={'inline-flex whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold tracking-wide ' + actionTone(action)}>
       {action}
     </span>
   );
@@ -115,8 +115,9 @@ function Inner() {
   );
 }
 
-// Sunbeam pills only; password events use the warning tone so they stand out.
+// Sunbeam pills only; password events and blocked pings stand out.
 function actionTone(action: string) {
+  if (action === 'PING_BLOCKED')                   return 'bg-rose-soft text-rose-deep';
   if (action.includes('PASSWORD'))                 return 'bg-warn-soft text-warn';
   if (action.startsWith('PING_'))                  return 'bg-brand-soft text-brand';
   if (action.startsWith('USER_'))                  return 'bg-gold-soft text-brand';

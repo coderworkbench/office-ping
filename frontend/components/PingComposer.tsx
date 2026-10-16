@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { apiFetch } from '../lib/api';
+import { useState } from 'react';
+import { apiFetch, pingErrorMessage } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { listOf, useApi } from '../lib/useApi';
+import { senderNotice } from '../lib/status';
 import { Icon } from './ui';
 import { PersonSelect, Person } from './PersonSelect';
 type Group = { id: number; name: string; member_count: number };
 type Template = { id: number; title: string; message: string };
 
-export function PingComposer() {
+export function PingComposer({ onSent, autoFocus }: { onSent?: () => void; autoFocus?: boolean } = {}) {
   const { user } = useAuth();
   const [mode, setMode] = useState<'user' | 'group'>('user');
-  const [people, setPeople] = useState<Person[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [templates, setTemplates] = useState<Template[]>([]);
   const [recipient, setRecipient] = useState<number | ''>('');
   const [group, setGroup] = useState<number | ''>('');
   const [templateId, setTemplateId] = useState<number | ''>('');
@@ -23,14 +22,9 @@ export function PingComposer() {
   const [busy, setBusy] = useState(false);
 
   const canGroup = user && user.role !== 'MEMBER';
-
-  useEffect(() => {
-    apiFetch<{ results: Person[] }>('/api/users/').then(d => setPeople(d.results || (d as any))).catch(() => {});
-    apiFetch<{ results: Template[] }>('/api/templates/').then(d => setTemplates(d.results || (d as any))).catch(() => {});
-    if (canGroup) {
-      apiFetch<{ results: Group[] }>('/api/groups/').then(d => setGroups(d.results || (d as any))).catch(() => {});
-    }
-  }, [canGroup]);
+  const people = listOf<Person>(useApi('/api/users/', { intervalMs: 60000 }).data);
+  const templates = listOf<Template>(useApi('/api/templates/').data);
+  const groups = listOf<Group>(useApi(canGroup ? '/api/groups/' : null).data);
 
   const selectedPerson = people.find(p => p.id === recipient);
   const selectedGroup = groups.find(g => g.id === group);
@@ -56,12 +50,13 @@ export function PingComposer() {
       const r = await apiFetch<any>('/api/pings/', {
         method: 'POST', body: JSON.stringify(body),
       });
-      setFeedback(`Sent · ping #${r.id}`);
+      const to = mode === 'user' ? selectedPerson?.full_name : selectedGroup?.name;
+      setFeedback(`Sent to ${to || 'them'} · ping #${r.id}`);
       setMessage(''); setTemplateId('');
+      window.dispatchEvent(new Event('op:sent'));
+      onSent?.();
     } catch (e: any) {
-      setFeedback(String(e.message).toLowerCase().includes('throttl')
-        ? 'Rate limit — give it a second.'
-        : 'Could not send. Try again.');
+      setFeedback(pingErrorMessage(e, 'Could not send. Try again.'));
     } finally { setBusy(false); }
   }
 
@@ -88,9 +83,14 @@ export function PingComposer() {
             value={recipient}
             onChange={(id) => setRecipient(id)}
             excludeId={user?.id}
+            autoFocus={autoFocus}
             placeholder="Type a name, team, or email…"
           />
-          {selectedPerson && !selectedPerson.is_online && (
+          {selectedPerson?.status ? (
+            <div className="rounded-xl bg-warn-soft px-3 py-2 text-sm text-ink">
+              {senderNotice(selectedPerson.full_name, selectedPerson.status)}
+            </div>
+          ) : selectedPerson && !selectedPerson.is_online && (
             <div className="text-sm text-warn">
               {selectedPerson.full_name} is offline — they'll see it when they return.
             </div>

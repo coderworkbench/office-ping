@@ -147,7 +147,7 @@ body {
   /* §10.2 meta pill (non-interactive). */
   .chip {
     @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full
-           px-2 py-0.5 text-[11px] font-semibold bg-inset text-ink-2;
+           px-2 py-0.5 text-xs font-semibold bg-inset text-ink-2;
   }
   /* §10.1 filter chip (interactive). Add .is-active for the selected state. */
   .chip-btn {
@@ -167,3 +167,18 @@ body {
     @apply text-[12px] font-semibold uppercase tracking-wide text-ink-3;
   }
 }
+
+/* Phone home screen (MobileHome): fills the space between the 48px top bar
+   and the 64px tab bar. While typing, the tab bar steps aside so the Send
+   bar sits right above the keyboard. */
+@media (max-width: 639px) {
+  .op-mobile-home {
+    position: fixed; left: 0; right: 0; z-index: 30;
+    top: calc(3rem + env(safe-area-inset-top));
+    bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+  body:has(.op-mobile-home :is(input, textarea):focus) .op-tabbar { display: none; }
+  body:has(.op-mobile-home :is(input, textarea):focus) .op-mobile-home { bottom: env(safe-area-inset-bottom); }
+}
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

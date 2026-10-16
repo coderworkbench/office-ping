@@ -11,7 +11,7 @@ PingDelivery.delivered only when a client actually ACKs via WebSocket.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Iterable, List
 import logging
 
@@ -36,6 +36,26 @@ class NotificationEnvelope:
     priority: str
     group_name: str | None
     created_at: str
+    # Recipient is in a meeting / do-not-disturb and the ping isn't urgent:
+    # the browser files it in the inbox without a pop-up or sound.
+    quiet: bool = False
+    # Re-alert for an urgent ping still not acknowledged (escalate_urgent).
+    reminder: bool = False
+
+    @classmethod
+    def for_delivery(cls, d, *, reminder: bool = False) -> "NotificationEnvelope":
+        ping = d.ping
+        return cls(
+            ping_id=ping.id,
+            delivery_id=d.id,
+            sender_name=ping.sender.get_full_name() or ping.sender.username,
+            message=ping.message,
+            priority=ping.priority,
+            group_name=ping.group.name if ping.group_id else None,
+            created_at=ping.created_at.isoformat(),
+            quiet=ping.priority != "URGENT" and d.recipient.wants_quiet,
+            reminder=reminder,
+        )
 
 
 class WebSocketNotifier:
@@ -49,18 +69,7 @@ class WebSocketNotifier:
         try:
             async_to_sync(layer.group_send)(
                 user_group_name(user_id),
-                {
-                    "type": "notification.message",
-                    "payload": {
-                        "ping_id": envelope.ping_id,
-                        "delivery_id": envelope.delivery_id,
-                        "sender_name": envelope.sender_name,
-                        "message": envelope.message,
-                        "priority": envelope.priority,
-                        "group_name": envelope.group_name,
-                        "created_at": envelope.created_at,
-                    },
-                },
+                {"type": "notification.message", "payload": asdict(envelope)},
             )
         except Exception:
             logger.exception("Failed WS notify to user %s", user_id)
@@ -75,26 +84,12 @@ class NotificationService:
     def __init__(self, notifiers: Iterable | None = None) -> None:
         self.notifiers: List = list(notifiers) if notifiers else [WebSocketNotifier()]
 
-    def deliver(self, ping, deliveries):
-        envelopes = []
+    def deliver(self, ping, deliveries, *, reminder: bool = False):
         for d in deliveries:
-            envelopes.append(
-                (
-                    d.recipient_id,
-                    NotificationEnvelope(
-                        ping_id=ping.id,
-                        delivery_id=d.id,
-                        sender_name=ping.sender.get_full_name() or ping.sender.username,
-                        message=ping.message,
-                        priority=ping.priority,
-                        group_name=ping.group.name if ping.group_id else None,
-                        created_at=ping.created_at.isoformat(),
-                    ),
-                )
-            )
-        for user_id, envelope in envelopes:
+            d.ping = ping
+            envelope = NotificationEnvelope.for_delivery(d, reminder=reminder)
             for n in self.notifiers:
-                n.send(user_id, envelope)
+                n.send(d.recipient_id, envelope)
 
     @staticmethod
     def notify_recipient_handled(user_id: int, ping_id: int) -> None:

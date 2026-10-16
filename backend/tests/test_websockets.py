@@ -96,3 +96,59 @@ async def test_ping_handled_is_only_sent_to_the_recipient(member_a, member_b, hr
     await acknowledge(member_b, ping_id)
     assert await other.receive_nothing(timeout=0.5)
     await other.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+async def test_sender_sees_the_quick_reply_live(member_a, member_b):
+    sender = await open_socket(NotificationConsumer, "/ws/notifications/", member_a)
+    ping_id = await send_ping(member_a, member_b, "Please come to my desk")
+
+    @sync_to_async
+    def ack_with_reply():
+        r = api_as(member_b).post(f"/api/pings/{ping_id}/acknowledge/",
+                                  {"reply": "Coming in 2 min"}, format="json")
+        assert r.status_code == 200, r.data
+    await ack_with_reply()
+
+    msg = await sender.receive_json_from(timeout=2)
+    assert msg["type"] == "ping_status"
+    p = msg["payload"]
+    assert (p["kind"], p["ping_id"], p["reply"], p["recipient_name"]) == \
+        ("acknowledged", ping_id, "Coming in 2 min", "Mem B")
+    await sender.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+async def test_escalation_reminds_recipient_and_tells_sender(member_a, member_b, settings):
+    from datetime import timedelta
+    from django.utils import timezone
+    from apps.notifications.escalation import escalate_due
+    from apps.notifications.models import PingDelivery
+    settings.URGENT_ESCALATE_AFTER_MINUTES = 5
+
+    sender = await open_socket(NotificationConsumer, "/ws/notifications/", member_a)
+    recipient = await open_socket(NotificationConsumer, "/ws/notifications/", member_b)
+
+    @sync_to_async
+    def send_urgent_and_age():
+        r = api_as(member_a).post("/api/pings/", {"recipient": member_b.id, "message": "Server down",
+                                                  "priority": "URGENT"}, format="json")
+        PingDelivery.objects.filter(ping_id=r.data["id"]).update(
+            created_at=timezone.now() - timedelta(minutes=6))
+        return r.data["id"]
+    ping_id = await send_urgent_and_age()
+    first = await recipient.receive_json_from(timeout=2)
+    assert first["payload"]["reminder"] is False
+
+    assert await sync_to_async(escalate_due)() == 1
+    again = await recipient.receive_json_from(timeout=2)
+    assert again["type"] == "notification"
+    assert again["payload"]["ping_id"] == ping_id and again["payload"]["reminder"] is True
+    told = await sender.receive_json_from(timeout=2)
+    assert told["payload"]["kind"] == "unacknowledged"
+    assert told["payload"]["recipient_name"] == "Mem B" and told["payload"]["minutes"] == 5
+
+    for comm in (sender, recipient):
+        await comm.disconnect()

@@ -101,6 +101,10 @@ class PingDelivery(models.Model):
     delivered_at = models.DateTimeField(null=True, blank=True)
     seen_at = models.DateTimeField(null=True, blank=True)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
+    # Optional quick reply sent with the acknowledgement ("On my way").
+    reply = models.CharField(max_length=120, blank=True)
+    # When an unacknowledged urgent ping was re-alerted (see escalate_urgent).
+    escalated_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:

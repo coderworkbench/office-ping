@@ -40,7 +40,25 @@ report `Delivered: 4 / Offline: 1 / Acknowledged: 3`.
 
 - `NORMAL` → pop-up with a blue accent and a two-note chime.
 - `URGENT` → jumps to the front of the queue, red pulsing pop-up, and a
-  three-note chime.
+  three-note chime. Still unacknowledged after
+  `URGENT_ESCALATE_AFTER_MINUTES`, it is re-sent with `reminder: true` (the
+  pop-up returns, marked *Reminder*) and the sender gets a
+  `ping_status` event of kind `unacknowledged`.
+
+## Quiet delivery (status)
+
+A recipient whose status is *In a meeting* or *Do not disturb* gets normal
+pings with `quiet: true`: the browser files them in the inbox and updates the
+badge, without a pop-up, sound or desktop notification. Urgent pings are never
+quiet. Status is set with `PUT /api/me/status/ {kind, text, until}` (`kind`
+`""` clears it) and appears as `status` on `/api/users/`.
+
+## Quick replies
+
+`POST /api/pings/<id>/acknowledge/ {"reply": "On my way"}` acknowledges with
+a reply (max 120 characters). The sender receives a `ping_status` event of
+kind `acknowledged` carrying `reply` and `recipient_name`, shown as a notice;
+the reply is also stored on the delivery and shown in History.
 
 ## Service worker
 

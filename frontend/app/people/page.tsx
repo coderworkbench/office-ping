@@ -1,14 +1,18 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Guard } from '../../components/Guard';
-import { apiFetch } from '../../lib/api';
+import { apiFetch, pingErrorMessage } from '../../lib/api';
 import { useAuth } from '../../lib/auth';
+import { listOf, useApi } from '../../lib/useApi';
+import { NudgeHint } from '../../components/NudgeHint';
+import { describeStatus, Status } from '../../lib/status';
 import { Avatar, Empty, Icon, PageHeader, Section, Skeleton } from '../../components/ui';
 import { PingDialog } from '../../components/PingDialog';
 
 type Person = {
   id: number; full_name: string; department: string; designation: string;
   is_online: boolean;
+  status: Status | null;
 };
 
 const NUDGE_MESSAGE = '👋 Nudge';
@@ -17,15 +21,12 @@ export default function PeoplePage() { return <Guard><Inner /></Guard>; }
 
 function Inner() {
   const { user } = useAuth();
-  const [people, setPeople] = useState<Person[] | null>(null);
+  const { data } = useApi('/api/users/', { intervalMs: 30000 });
+  const people: Person[] | null = data ? listOf<Person>(data) : null;
   const [q, setQ] = useState('');
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ text: string; ok: boolean } | null>(null);
   const [dialogTarget, setDialogTarget] = useState<Person | null>(null);
-
-  useEffect(() => {
-    apiFetch<any>('/api/users/').then(d => setPeople(d.results || d));
-  }, []);
 
   const list = useMemo(() => {
     if (!people) return [];
@@ -39,9 +40,9 @@ function Inner() {
       .sort((a, b) => Number(b.is_online) - Number(a.is_online));
   }, [people, q, user?.id]);
 
-  function flash(msg: string) {
-    setFeedback(msg);
-    setTimeout(() => setFeedback(null), 3500);
+  function flash(text: string, ok = true) {
+    setFeedback({ text, ok });
+    setTimeout(() => setFeedback(null), ok ? 3500 : 6000);
   }
 
   async function nudge(p: Person) {
@@ -51,11 +52,10 @@ function Inner() {
         method: 'POST',
         body: JSON.stringify({ recipient: p.id, message: NUDGE_MESSAGE }),
       });
-      flash(`Nudged ${p.full_name} ·`);
+      flash(`Nudged ${p.full_name}`);
+      window.dispatchEvent(new Event('op:sent'));
     } catch (e: any) {
-      flash(String(e.message).toLowerCase().includes('throttl')
-        ? 'Easy — rate limited.'
-        : `Couldn't reach ${p.full_name}`);
+      flash(pingErrorMessage(e, `Couldn't reach ${p.full_name}`), false);
     } finally { setBusyId(null); }
   }
 
@@ -81,13 +81,15 @@ function Inner() {
       />
 
       {feedback && (
-        <div aria-live="polite" className="mb-4 inline-flex items-center gap-2 rounded-xl bg-success-soft px-3 py-2 text-sm font-semibold text-success animate-slideIn">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
-          {feedback}
+        <div aria-live="polite" className={'mb-4 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold animate-slideIn ' +
+          (feedback.ok ? 'bg-success-soft text-success' : 'bg-rose-soft text-rose-deep')}>
+          <span className={'h-1.5 w-1.5 rounded-full ' + (feedback.ok ? 'bg-success' : 'bg-rose')} aria-hidden />
+          {feedback.text}
         </div>
       )}
 
       <Section surface>
+        <NudgeHint className="mb-2" />
         {!people && (
           <ul className="divide-y divide-line-2">
             {Array.from({ length: 4 }).map((_, i) =>
@@ -115,15 +117,20 @@ function Inner() {
                   <div className="truncate font-bold text-ink">{p.full_name}</div>
                   <div className="truncate text-[13px] text-ink-2">
                     {/* status lives here on phones; its own column from sm up */}
-                    <span className={'sm:hidden ' + (p.is_online ? 'font-semibold text-success' : 'text-ink-3')}>
+                    <span className={'sm:hidden font-semibold ' + (p.is_online ? 'text-success' : 'text-ink-2')}>
                       {p.is_online ? 'Online' : 'Offline'} ·{' '}
                     </span>
                     {p.department || '—'}
                     {p.designation ? ` · ${p.designation}` : ''}
                   </div>
+                  {p.status && (
+                    <div className={'mt-0.5 truncate text-[13px] font-semibold ' + (p.status.quiet ? 'text-rose-deep' : 'text-warn')}>
+                      {describeStatus(p.status, { emoji: true })}
+                    </div>
+                  )}
                 </div>
-                <span className={'hidden w-16 shrink-0 text-[11px] font-semibold uppercase tracking-wide sm:block ' +
-                  (p.is_online ? 'text-success' : 'text-ink-3')}>
+                <span className={'hidden w-16 shrink-0 text-[13px] font-semibold sm:block ' +
+                  (p.is_online ? 'text-success' : 'text-ink-2')}>
                   {p.is_online ? 'Online' : 'Offline'}
                 </span>
 

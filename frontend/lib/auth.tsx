@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiFetch, login as apiLogin, logout as apiLogout, getAccessToken } from './api';
 import { getDeviceId, detectBrowser } from './device';
+import type { Status } from './status';
+import { invalidate } from './useApi';
 
 export type User = {
   id: number;
@@ -14,6 +16,7 @@ export type User = {
   role: 'ADMIN' | 'HR' | 'MEMBER';
   department: string;
   designation: string;
+  status: Status | null;
 };
 
 type AuthState = {
@@ -21,11 +24,13 @@ type AuthState = {
   loading: boolean;
   signIn: (u: string, p: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Re-read /api/me/ (e.g. after changing your status). */
+  refresh: () => Promise<void>;
 };
 
 const AuthCtx = createContext<AuthState>({
   user: null, loading: true,
-  signIn: async () => {}, signOut: async () => {},
+  signIn: async () => {}, signOut: async () => {}, refresh: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -59,12 +64,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signIn(username: string, password: string) {
     await apiLogin(username, password);
+    invalidate('');   // never show the previous person's cached data
     await loadMe();
   }
-  async function signOut() { await apiLogout(); setUser(null); }
+  async function refresh() {
+    try { setUser(await apiFetch<User>('/api/me/')); } catch {}
+  }
+  async function signOut() { await apiLogout(); invalidate(''); setUser(null); }
 
   return (
-    <AuthCtx.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthCtx.Provider value={{ user, loading, signIn, signOut, refresh }}>
       {children}
     </AuthCtx.Provider>
   );

@@ -158,23 +158,14 @@ def pending_notifications(user_id):
     them would re-open every pop-up the user put off with "Later" on each
     reload or reconnect.
     """
+    from dataclasses import asdict
     from .models import PingDelivery
-    qs = PingDelivery.objects.select_related("ping", "ping__sender",
-                                              "ping__group").filter(
+    from .services import NotificationEnvelope
+    qs = PingDelivery.objects.select_related("ping", "ping__sender", "ping__group",
+                                              "recipient").filter(
         recipient_id=user_id,
         delivered_at__isnull=True,
         acknowledged_at__isnull=True,
         created_at__gte=timezone.now() - timedelta(days=1),
     ).order_by("created_at")[:50]
-    return [
-        {
-            "ping_id": d.ping_id,
-            "delivery_id": d.id,
-            "sender_name": d.ping.sender.get_full_name() or d.ping.sender.username,
-            "message": d.ping.message,
-            "priority": d.ping.priority,
-            "group_name": d.ping.group.name if d.ping.group_id else None,
-            "created_at": d.ping.created_at.isoformat(),
-        }
-        for d in qs
-    ]
+    return [asdict(NotificationEnvelope.for_delivery(d)) for d in qs]

@@ -11,9 +11,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { apiFetch } from '../lib/api';
+import { prefetch } from '../lib/useApi';
 import { Avatar, Icon } from './ui';
 import { Logo } from './Logo';
 import { Tour } from './Tour';
+import { QuickPing, QUICK_PING_EVENT, ShortcutHint } from './QuickPing';
+import { StatusDialog } from './StatusDialog';
+import { describeStatus } from '../lib/status';
+import { useLiveStatus } from './NotificationsRuntime';
 
 type Role = 'ADMIN' | 'HR' | 'MEMBER';
 type NavItem = { href: string; label: string; icon: any; roles?: Role[]; badge?: number };
@@ -24,6 +29,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [unread, setUnread] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState<boolean | null>(null);
+  const [statusOpen, setStatusOpen] = useState(false);
+
+  // The Manage section remembers whether it was left open.
+  useEffect(() => {
+    try { setManageOpen(localStorage.getItem('op_nav_manage') === 'open'); } catch { setManageOpen(false); }
+  }, []);
+  function toggleManage() {
+    const next = !manageOpen;
+    setManageOpen(next);
+    try { localStorage.setItem('op_nav_manage', next ? 'open' : 'closed'); } catch {}
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -35,13 +52,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
     load();
     const h = () => load();
-    window.addEventListener('op:ping', h);
-    window.addEventListener('op:ping_handled', h);
+    const events = ['op:ping', 'op:ping_handled', 'op:inbox_changed'];
+    events.forEach(e => window.addEventListener(e, h));
     const t = setInterval(load, 30000);
     return () => {
       mounted = false;
-      window.removeEventListener('op:ping', h);
-      window.removeEventListener('op:ping_handled', h);
+      events.forEach(e => window.removeEventListener(e, h));
       clearInterval(t);
     };
   }, []);
@@ -56,30 +72,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isActive = (href: string) =>
     href === '/dashboard' || href === '/admin' ? pathname === href : !!pathname?.startsWith(href);
 
-  const groups: { label: string; items: NavItem[] }[] = [
+  const groups: { label: string; items: NavItem[]; collapsible?: boolean }[] = [
     {
       label: 'Workspace',
       items: [
         { href: '/dashboard',     label: 'Overview', icon: 'dashboard' },
         { href: '/people',        label: 'People',   icon: 'users' },
         { href: '/notifications', label: 'Inbox',    icon: 'inbox', badge: unread },
-        { href: '/history',       label: 'History',  icon: 'clock' },
+        { href: '/history',       label: 'History',  icon: 'history' },
         { href: '/help',          label: 'Help',     icon: 'help' },
       ],
     },
     {
-      label: 'Broadcast',
+      // Collapsible so the rail fits a laptop screen without scrolling.
+      label: 'Manage',
+      collapsible: true,
       items: [
-        { href: '/groups',    label: 'Groups',    icon: 'group', roles: ['ADMIN', 'HR'] },
-        { href: '/templates', label: 'Templates', icon: 'send',  roles: ['ADMIN', 'HR'] },
-      ],
-    },
-    {
-      label: 'Admin',
-      items: [
-        { href: '/admin',       label: 'Settings',  icon: 'shield', roles: ['ADMIN'] },
-        { href: '/admin/users', label: 'Users',     icon: 'users',  roles: ['ADMIN'] },
-        { href: '/admin/audit', label: 'Audit log', icon: 'clock',  roles: ['ADMIN'] },
+        { href: '/groups',      label: 'Groups',    icon: 'group',     roles: ['ADMIN', 'HR'] },
+        { href: '/templates',   label: 'Templates', icon: 'send',      roles: ['ADMIN', 'HR'] },
+        { href: '/admin/users', label: 'Users',     icon: 'userAdmin', roles: ['ADMIN'] },
+        { href: '/admin/audit', label: 'Audit log', icon: 'audit',     roles: ['ADMIN'] },
+        { href: '/admin',       label: 'Settings',  icon: 'settings',  roles: ['ADMIN'] },
       ],
     },
   ];
@@ -89,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: '/dashboard',     label: 'Overview', icon: 'dashboard' },
     { href: '/people',        label: 'People',   icon: 'users' },
     { href: '/notifications', label: 'Inbox',    icon: 'inbox', badge: unread },
-    { href: '/history',       label: 'History',  icon: 'clock' },
+    { href: '/history',       label: 'History',  icon: 'history' },
   ];
   const tabHrefs = new Set(tabs.map(t => t.href));
   const moreItems = groups.flatMap(g => g.items).filter(i => allowed(i) && !tabHrefs.has(i.href));
@@ -111,26 +124,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Logo size={36} />
           <span className="leading-tight">
             <span className="block text-[15px] font-bold">Office Ping</span>
-            <span className="block text-[10px] uppercase tracking-[0.14em] text-white/45">Internal · v1</span>
+            <span className="block text-[10px] uppercase tracking-[0.14em] text-white/60">Internal · v1</span>
           </span>
         </Link>
 
-        <nav aria-label="Main" className="-mx-2 flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-0 py-5">
+        <button type="button" onClick={() => window.dispatchEvent(new Event(QUICK_PING_EVENT))}
+                className="mt-4 flex min-h-[40px] w-full items-center gap-2.5 rounded-lg bg-white/10 px-3 text-sm font-semibold text-white hover:bg-white/15">
+          <Icon name="send" size={18} /> <span className="flex-1 text-left">Quick ping</span> <ShortcutHint />
+        </button>
+
+        <nav aria-label="Main" className="-mx-2 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-0 py-5">
           {groups.map(g => {
             const visible = g.items.filter(allowed);
             if (!visible.length) return null;
+            // Open when the person left it open, or when they're on one of its pages.
+            const open = !g.collapsible || !!manageOpen || visible.some(i => isActive(i.href));
             return (
               <div key={g.label}>
-                <div className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wide text-white/40">{g.label}</div>
-                <ul className="space-y-0.5">
+                {g.collapsible ? (
+                  <button type="button" onClick={toggleManage} aria-expanded={open} aria-controls="nav-manage"
+                          data-tour="nav-manage"
+                          className="mb-1.5 flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white/60 hover:text-white">
+                    <span className={'transition-transform duration-150 ' + (open ? 'rotate-90' : '')}><Icon name="chevron" size={14} /></span>
+                    {g.label}
+                    {!open && <span className="ml-auto font-semibold normal-case tracking-normal text-white/60">{visible.length} pages</span>}
+                  </button>
+                ) : (
+                  <div className="mb-1.5 px-2 text-[11px] font-bold uppercase tracking-wide text-white/60">{g.label}</div>
+                )}
+                {open && <ul id={g.collapsible ? 'nav-manage' : undefined} className="space-y-0.5">
                   {visible.map(i => {
                     const active = isActive(i.href);
                     return (
                       <li key={i.href}>
                         <Link href={i.href} aria-current={active ? 'page' : undefined} data-tour={tourId(i.href)}
+                          onMouseEnter={() => warm(i.href, role)} onFocus={() => warm(i.href, role)}
                           className={
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-150 ' +
-                            (active ? 'bg-white/10 text-gold-fill' : 'text-white/70 hover:bg-white/5 hover:text-white')
+                            (active ? 'bg-white/10 text-gold-fill' : 'text-white/75 hover:bg-white/5 hover:text-white')
                           }>
                           <Icon name={i.icon} size={20} />
                           <span className="flex-1">{i.label}</span>
@@ -139,42 +170,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       </li>
                     );
                   })}
-                </ul>
+                </ul>}
               </div>
             );
           })}
         </nav>
 
+        <button type="button" onClick={() => setStatusOpen(true)} data-tour="status"
+                className="-mx-2 mb-2 flex min-h-[40px] items-center gap-2 truncate rounded-lg px-2 text-left text-[13px] font-semibold text-white/75 hover:bg-white/5 hover:text-white">
+          <span className={'h-2 w-2 shrink-0 rounded-full ' + (user.status ? (user.status.quiet ? 'bg-live' : 'bg-gold-fill') : 'bg-success')} aria-hidden />
+          <span className="truncate">{user.status ? describeStatus(user.status) : 'Available · set a status'}</span>
+        </button>
         <div className="-mx-2 mb-4 flex items-center gap-1 border-t border-white/10 pt-4">
           <Link href="/account" title="Your account"
                 className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5">
             <Avatar name={name} size={36} tone="gold" />
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{name}</span>
-              <span className="block text-[11px] uppercase tracking-wide text-white/50">{role}</span>
+              <span className="block text-xs uppercase tracking-wide text-white/65">{role}</span>
             </span>
           </Link>
           <Link href="/account" title="Change password" aria-label="Change password" data-tour="account"
                 className={'grid h-11 w-11 place-items-center rounded-lg hover:bg-white/10 hover:text-white ' +
-                  (pathname === '/account' ? 'bg-white/10 text-gold-fill' : 'text-white/60')}>
+                  (pathname === '/account' ? 'bg-white/10 text-gold-fill' : 'text-white/70')}>
             <Icon name="key" size={18} />
           </Link>
           <button title="Sign out" aria-label="Sign out" onClick={doSignOut}
-                  className="grid h-11 w-11 place-items-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white">
+                  className="grid h-11 w-11 place-items-center rounded-lg text-white/70 hover:bg-white/10 hover:text-white">
             <Icon name="logout" size={18} />
           </button>
         </div>
       </aside>
 
       {/* ── Mobile / tablet top bar (<1024px) ──────────────────────────── */}
-      <header className="lg:hidden sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-line bg-surface px-4 shadow-sm sm:px-6"
-              style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <Logo size={32} />
+      <header className="lg:hidden sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-line bg-surface px-4 shadow-sm sm:px-6"
+              style={{ paddingTop: 'env(safe-area-inset-top)', boxSizing: 'content-box' }}>
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <Logo size={28} />
           <span className="text-[15px] font-bold text-ink">Office Ping</span>
+          <LiveDot />
         </Link>
         <Link href="/account" aria-label="Your account" data-tour="account" className="ml-auto grid h-11 w-11 place-items-center rounded-full">
-          <Avatar name={name} size={34} tone="gold" />
+          <Avatar name={name} size={32} tone="gold" />
         </Link>
       </header>
 
@@ -187,9 +224,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Bottom tab bar (<1024px) ──────────────────────────────────── */}
       <nav aria-label="Main"
-           className="lg:hidden fixed inset-x-0 bottom-0 z-40 rounded-t-2xl border-t border-line bg-surface shadow-up"
+           className="op-tabbar lg:hidden fixed inset-x-0 bottom-0 z-40 rounded-t-2xl border-t border-line bg-surface shadow-up"
            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <ul className="mx-auto grid max-w-xl grid-cols-5 px-1 pt-1.5 pb-1">
+        <ul className="mx-auto grid h-16 max-w-xl grid-cols-5 items-center px-1">
           {tabs.map(t => (
             <li key={t.href}>
               <TabLink href={t.href} label={t.label} icon={t.icon} badge={t.badge} active={isActive(t.href)} />
@@ -214,11 +251,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         items={moreItems}
         isActive={isActive}
         onSignOut={doSignOut}
+        statusLabel={user.status ? describeStatus(user.status, { emoji: true }) : 'Available'}
+        onStatus={() => { setSheetOpen(false); setStatusOpen(true); }}
       />
 
+      <StatusDialog open={statusOpen} onClose={() => setStatusOpen(false)} />
+      <QuickPing />
       <Tour />
     </div>
   );
+}
+
+// Connection state as a small dot next to the name in the phone top bar.
+function LiveDot() {
+  const live = useLiveStatus() === 'open';
+  return (
+    <span className={'h-2 w-2 rounded-full ' + (live ? 'bg-success' : 'bg-warn animate-pulse')}
+          title={live ? 'Live' : 'Reconnecting…'} aria-label={live ? 'Live' : 'Reconnecting'} role="img" />
+  );
+}
+
+// Load a page's data while the pointer is on its link, so it opens with
+// content instead of a skeleton. Keys must match what the page asks for.
+function warm(href: string, role?: Role) {
+  const urls: Record<string, string[]> = {
+    '/dashboard':     role && role !== 'MEMBER' ? ['/api/dashboard/'] : [],
+    '/people':        ['/api/users/'],
+    '/notifications': ['/api/notifications/'],
+    '/history':       ['/api/pings/?scope=sent'],
+  };
+  (urls[href] || []).forEach(u => prefetch(u));
 }
 
 // Stable hooks for the guided tour: /admin/users → "nav-users", /notifications → "nav-inbox".
@@ -255,6 +317,7 @@ function TabLink({ href, label, icon, badge, active }:
   return (
     <Link href={href} aria-current={active ? 'page' : undefined} data-tour={tourId(href)}
           aria-label={badge ? `${label}, ${badge} unread` : undefined}
+          onTouchStart={() => warm(href)}
           className="flex flex-col items-center gap-0.5 py-1 min-h-[52px]">
       <TabIcon icon={icon} active={active} badge={badge} />
       <span className={'text-[11px] font-semibold ' + (active ? 'text-ink' : 'text-ink-3')}>{label}</span>
@@ -264,9 +327,10 @@ function TabLink({ href, label, icon, badge, active }:
 
 // §17.2 bottom sheet: scrim + panel sliding up, grab handle, Esc / scrim to close,
 // body scroll locked, focus moved in and returned to the trigger on close.
-function MoreSheet({ open, onClose, name, role, items, isActive, onSignOut }: {
+function MoreSheet({ open, onClose, name, role, items, isActive, onSignOut, statusLabel, onStatus }: {
   open: boolean; onClose: () => void; name: string; role: Role;
   items: NavItem[]; isActive: (href: string) => boolean; onSignOut: () => void;
+  statusLabel: string; onStatus: () => void;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const returnTo = useRef<HTMLElement | null>(null);
@@ -311,6 +375,11 @@ function MoreSheet({ open, onClose, name, role, items, isActive, onSignOut }: {
             <div className="text-xs font-semibold uppercase tracking-wide text-ink-3">{role}</div>
           </div>
         </div>
+        <button type="button" onClick={onStatus}
+                className="mb-2 flex min-h-[48px] w-full items-center gap-3 rounded-xl border border-line px-3 text-left text-[15px] font-semibold text-ink active:bg-inset">
+          <span className="min-w-0 flex-1 truncate">{statusLabel}</span>
+          <span className="text-sm font-semibold text-brand">Set status</span>
+        </button>
         <ul className="divide-y divide-line-2">
           {items.map(i => (
             <li key={i.href}>

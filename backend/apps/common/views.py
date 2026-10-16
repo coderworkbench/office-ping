@@ -10,46 +10,57 @@ from apps.notifications.models import Ping
 
 User = get_user_model()
 
+# A ping counts as "awaiting acknowledgement" for this long; the dashboard
+# card and the History "Awaiting ack" filter share this definition.
+AWAITING_ACK_WINDOW = timedelta(days=1)
+
+
+def start_of_today():
+    """Local (TIME_ZONE) midnight, so "today" matches the office's day."""
+    return timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def awaiting_ack(qs):
+    return qs.filter(acknowledged_at__isnull=True,
+                     created_at__gte=timezone.now() - AWAITING_ACK_WINDOW)
+
 
 class DashboardView(APIView):
     permission_classes = [IsHROrAdmin]
 
     def get(self, request):
         now = timezone.now()
-        start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        online_cutoff = now - timedelta(seconds=60)
-        online_qs = User.objects.filter(
-            is_active=True, last_seen_at__gte=online_cutoff
-        )
-        pings_today = Ping.objects.filter(created_at__gte=start_of_day)
-        pending_acks = Ping.objects.filter(
-            acknowledged_at__isnull=True,
-            created_at__gte=now - timedelta(days=1),
-        )
+        # Counts are about your teammates, matching the People page: you
+        # aren't included.
+        teammates = User.objects.filter(is_active=True).exclude(pk=request.user.pk)
+        total = teammates.count()
+        online = teammates.filter(last_seen_at__gte=now - timedelta(seconds=60)).count()
         return Response(
             {
-                "total_employees": User.objects.filter(is_active=True).count(),
-                "online_employees": online_qs.count(),
-                "offline_employees": User.objects.filter(is_active=True).count()
-                - online_qs.count(),
+                "total_employees": total,
+                "online_employees": online,
+                "offline_employees": total - online,
                 "total_groups": Group.objects.filter(is_active=True).count(),
-                "pings_today": pings_today.count(),
-                "pending_acknowledgements": pending_acks.count(),
+                # Whole office, every sender.
+                "pings_today": Ping.objects.filter(created_at__gte=start_of_today()).count(),
+                "pending_acknowledgements": awaiting_ack(Ping.objects.all()).count(),
                 "recent_pings": [
                     {
                         "id": p.id,
                         "sender": p.sender.get_full_name() or p.sender.username,
                         "recipient": (
-                            p.recipient.get_full_name() if p.recipient else None
+                            (p.recipient.get_full_name() or p.recipient.username)
+                            if p.recipient else None
                         ),
                         "group": p.group.name if p.group else None,
                         "message": p.message,
+                        "priority": p.priority,
                         "status": p.status,
                         "created_at": p.created_at.isoformat(),
                     }
                     for p in Ping.objects.select_related(
                         "sender", "recipient", "group"
-                    ).order_by("-created_at")[:10]
+                    ).order_by("-created_at")[:30]
                 ],
             }
         )

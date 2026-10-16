@@ -29,7 +29,7 @@ function Inner() {
   });
 
   async function load() {
-    const d = await apiFetch<any>('/api/users/');
+    const d = await apiFetch<any>('/api/users/?include_inactive=1');
     setUsers(d.results || d);
   }
   useEffect(() => { load(); }, []);

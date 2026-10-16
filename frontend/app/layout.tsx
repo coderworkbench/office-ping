@@ -5,6 +5,7 @@ import { AuthProvider } from '../lib/auth';
 import { NotificationsRuntime } from '../components/NotificationsRuntime';
 import { ServiceWorkerBoot } from '../components/ServiceWorkerBoot';
 import { PingAlert } from '../components/PingAlert';
+import { SenderToasts } from '../components/SenderToasts';
 
 // Sunbeam §3.1 — Noto Sans, self-hosted (no third-party font CDN), one
 // variable Latin file covering every weight. Non-Latin scripts fall back to
@@ -30,7 +31,9 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: '#FFFBEA', viewportFit: 'cover' };
+// resizes-content: on Android the page shrinks above the keyboard, so the
+// phone composer's Send bar stays visible while typing.
+export const viewport: Viewport = { themeColor: '#FFFBEA', viewportFit: 'cover', interactiveWidget: 'resizes-content' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -40,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <NotificationsRuntime />
           <PingAlert />
+          <SenderToasts />
           {children}
         </AuthProvider>
       </body>

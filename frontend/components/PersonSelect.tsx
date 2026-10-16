@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Avatar, Icon } from './ui';
+import { describeStatus, Status } from '../lib/status';
 
 export type Person = {
   id: number;
@@ -20,16 +21,18 @@ export type Person = {
   email?: string;
   employee_code?: string | null;
   is_online: boolean;
+  status?: Status | null;
 };
 
 export function PersonSelect({
-  people, value, onChange, placeholder = 'Search people…', excludeId,
+  people, value, onChange, placeholder = 'Search people…', excludeId, autoFocus,
 }: {
   people: Person[];
   value: number | '';
   onChange: (id: number | '') => void;
   placeholder?: string;
   excludeId?: number;
+  autoFocus?: boolean;
 }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -119,6 +122,7 @@ export function PersonSelect({
         )}
         <input
           ref={inputRef}
+          autoFocus={autoFocus}
           aria-label="Who should get this?"
           className="input pl-11 pr-11"
           placeholder={placeholder}
@@ -173,12 +177,12 @@ export function PersonSelect({
                   <div className="flex-1 min-w-0">
                     <div className="truncate text-sm font-semibold text-ink">{p.full_name}</div>
                     <div className="truncate text-xs text-ink-2">
-                      {p.department || '—'}
-                      {p.email ? ` · ${p.email}` : ''}
+                      {p.status ? describeStatus(p.status, { emoji: true })
+                        : <>{p.department || '—'}{p.email ? ` · ${p.email}` : ''}</>}
                     </div>
                   </div>
-                  <span className={'shrink-0 text-[11px] font-semibold uppercase tracking-wide ' +
-                    (p.is_online ? 'text-success' : 'text-ink-3')}>
+                  <span className={'shrink-0 text-xs font-semibold ' +
+                    (p.is_online ? 'text-success' : 'text-ink-2')}>
                     {p.is_online ? 'Online' : 'Offline'}
                   </span>
                 </button>

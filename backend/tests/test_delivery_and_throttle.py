@@ -61,12 +61,95 @@ def test_listing_pings_is_not_rate_limited(auth, member_a):
 
 
 @pytest.mark.django_db
-def test_sending_pings_is_still_rate_limited(auth, member_a, member_b):
-    c = auth(member_a)
+@pytest.mark.parametrize("role", ["member", "hr", "admin"])
+def test_everyone_can_send_five_pings_a_minute(role, auth, member_a, member_b,
+                                               hr_user, admin_user, settings):
+    settings.PING_RATE_PER_RECIPIENT = "100/minute"   # isolate the overall limit
+    sender = {"member": member_a, "hr": hr_user, "admin": admin_user}[role]
+    c = auth(sender)
     codes = [
-        c.post("/api/pings/", {"recipient": member_b.id, "message": "hi"},
+        c.post("/api/pings/", {"recipient": member_b.id, "message": f"hi {i}"},
                format="json").status_code
-        for _ in range(12)
+        for i in range(6)
     ]
-    assert codes[:10] == [201] * 10   # members: 10/minute
-    assert 429 in codes[10:]
+    assert codes == [201] * 5 + [429]
+
+
+@pytest.mark.django_db
+def test_rate_limit_says_how_long_to_wait(auth, member_a, member_b, settings):
+    settings.PING_RATE_PER_RECIPIENT = "100/minute"
+    c = auth(member_a)
+    for i in range(5):
+        _ping(c, member_b, f"hi {i}")
+    r = c.post("/api/pings/", {"recipient": member_b.id, "message": "hi"},
+               format="json")
+    assert r.status_code == 429
+    assert r.data["detail"].startswith("You can send 5 pings a minute. Try again in ")
+    assert int(r["Retry-After"]) > 0
+
+
+# ---------- One person can't bombard another ----------
+
+def _send(client, recipient, message):
+    return client.post("/api/pings/", {"recipient": recipient.id, "message": message},
+                       format="json")
+
+
+@pytest.mark.django_db
+def test_same_message_to_same_person_is_refused(auth, member_a, member_b):
+    c = auth(member_a)
+    _ping(c, member_b, "Please come to my desk")
+    r = _send(c, member_b, "  Please come to my desk ")
+    assert r.status_code == 429
+    name = member_b.get_full_name() or member_b.username
+    assert r.data["detail"].startswith(
+        f"You just sent {name} this same message. Try again in ")
+    assert 0 < int(r["Retry-After"]) <= 60
+
+
+@pytest.mark.django_db
+def test_at_most_two_pings_a_minute_to_the_same_person(auth, member_a, member_b, hr_user):
+    c = auth(member_a)
+    _ping(c, member_b, "one")
+    _ping(c, member_b, "two")
+    r = _send(c, member_b, "three")
+    assert r.status_code == 429
+    name = member_b.get_full_name() or member_b.username
+    assert r.data["detail"].startswith(
+        f"You've already pinged {name} twice in the last minute. Try again in ")
+    # Other people can still be pinged, and others can still ping member_b.
+    assert _send(c, hr_user, "three").status_code == 201
+    assert _send(auth(hr_user), member_b, "one").status_code == 201
+
+
+@pytest.mark.django_db
+def test_per_person_limit_applies_to_hr_and_admins_too(auth, admin_user, member_b):
+    c = auth(admin_user)
+    _ping(c, member_b, "one")
+    _ping(c, member_b, "two")
+    assert _send(c, member_b, "three").status_code == 429
+
+
+@pytest.mark.django_db
+def test_per_person_limit_resets_after_a_minute(auth, member_a, member_b):
+    from apps.notifications.models import Ping
+    c = auth(member_a)
+    _ping(c, member_b, "hi")
+    _ping(c, member_b, "again")
+    Ping.objects.update(created_at=timezone.now() - timedelta(seconds=61))
+    assert _send(c, member_b, "hi").status_code == 201
+
+
+@pytest.mark.django_db
+def test_blocked_attempts_are_audited_once_a_minute(auth, member_a, member_b):
+    from apps.audit.models import AuditLog
+    c = auth(member_a)
+    _ping(c, member_b, "hi")
+    for _ in range(3):
+        assert _send(c, member_b, "hi").status_code == 429
+    logs = AuditLog.objects.filter(action="PING_BLOCKED")
+    assert logs.count() == 1
+    log = logs.get()
+    assert log.actor == member_a
+    assert log.target == str(member_b.id)
+    assert log.metadata == {"reason": "duplicate", "recipient": member_b.username}

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -20,6 +21,18 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True, db_index=True)
     last_seen_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
+    class Status(models.TextChoices):
+        MEETING = "MEETING", "In a meeting"
+        LUNCH = "LUNCH", "Out for lunch"
+        AWAY = "AWAY", "Away from desk"
+        DND = "DND", "Do not disturb"
+
+    # A status someone sets for themselves; it ends at status_until (or when
+    # they clear it). MEETING and DND make non-urgent pings arrive quietly.
+    status_kind = models.CharField(max_length=16, choices=Status.choices, blank=True)
+    status_text = models.CharField(max_length=80, blank=True)
+    status_until = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -34,6 +47,28 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.get_full_name() or self.username
+
+    QUIET_STATUSES = ("MEETING", "DND")
+
+    def current_status(self):
+        """The status in effect now, or None once it has expired or been cleared."""
+        if not self.status_kind:
+            return None
+        if self.status_until and self.status_until <= timezone.now():
+            return None
+        return {
+            "kind": self.status_kind,
+            "label": self.Status(self.status_kind).label,
+            "text": self.status_text,
+            "until": self.status_until.isoformat() if self.status_until else None,
+            "quiet": self.status_kind in self.QUIET_STATUSES,
+        }
+
+    @property
+    def wants_quiet(self) -> bool:
+        """Non-urgent pings go to the inbox without a pop-up or sound."""
+        s = self.current_status()
+        return bool(s and s["quiet"])
 
     @property
     def is_admin(self) -> bool:

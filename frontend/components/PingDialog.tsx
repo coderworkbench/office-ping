@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { apiFetch } from '../lib/api';
+import { apiFetch, pingErrorMessage } from '../lib/api';
+import { listOf, useApi } from '../lib/useApi';
+import { senderNotice, Status } from '../lib/status';
 import { Avatar, CloseButton, Icon, ModalFrame } from './ui';
 
 type Template = { id: number; title: string; message: string };
@@ -21,7 +23,9 @@ export function PingDialog({
 }) {
   const [message, setMessage] = useState(defaultMessage);
   const [priority, setPriority] = useState<'NORMAL' | 'URGENT'>('NORMAL');
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const templates = listOf<Template>(useApi(open ? '/api/templates/' : null).data);
+  const status = listOf<{ id: number; status: Status | null }>(useApi(open ? '/api/users/' : null).data)
+    .find(u => u.id === recipientId)?.status;
   const [templateId, setTemplateId] = useState<number | ''>('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +38,6 @@ export function PingDialog({
     setTemplateId('');
     setError(null);
     setBusy(false);
-    apiFetch<any>('/api/templates/').then(d => setTemplates(d.results || d)).catch(() => {});
     setTimeout(() => textAreaRef.current?.focus(), 20);
   }, [open, defaultMessage]);
 
@@ -71,9 +74,9 @@ export function PingDialog({
         }),
       });
       onSent(r.id); onClose();
+      window.dispatchEvent(new Event('op:sent'));
     } catch (e: any) {
-      setError(String(e.message).toLowerCase().includes('throttl')
-        ? 'Rate limit — give it a moment.' : 'Could not send. Try again.');
+      setError(pingErrorMessage(e, 'Could not send. Try again.'));
     } finally { setBusy(false); }
   }
 
@@ -88,8 +91,11 @@ export function PingDialog({
             </h2>
             <p className="mt-0.5 text-[13px] text-ink-2">
               They'll see a pop-up, a desktop notification and an inbox entry.
-              {recipientIsOnline === false && <span className="text-warn"> Currently offline — they'll see it when they return.</span>}
+              {!status && recipientIsOnline === false && <span className="text-warn"> Currently offline — they'll see it when they return.</span>}
             </p>
+            {status && (
+              <p className="mt-2 rounded-xl bg-warn-soft px-3 py-2 text-[13px] text-ink">{senderNotice(recipientName, status)}</p>
+            )}
           </div>
           <CloseButton onClick={onClose} />
         </div>
@@ -133,7 +139,7 @@ export function PingDialog({
 
         {error && (
           <div role="alert"
-            className="mt-4 rounded-xl bg-rose-soft px-3 py-2 text-sm text-rose">
+            className="mt-4 rounded-xl bg-rose-soft px-3 py-2 text-sm text-rose-deep">
             {error}
           </div>
         )}

@@ -2,13 +2,17 @@
 
 ## Apps
 
-- `apps.accounts` — custom `User`, roles (ADMIN/HR/MEMBER), `Device`
-  (per-browser session), JWT auth, password change, device registration.
+- `apps.accounts` — custom `User`, roles (ADMIN/HR/MEMBER), status
+  (meeting / DND / lunch / away, with an end time), `Device`
+  (per-browser session), JWT auth with sign-in lockout, password change,
+  device registration.
 - `apps.groups` — `Group` + `GroupMember`.
 - `apps.templates` — `MessageTemplate` (DRF app label `message_templates`
   to avoid collision with Django's `templates`).
 - `apps.notifications` — `Ping` (sender XOR recipient/group), `PingDelivery`
-  (per-recipient status), REST ViewSet, Channels consumers.
+  (per-recipient status, quick reply, escalation time), REST ViewSet with
+  History filters and CSV export, Channels consumers, and the
+  `escalate_urgent` command run by the `escalator` service.
 - `apps.audit` — `AuditLog` with helpers and middleware. Only admins can read.
 - `apps.common` — role-based permission classes and the aggregate dashboard.
 
@@ -45,8 +49,19 @@ connect time. The server only addresses that group. A connected user
 
 Scoped throttles on `POST /api/pings/`:
 
-- `ping_send` — default `10/minute`.
-- `ping_send_elevated` — `60/minute` for ADMIN/HR.
+- `ping_send` — MEMBER, default `5/minute` (`PING_RATE` in `.env`).
+- `ping_send_elevated` — ADMIN/HR, default `5/minute` (`PING_RATE_ELEVATED`).
+
+A group ping counts once. Over the limit the API answers `429` with a
+`Retry-After` header and a message such as "You can send 5 pings a minute.
+Try again in 42 seconds.", which the UI shows as-is.
+
+Direct pings also have a per-pair limit, checked in `PingViewSet.create`
+against recent `Ping` rows: at most `PING_RATE_PER_RECIPIENT` (default
+`2/minute`) from one sender to the same recipient, and never the same message
+twice to the same recipient within that period. It applies to every role;
+group pings are exempt. Refusals are `429` with `Retry-After`, and a
+`PING_BLOCKED` audit entry is written at most once per period per pair.
 
 Chosen scope depends on the authenticated user; clients cannot bypass.
 

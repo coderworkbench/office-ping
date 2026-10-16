@@ -97,6 +97,12 @@ export function apiErrorMessage(e: unknown, fallback = 'Something went wrong. Tr
   return fallback;
 }
 
+// For sending pings: the server's rate-limit message ("You can send 5 pings a
+// minute. Try again in 42 seconds.") or the fallback for anything else.
+export function pingErrorMessage(e: unknown, fallback: string): string {
+  return e instanceof ApiError && e.status === 429 ? apiErrorMessage(e, fallback) : fallback;
+}
+
 export async function login(username: string, password: string) {
   const r = await fetch(`${API_BASE}/api/auth/login/`, {
     method: 'POST',
