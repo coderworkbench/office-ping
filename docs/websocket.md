@@ -16,7 +16,20 @@ Server → client messages:
 { "type": "ping_status",
   "payload": { "ping_id": 42, "kind": "acknowledged",
                "delivery_id": 7, "recipient_id": 102, "at": "..." } }
+
+{ "type": "ping_handled", "payload": { "ping_id": 42 } }
 ```
+
+- `notification` goes to every open tab/device of the recipient. On connect,
+  the server also re-sends pings that never reached a browser
+  (`delivered_at` is null, last 24 h). Delivered-but-unacknowledged pings
+  are *not* re-sent; they live in the inbox. A ping created while a socket is
+  connecting can arrive twice (live and as pending), so the client shows each
+  `ping_id` once per session.
+- `ping_handled` goes to all of the recipient's tabs/devices when they
+  acknowledge a ping anywhere, so the pop-up and OS notification close
+  everywhere.
+- `ping_status` goes to the sender.
 
 Client → server messages:
 
@@ -29,6 +42,9 @@ Backend never trusts a user-supplied `recipient_id` — the consumer only
 accepts ACKs for `PingDelivery` rows where `recipient_id == scope.user.id`.
 
 ## `/ws/presence/`
+
+Heartbeats only. This socket does not join the `user.<id>` group, so ping
+events never reach it.
 
 Client → server:
 

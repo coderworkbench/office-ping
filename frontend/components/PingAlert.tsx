@@ -49,10 +49,17 @@ export function PingAlert() {
         return i <= 0 ? prev : [prev[i], ...prev.slice(0, i), ...prev.slice(i + 1)];
       });
     };
+    // Acknowledged in another tab or on another device.
+    const onHandled = (ev: Event) => {
+      const { ping_id } = (ev as CustomEvent<{ ping_id: number }>).detail;
+      setQueue(prev => prev.filter(x => x.ping_id !== ping_id));
+    };
     window.addEventListener('op:ping', onPing);
+    window.addEventListener('op:ping_handled', onHandled);
     navigator.serviceWorker?.addEventListener('message', onSwMessage);
     return () => {
       window.removeEventListener('op:ping', onPing);
+      window.removeEventListener('op:ping_handled', onHandled);
       navigator.serviceWorker?.removeEventListener('message', onSwMessage);
     };
   }, []);

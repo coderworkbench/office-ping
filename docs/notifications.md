@@ -32,6 +32,9 @@ report `Delivered: 4 / Offline: 1 / Acknowledged: 3`.
   and the service worker posts `focus-ping` so that ping's pop-up comes first.
   Once a ping is handled in-app, its OS notification (tag `ping-<id>`) is
   closed automatically.
+- **Several tabs or devices**: each one shows the ping, but acknowledging it
+  in one closes the pop-up and OS notification in all of them
+  (`ping_handled` WebSocket message).
 
 ## Priority
 

@@ -170,6 +170,7 @@ class PingViewSet(PingThrottleMixin, viewsets.ModelViewSet):
                 ping, "acknowledged",
                 {"delivery_id": d.id, "recipient_id": d.recipient_id},
             )
+            NotificationService.notify_recipient_handled(d.recipient_id, ping.id)
             record_audit(request, "PING_ACKNOWLEDGED", target=str(ping.id))
         return Response(PingSerializer(d.ping).data)
 

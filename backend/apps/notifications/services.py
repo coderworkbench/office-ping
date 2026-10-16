@@ -97,6 +97,20 @@ class NotificationService:
                 n.send(user_id, envelope)
 
     @staticmethod
+    def notify_recipient_handled(user_id: int, ping_id: int) -> None:
+        """Tell all of the recipient's open tabs/devices a ping was acknowledged."""
+        layer = get_channel_layer()
+        if layer is None:
+            return
+        try:
+            async_to_sync(layer.group_send)(
+                user_group_name(user_id),
+                {"type": "ping.handled", "payload": {"ping_id": ping_id}},
+            )
+        except Exception:
+            logger.exception("Failed WS handled update to user %s", user_id)
+
+    @staticmethod
     def notify_sender_update(ping, kind: str, data: dict) -> None:
         """Push a lightweight status update (delivered/seen/ack) to the sender."""
         layer = get_channel_layer()

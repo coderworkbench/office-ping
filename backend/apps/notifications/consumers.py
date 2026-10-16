@@ -21,9 +21,10 @@ from .services import user_group_name
 
 
 class _UserScopedMixin:
-    """Place connection into `user.<id>` group; reject if unauthenticated."""
+    """Reject unauthenticated connections; optionally join the `user.<id>` group."""
 
     group_name = None
+    joins_user_group = True
 
     async def connect(self):
         user = self.scope.get("user")
@@ -31,8 +32,9 @@ class _UserScopedMixin:
             await self.close(code=4401)
             return
         self.user = user
-        self.group_name = user_group_name(user.id)
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        if self.joins_user_group:
+            self.group_name = user_group_name(user.id)
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
         await self._touch_user()
 
@@ -77,6 +79,10 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
     async def ping_status(self, event):
         """Status updates for the sender (delivered/seen/ack)."""
         await self.send_json({"type": "ping_status", "payload": event["payload"]})
+
+    async def ping_handled(self, event):
+        """The recipient acknowledged a ping on some device: clear it everywhere."""
+        await self.send_json({"type": "ping_handled", "payload": event["payload"]})
 
     @database_sync_to_async
     def _mark_delivered(self, delivery_id):
@@ -132,6 +138,10 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
 
 
 class PresenceConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
+    # Heartbeats only. Joining `user.<id>` made this socket receive ping events
+    # it has no handler for, which crashed it on every ping.
+    joins_user_group = False
+
     async def receive_json(self, content, **kwargs):
         """Heartbeat message: { "type": "heartbeat" }."""
         if content.get("type") == "heartbeat":
