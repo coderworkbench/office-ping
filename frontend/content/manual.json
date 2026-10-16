@@ -13,12 +13,14 @@
           "When the banner at the top of the page asks, click **Enable**, then **Allow** in the browser's pop-up. This lets pings show as desktop notifications.",
           "Change the password your admin gave you (see *Your password*)."
         ] },
+        { "tip": "**Want a quick walkthrough?** Click **Show me around** at the top of the Help page for a one-minute guided tour of the real screens. Sections below also have short animated demos." },
         { "p": "**Finding your way around.** On a computer, every page is in the dark sidebar on the left. On a phone or tablet, the main pages (Overview, People, Inbox, History) are in the bar at the bottom of the screen, and everything else, including Help, Change password and Sign out, is under **More**." },
         { "tip": "**Keep Office Ping open.** You only receive alerts while an Office Ping tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: right-click the tab and choose **Pin**, or install it as an app: in Chrome, menu → **Install Office Ping**; in Edge, menu → **Apps → Install Office Ping**." }
       ]
     },
     {
       "id": "sending",
+      "demos": ["send-ping", "people"],
       "title": "Sending a ping",
       "audience": "all",
       "blocks": [
@@ -42,6 +44,7 @@
     },
     {
       "id": "receiving",
+      "demos": ["receive"],
       "title": "Receiving a ping",
       "audience": "all",
       "blocks": [
@@ -78,6 +81,7 @@
     },
     {
       "id": "history",
+      "demos": ["status"],
       "title": "History and ping status",
       "audience": "all",
       "blocks": [
@@ -95,6 +99,7 @@
     },
     {
       "id": "password",
+      "demos": ["password"],
       "title": "Your password",
       "audience": "all",
       "blocks": [
@@ -127,6 +132,7 @@
     },
     {
       "id": "groups",
+      "demos": ["groups"],
       "title": "Pinging groups and managing them",
       "audience": "hr",
       "blocks": [
@@ -182,6 +188,7 @@
     },
     {
       "id": "reset-password",
+      "demos": ["reset"],
       "title": "Resetting someone's password",
       "audience": "admin",
       "blocks": [

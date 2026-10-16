@@ -37,6 +37,7 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 
 **Design**
 - **Sunbeam theme**: the TGF design system (warm cream, gold accent, Noto Sans), shared with Khoji Connect.
+- **Built-in help**: a Help page with animated, step-by-step demos of each task, and a guided tour that spotlights the real controls (offered once on first sign-in, replayable from Help).
 - **Responsive**: a navigation rail on desktop; on phones and tablets a bottom tab bar, bottom-sheet dialogs and card layouts instead of wide tables. Large tap targets, keyboard focus rings and reduced-motion support.
 
 **Deployment**

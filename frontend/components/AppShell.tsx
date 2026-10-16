@@ -13,6 +13,7 @@ import { useAuth } from '../lib/auth';
 import { apiFetch } from '../lib/api';
 import { Avatar, Icon } from './ui';
 import { Logo } from './Logo';
+import { Tour } from './Tour';
 
 type Role = 'ADMIN' | 'HR' | 'MEMBER';
 type NavItem = { href: string; label: string; icon: any; roles?: Role[]; badge?: number };
@@ -126,7 +127,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     const active = isActive(i.href);
                     return (
                       <li key={i.href}>
-                        <Link href={i.href} aria-current={active ? 'page' : undefined}
+                        <Link href={i.href} aria-current={active ? 'page' : undefined} data-tour={tourId(i.href)}
                           className={
                             'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-150 ' +
                             (active ? 'bg-white/10 text-gold-fill' : 'text-white/70 hover:bg-white/5 hover:text-white')
@@ -153,7 +154,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="block text-[11px] uppercase tracking-wide text-white/50">{role}</span>
             </span>
           </Link>
-          <Link href="/account" title="Change password" aria-label="Change password"
+          <Link href="/account" title="Change password" aria-label="Change password" data-tour="account"
                 className={'grid h-11 w-11 place-items-center rounded-lg hover:bg-white/10 hover:text-white ' +
                   (pathname === '/account' ? 'bg-white/10 text-gold-fill' : 'text-white/60')}>
             <Icon name="key" size={18} />
@@ -172,7 +173,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Logo size={32} />
           <span className="text-[15px] font-bold text-ink">Office Ping</span>
         </Link>
-        <Link href="/account" aria-label="Your account" className="ml-auto grid h-11 w-11 place-items-center rounded-full">
+        <Link href="/account" aria-label="Your account" data-tour="account" className="ml-auto grid h-11 w-11 place-items-center rounded-full">
           <Avatar name={name} size={34} tone="gold" />
         </Link>
       </header>
@@ -195,7 +196,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </li>
           ))}
           <li>
-            <button type="button" onClick={() => setSheetOpen(true)}
+            <button type="button" onClick={() => setSheetOpen(true)} data-tour="nav-more"
                     aria-haspopup="dialog" aria-expanded={sheetOpen}
                     className="flex w-full flex-col items-center gap-0.5 py-1 min-h-[52px]">
               <TabIcon icon="more" active={moreActive || sheetOpen} />
@@ -214,8 +215,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         isActive={isActive}
         onSignOut={doSignOut}
       />
+
+      <Tour />
     </div>
   );
+}
+
+// Stable hooks for the guided tour: /admin/users → "nav-users", /notifications → "nav-inbox".
+function tourId(href: string) {
+  const last = href.split('/').filter(Boolean).pop() || 'home';
+  const alias: Record<string, string> = { dashboard: 'overview', notifications: 'inbox', admin: 'settings' };
+  return 'nav-' + (alias[last] || last);
 }
 
 function CountBadge({ n }: { n: number }) {
@@ -243,7 +253,7 @@ function TabIcon({ icon, active, badge }: { icon: any; active: boolean; badge?: 
 function TabLink({ href, label, icon, badge, active }:
   { href: string; label: string; icon: any; badge?: number; active: boolean }) {
   return (
-    <Link href={href} aria-current={active ? 'page' : undefined}
+    <Link href={href} aria-current={active ? 'page' : undefined} data-tour={tourId(href)}
           aria-label={badge ? `${label}, ${badge} unread` : undefined}
           className="flex flex-col items-center gap-0.5 py-1 min-h-[52px]">
       <TabIcon icon={icon} active={active} badge={badge} />

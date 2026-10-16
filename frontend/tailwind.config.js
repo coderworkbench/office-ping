@@ -67,6 +67,15 @@ module.exports = {
           '0%, 100%': { boxShadow: '0 0 0 0 rgb(220 31 83 / .55)' },
           '50%':      { boxShadow: '0 0 0 18px rgb(220 31 83 / 0)' },
         },
+        clickRing: {
+          '0%':   { transform: 'scale(.3)', opacity: '.9' },
+          '100%': { transform: 'scale(1.7)', opacity: '0' },
+        },
+        // Guided-tour spotlight: a slow gold pulse around the highlighted control.
+        tourPulse: {
+          '0%, 100%': { boxShadow: '0 0 0 9999px rgb(20 14 2 / .58), 0 0 0 3px rgb(246 198 44), 0 0 0 3px rgb(246 198 44 / .5)' },
+          '50%':      { boxShadow: '0 0 0 9999px rgb(20 14 2 / .58), 0 0 0 3px rgb(246 198 44), 0 0 0 10px rgb(246 198 44 / 0)' },
+        },
         ring: {
           '0%, 60%, 100%': { transform: 'rotate(0)' },
           '10%, 30%':      { transform: 'rotate(-14deg)' },
@@ -82,6 +91,8 @@ module.exports = {
         /* urgent pop-up: pop in, then keep pulsing a red halo */
         alertPulse: 'popIn 260ms cubic-bezier(.2,.8,.2,1.2), alertPulse 1.6s ease-in-out 260ms infinite',
         ring:     'ring 1.8s ease-in-out infinite',
+        clickRing: 'clickRing 700ms ease-out 550ms both',
+        tourPulse: 'tourPulse 1.8s ease-in-out infinite',
       },
     },
   },

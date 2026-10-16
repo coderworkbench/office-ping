@@ -4,6 +4,8 @@ import { Guard } from '../../components/Guard';
 import { PageHeader } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import manual from '../../content/manual.json';
+import { DemoPlayer } from '../../components/help/DemoPlayer';
+import { DEMOS } from '../../components/help/demos';
 
 // The manual's text lives in content/manual.json (also exported to
 // docs/user-manual.md by scripts/export-manual.mjs). Sections are shown only
@@ -16,7 +18,7 @@ type Block =
   | { list: string[] }
   | { tip: string }
   | { table: { head: string[]; rows: string[][] } };
-type Section = { id: string; title: string; audience: Audience; blocks: Block[] };
+type Section = { id: string; title: string; audience: Audience; demos?: string[]; blocks: Block[] };
 
 const AUDIENCE_LABEL: Record<Audience, string> = {
   all: 'For everyone',
@@ -44,6 +46,11 @@ function Inner() {
         eyebrow="Help"
         title="How Office Ping works"
         lead={<Inline text={manual.intro} />}
+        actions={
+          <button className="btn-primary" onClick={() => window.dispatchEvent(new Event('op:tour'))}>
+            <span aria-hidden>🧭</span> Show me around
+          </button>
+        }
       />
 
       <nav aria-label="Contents" className="surface mb-6 p-4 sm:p-5 lg:mb-8">
@@ -76,6 +83,11 @@ function Inner() {
                 </span>
               )}
             </header>
+            {!!s.demos?.length && (
+              <div className={'mb-5 grid gap-4 ' + (s.demos.length > 1 ? 'xl:grid-cols-2' : 'max-w-2xl')}>
+                {s.demos.filter(id => DEMOS[id]).map(id => <DemoPlayer key={id} demo={DEMOS[id]} />)}
+              </div>
+            )}
             <div className="max-w-3xl space-y-4 text-[15px] leading-relaxed text-ink-2">
               {s.blocks.map((b, i) => <BlockView key={i} block={b} />)}
             </div>

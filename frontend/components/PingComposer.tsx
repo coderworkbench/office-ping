@@ -69,7 +69,7 @@ export function PingComposer() {
     <form onSubmit={submit} className="space-y-5">
       {/* Mode toggle — Sunbeam segmented control (§15.4) */}
       {canGroup && (
-        <div role="group" aria-label="Send to" className="inline-flex gap-1 rounded-lg border border-line bg-surface-2 p-1">
+        <div role="group" aria-label="Send to" data-tour="composer-mode" className="inline-flex gap-1 rounded-lg border border-line bg-surface-2 p-1">
           {(['user', 'group'] as const).map(m => (
             <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m}
               className={'min-h-[36px] rounded-md px-3.5 text-sm font-semibold transition-colors duration-150 ' +
@@ -82,7 +82,7 @@ export function PingComposer() {
 
       {/* WHO */}
       {mode === 'user' ? (
-        <div className="space-y-2">
+        <div className="space-y-2" data-tour="composer-search">
           <PersonSelect
             people={people as Person[]}
             value={recipient}
@@ -115,7 +115,7 @@ export function PingComposer() {
 
       {/* QUICK TEMPLATES */}
       {templates.length > 0 && (
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Quick templates">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Quick templates" data-tour="composer-templates">
           {templates.map(t => (
             <button key={t.id} type="button" onClick={() => applyTemplate(t.id)}
               aria-pressed={templateId === t.id}
@@ -132,7 +132,7 @@ export function PingComposer() {
           placeholder="A short message. “Please come here.”"
           className="input resize-none" />
         <div className="mt-1.5 flex items-center justify-between text-xs text-ink-3">
-          <label className="-ml-1 inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg px-1 text-sm sm:min-h-0">
+          <label data-tour="composer-urgent" className="-ml-1 inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg px-1 text-sm sm:min-h-0">
             <input type="checkbox" checked={priority === 'URGENT'}
                    onChange={e => setPriority(e.target.checked ? 'URGENT' : 'NORMAL')}
                    className="h-4 w-4 accent-[rgb(var(--live))]" />
@@ -152,7 +152,7 @@ export function PingComposer() {
             </span>
           )}
         </div>
-        <button disabled={busy} className="btn-primary w-full sm:w-auto">
+        <button disabled={busy} data-tour="composer-send" className="btn-primary w-full sm:w-auto">
           <Icon name="send" size={16} />
           {busy ? 'Sending…' : 'Send ping'}
         </button>

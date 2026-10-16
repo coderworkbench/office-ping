@@ -39,6 +39,8 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 3. When the banner at the top of the page asks, click **Enable**, then **Allow** in the browser's pop-up. This lets pings show as desktop notifications.
 4. Change the password your admin gave you (see *Your password*).
 
+> 💡 **Want a quick walkthrough?** Click **Show me around** at the top of the Help page for a one-minute guided tour of the real screens. Sections below also have short animated demos.
+
 **Finding your way around.** On a computer, every page is in the dark sidebar on the left. On a phone or tablet, the main pages (Overview, People, Inbox, History) are in the bar at the bottom of the screen, and everything else, including Help, Change password and Sign out, is under **More**.
 
 > 💡 **Keep Office Ping open.** You only receive alerts while an Office Ping tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: right-click the tab and choose **Pin**, or install it as an app: in Chrome, menu → **Install Office Ping**; in Edge, menu → **Apps → Install Office Ping**.
@@ -46,6 +48,8 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 <a id="sending"></a>
 
 ## Sending a ping
+
+> 🎬 In the app (Help page) this section has an animated demo.
 
 **From the Overview page** (the first page after signing in):
 
@@ -69,6 +73,8 @@ To prevent spamming, members can send up to **10 pings a minute**. If you go ove
 <a id="receiving"></a>
 
 ## Receiving a ping
+
+> 🎬 In the app (Help page) this section has an animated demo.
 
 When someone pings you, the page dims and a pop-up appears in the middle of the screen showing who sent it, when, and the message. At the same time:
 
@@ -101,6 +107,8 @@ The Inbox lists every ping sent to you. The number next to **Inbox** (in the sid
 
 ## History and ping status
 
+> 🎬 In the app (Help page) this section has an animated demo.
+
 **History** shows pings you sent (**My sent**) and pings you received (**My received**), with their status:
 
 | Status | Meaning |
@@ -114,6 +122,8 @@ Pings to a group show progress such as **2/3 delivered · 1 ack**.
 <a id="password"></a>
 
 ## Your password
+
+> 🎬 In the app (Help page) this section has an animated demo.
 
 1. On a computer, click the **key icon** at the bottom of the sidebar. On a phone, tap **More → Change password**.
 2. Enter your current password, then your new password twice.
@@ -141,6 +151,8 @@ Passwords need at least 8 characters and can't be a common password, only number
 ## Pinging groups and managing them
 
 *For HR and admins*
+
+> 🎬 In the app (Help page) this section has an animated demo.
 
 HR and admins can ping a whole team at once: on the Overview page, click **A group**, pick the group, write the message and click **Send ping**. Every member gets it, and History shows how many received and acknowledged it.
 
@@ -192,6 +204,8 @@ Go to **Admin → Users**.
 ## Resetting someone's password
 
 *For admins*
+
+> 🎬 In the app (Help page) this section has an animated demo.
 
 1. On **Admin → Users**, click **Reset password** in the person's row.
 2. A strong, easy-to-read password is suggested (for example *Kp7m-Qx4z-Rt9w*). Click **Generate** for another, or type your own.

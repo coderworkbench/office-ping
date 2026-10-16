@@ -44,6 +44,7 @@ for (const a of ['all', 'hr', 'admin']) {
 for (const s of manual.sections) {
   const heading = [`<a id="${slug(s)}"></a>`, `## ${s.title}`];
   if (s.audience !== 'all') heading.push(`*${AUDIENCE[s.audience]}*`);
+  if (s.demos?.length) heading.push('> 🎬 In the app (Help page) this section has an animated demo.');
   out.push(heading.join('\n\n'), ...s.blocks.map(block));
 }
 

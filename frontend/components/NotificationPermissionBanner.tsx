@@ -18,7 +18,7 @@ export function NotificationPermissionBanner() {
   const denied = perm === 'denied';
 
   return (
-    <div className="mb-6 animate-slideIn">
+    <div className="mb-6 animate-slideIn" data-tour="notify-enable">
       <div className={
         'flex flex-wrap items-center gap-3 rounded-2xl border px-3.5 py-3 text-sm ' +
         (denied ? 'border-rose/30 bg-rose-soft text-rose'
