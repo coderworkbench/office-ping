@@ -179,6 +179,7 @@ body {
   }
   body:has(.op-mobile-home :is(input, textarea):focus) .op-tabbar { display: none; }
   body:has(.op-mobile-home :is(input, textarea):focus) .op-mobile-home { bottom: env(safe-area-inset-bottom); }
+  .op-mobile-home:has(textarea:focus) .op-recent { display: none; }
 }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

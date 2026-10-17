@@ -128,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
 
-        <button type="button" onClick={() => window.dispatchEvent(new Event(QUICK_PING_EVENT))}
+        <button type="button" onClick={() => window.dispatchEvent(new Event(QUICK_PING_EVENT))} data-tour="quick-ping"
                 className="mt-4 flex min-h-[40px] w-full items-center gap-2.5 rounded-lg bg-white/10 px-3 text-sm font-semibold text-white hover:bg-white/15">
           <Icon name="send" size={18} /> <span className="flex-1 text-left">Quick ping</span> <ShortcutHint />
         </button>

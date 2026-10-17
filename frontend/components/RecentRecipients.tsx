@@ -94,7 +94,7 @@ export function RecentRecipients() {
 
         {/* Chips wrap rather than scroll sideways (§10.1); each chip can shrink
             (min-w-0 + truncated name) so a narrow phone never scrolls (§6.4). */}
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-wrap gap-2" data-tour="composer-recent">
           {chips.map(p => (
             <li key={p.id}
                 className="flex min-w-0 max-w-full items-center gap-1.5 rounded-full border border-line

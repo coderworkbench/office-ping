@@ -5,7 +5,8 @@
 // bar, and its Send bar stays above the on-screen keyboard.
 //
 //   search (with Person / Group inside) · recent avatars · quick messages
-//   (swipe sideways) · message box (takes what's left) · Urgent + Send
+//   (wrapping onto rows) · a 3-line message box · Urgent + Send. While you
+//   type a message the avatar row steps aside to make room for the keyboard.
 //
 // Tap an avatar to choose it; long-press it to send a 👋 Nudge straight away.
 // Sending with an empty message to a person also sends a Nudge.
@@ -144,7 +145,7 @@ export function MobileHome() {
             onChange={e => { setQuery(e.target.value); setSearching(true); }}
             onFocus={() => { setSearching(true); setQuery(''); }}
             onBlur={() => setTimeout(() => setSearching(false), 150)}
-            placeholder={mode === 'user' ? 'Search person' : 'Search group'}
+            placeholder="Search"
             aria-label={mode === 'user' ? 'Who should get this?' : 'Which group?'}
             className={'h-full min-w-0 flex-1 bg-transparent px-2 text-base outline-none placeholder:text-ink-3 focus-visible:!shadow-none ' +
               (!searching && targetName ? 'font-semibold text-ink' : 'text-ink')}
@@ -158,7 +159,7 @@ export function MobileHome() {
                  className="mr-1 flex shrink-0 gap-0.5 rounded-lg bg-inset p-0.5">
               {(['user', 'group'] as const).map(m => (
                 <button key={m} type="button" aria-pressed={mode === m} onClick={() => switchMode(m)}
-                        className={'h-8 rounded-md px-2.5 text-[13px] font-semibold ' +
+                        className={'h-8 rounded-md px-2 text-[13px] font-semibold ' +
                           (mode === m ? 'bg-surface text-brand shadow-sm' : 'text-ink-2')}>
                   {m === 'user' ? 'Person' : 'Group'}
                 </button>
@@ -194,7 +195,8 @@ export function MobileHome() {
       </div>
 
       {/* Recent people (or groups): tap to choose, long-press to nudge */}
-      <ul className="no-scrollbar -mx-4 flex shrink-0 gap-3 overflow-x-auto px-4" aria-label={mode === 'user' ? 'Recent people' : 'Groups'}>
+      <ul className="op-recent no-scrollbar -mx-4 flex shrink-0 gap-3 overflow-x-auto px-4" data-tour="composer-recent"
+          aria-label={mode === 'user' ? 'Recent people' : 'Groups'}>
         {mode === 'user' ? recent.map(p => (
           <li key={p.id}>
             <AvatarButton
@@ -226,29 +228,31 @@ export function MobileHome() {
         </p>
       )}
 
-      {/* Quick messages: one row, swipe sideways */}
+      {/* Quick messages wrap onto rows; on a short screen the box shrinks and scrolls. */}
       {templates.length > 0 && (
         <div role="group" aria-label="Quick messages" data-tour="composer-templates"
-             className="no-scrollbar -mx-4 flex shrink-0 gap-2 overflow-x-auto px-4">
+             className="flex min-h-[40px] shrink flex-wrap content-start gap-2 overflow-y-auto">
           {templates.map(t => (
             <button key={t.id} type="button" aria-pressed={templateId === t.id}
                     onClick={() => { setTemplateId(t.id); setMessage(t.message); }}
-                    className={'chip-btn shrink-0 whitespace-nowrap ' + (templateId === t.id ? 'is-active' : '')}>
-              {t.title}
+                    className={'chip-btn !min-h-[40px] max-w-full ' + (templateId === t.id ? 'is-active' : '')}>
+              <span className="truncate">{t.title}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Message: takes whatever height is left */}
-      <div className="relative min-h-[72px] flex-1">
+      {/* Message: about three lines; gives way when the keyboard needs room. */}
+      <div className="relative min-h-[64px] shrink basis-[108px]">
         <textarea value={message} maxLength={500}
                   onChange={e => { setMessage(e.target.value); setTemplateId(null); }}
-                  placeholder={mode === 'user' ? 'Short message… (leave empty to send a 👋 Nudge)' : 'Message for the group…'}
+                  placeholder={mode === 'user' ? 'Message… (leave empty to send a 👋 Nudge)' : 'Message for the group…'}
                   aria-label="Message"
                   className="input h-full resize-none pb-6" />
         <span className="pointer-events-none absolute bottom-2 right-3 text-xs tabular-nums text-ink-3">{message.length}/500</span>
       </div>
+
+      <div className="flex-1" aria-hidden />
 
       {feedback && (
         <p aria-live="polite" className={'shrink-0 truncate text-sm font-semibold ' + (feedback.ok ? 'text-success' : 'text-rose-deep')}>
@@ -259,7 +263,7 @@ export function MobileHome() {
       {/* Urgent + Send */}
       <div className="flex shrink-0 items-center justify-between gap-3">
         <label data-tour="composer-urgent"
-               className={'inline-flex min-h-[44px] cursor-pointer items-center gap-2 text-sm font-semibold ' +
+               className={'inline-flex min-h-[44px] cursor-pointer items-center gap-2 whitespace-nowrap text-sm font-semibold ' +
                  (urgent ? 'text-rose-deep' : 'text-ink-2')}>
           <input type="checkbox" className="peer sr-only" checked={urgent}
                  onChange={e => setUrgent(e.target.checked)} />

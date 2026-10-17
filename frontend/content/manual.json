@@ -30,6 +30,7 @@
       "id": "sending",
       "demos": [
         "send-ping",
+        "phone",
         "people"
       ],
       "title": "Sending a ping",
@@ -52,7 +53,7 @@
         {
           "list": [
             "**Tap a face** in the row under the search box to choose that person (it gets a gold ring), or type a name in the search box. HR and admins can switch the search box between **Person** and **Group**.",
-            "**Swipe the quick messages** sideways and tap one to fill in the message, or type your own.",
+            "**Tap a quick message** to fill in the message box, or type your own.",
             "Tap **Send**. It stays just above the keyboard while you type.",
             "**To nudge**, press and hold a face, or tap **Nudge** with the message box empty."
           ]
@@ -181,6 +182,9 @@
         {
           "p": "While a status is on, a bar at the top of every page reminds you. Click **I'm back** to clear it early. Your status shows next to your name on People, in the Recent list and when someone picks you to ping."
         }
+      ],
+      "demos": [
+        "my-status"
       ]
     },
     {
@@ -200,6 +204,9 @@
             "**Mark all read** clears the unread count. It does **not** acknowledge the pings: senders still see them as not acknowledged."
           ]
         }
+      ],
+      "demos": [
+        "inbox"
       ]
     },
     {

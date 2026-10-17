@@ -17,6 +17,8 @@ type Stop = {
   id: string;
   title: string;
   body: string;
+  /** Wording for phones (<640px), where the controls differ. */
+  phoneBody?: string;
   /** Page the target lives on; the tour navigates there first. */
   page?: string;
   /** Candidate selectors, first visible wins. No targets = centred card. */
@@ -30,21 +32,30 @@ const STOPS: Stop[] = [
   { id: 'search', page: '/dashboard', targets: ['[data-tour="composer-search"]'],
     title: 'Find who you need', body: 'Type a name, team or email here and pick the person from the list.' },
   { id: 'mode', page: '/dashboard', targets: ['[data-tour="composer-mode"]'], roles: ['HR', 'ADMIN'],
-    title: '…or a whole group', body: 'Switch to “A group” to ping everyone in a team at once.' },
+    title: '…or a whole group', body: 'Switch to Group to ping everyone in a team at once.' },
+  { id: 'recent', page: '/dashboard', targets: ['[data-tour="composer-recent"]'],
+    title: 'Your regulars', body: 'People you pinged lately, with one-click Nudge (a quick tap, no message) and Ping (write a message).',
+    phoneBody: 'Tap a face to choose that person. Press and hold a face to send a 👋 Nudge straight away.' },
   { id: 'templates', page: '/dashboard', targets: ['[data-tour="composer-templates"]'],
     title: 'Pick a quick message', body: 'Tap a ready-made message, or type your own in the box below.' },
   { id: 'urgent', page: '/dashboard', targets: ['[data-tour="composer-urgent"]'],
     title: 'Urgent? Only when it really is', body: 'Urgent pings show in red and jump ahead of other pings.' },
   { id: 'send', page: '/dashboard', targets: ['[data-tour="composer-send"]'],
-    title: 'Send', body: 'They get a pop-up straight away and can click Acknowledge, so you know they saw it.' },
+    title: 'Send', body: 'They get a pop-up straight away and answer with Acknowledge or a quick reply like “On my way”, which you see at once.',
+    phoneBody: 'They get a pop-up straight away and answer with a quick reply like “On my way”. With the message box empty, this sends a 👋 Nudge.' },
+  { id: 'quickping', targets: ['[data-tour="quick-ping"]'],
+    title: 'Ping from anywhere', body: 'Press Ctrl + K (⌘ K on a Mac), or click here, to ping someone without leaving the page you’re on.' },
+  { id: 'status', targets: ['[data-tour="status"]', '[data-tour="nav-more"]'],
+    title: 'Your status', body: 'In a meeting or need to focus? Set a status here. People see it, and normal pings wait quietly in your Inbox; urgent ones still pop up.',
+    phoneBody: 'In a meeting or need to focus? Set a status under More. People see it, and normal pings wait quietly in your Inbox; urgent ones still pop up.' },
   { id: 'notify', targets: ['[data-tour="notify-enable"]'],
     title: 'Turn on desktop notifications', body: 'Click Enable so pings reach you even when this tab is in the background.' },
   { id: 'people', targets: ['[data-tour="nav-people"]'],
-    title: 'People', body: "See who's online, and Nudge or Ping anyone in one click." },
+    title: 'People', body: "See who's online and who's busy, and Nudge or Ping anyone in one click." },
   { id: 'inbox', targets: ['[data-tour="nav-inbox"]'],
-    title: 'Inbox', body: 'Pings sent to you land here. The number shows how many you haven’t read.' },
+    title: 'Inbox', body: 'Pings sent to you land here, unanswered urgent ones first. The number shows how many you haven’t read.' },
   { id: 'history', targets: ['[data-tour="nav-history"]'],
-    title: 'History', body: 'Check whether your pings were delivered and acknowledged.' },
+    title: 'History', body: 'Check whether your pings were delivered and acknowledged, see replies, and search or filter past pings.' },
   { id: 'groups', targets: ['[data-tour="nav-groups"]', '[data-tour="nav-manage"]', '[data-tour="nav-more"]'], roles: ['HR', 'ADMIN'],
     title: 'Groups and templates', body: 'Create teams to ping together, and manage the quick messages everyone sees. They’re under Manage in the sidebar, or More on a phone.' },
   { id: 'users', targets: ['[data-tour="nav-users"]', '[data-tour="nav-manage"]', '[data-tour="nav-more"]'], roles: ['ADMIN'],
@@ -59,6 +70,9 @@ const STOPS: Stop[] = [
 
 const PAD = 6;
 const doneKey = (uid: number) => `op_tour_done_${uid}`;
+// Every page mounts its own shell (and tour), so a running tour keeps its
+// place here while it moves between pages.
+const RUN_KEY = 'op_tour_step';
 
 function visibleMatch(selectors: string[]): HTMLElement | null {
   for (const sel of selectors) {
@@ -76,7 +90,13 @@ export function Tour() {
   const pathname = usePathname();
   const [active, setActive] = useState(false);
   const [idx, setIdx] = useState(0);
-  const [rect, setRect] = useState<DOMRect | null>(null);
+  // The measured target belongs to one step; a new step never shows the
+  // previous step's position, even for the one render before it's measured.
+  const [measured, setMeasured] = useState<{ idx: number; r: DOMRect } | null>(null);
+  const idxRef = useRef(0);
+  idxRef.current = idx;
+  const rect = measured && measured.idx === idx ? measured.r : null;
+  const setRect = (r: DOMRect | null) => setMeasured(r ? { idx: idxRef.current, r } : null);
   const [offer, setOffer] = useState(false);
   const dir = useRef(1);
   const target = useRef<HTMLElement | null>(null);
@@ -88,8 +108,25 @@ export function Tour() {
 
   const finish = useCallback(() => {
     setActive(false); setRect(null); target.current = null;
+    try { sessionStorage.removeItem(RUN_KEY); } catch {}
     if (user) try { localStorage.setItem(doneKey(user.id), '1'); } catch {}
   }, [user]);
+
+  // Pick up a tour that was running on the previous page.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(RUN_KEY);   // "step:direction"
+      if (saved !== null) {
+        const [i, d] = saved.split(':').map(Number);
+        dir.current = d === -1 ? -1 : 1;
+        setIdx(i || 0); setActive(true);
+      }
+    } catch {}
+  }, []);
+  useEffect(() => {
+    if (!active) return;
+    try { sessionStorage.setItem(RUN_KEY, `${idx}:${dir.current}`); } catch {}
+  }, [active, idx]);
 
   const start = useCallback(() => {
     setOffer(false); dir.current = 1; setIdx(0); setRect(null); setActive(true);
@@ -225,7 +262,7 @@ export function Tour() {
             <button onClick={finish} className="-mr-1 rounded-lg px-2 py-1 text-sm font-semibold text-ink-3 hover:bg-inset hover:text-ink">Skip</button>
           </div>
           <h2 id="tour-title" className="text-lg font-bold text-ink">{stop.title}</h2>
-          <p className="mt-1 text-sm text-ink-2">{stop.body}</p>
+          <p className="mt-1 text-sm text-ink-2">{vw < 640 && stop.phoneBody ? stop.phoneBody : stop.body}</p>
           <div className="mt-4 flex items-center justify-between gap-3">
             <div className="flex gap-1" aria-hidden>
               {stops.map((s, i) => (

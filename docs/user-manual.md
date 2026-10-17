@@ -64,7 +64,7 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 **On a phone**, the Overview is one screen with everything you need:
 
 - **Tap a face** in the row under the search box to choose that person (it gets a gold ring), or type a name in the search box. HR and admins can switch the search box between **Person** and **Group**.
-- **Swipe the quick messages** sideways and tap one to fill in the message, or type your own.
+- **Tap a quick message** to fill in the message box, or type your own.
 - Tap **Send**. It stays just above the keyboard while you type.
 - **To nudge**, press and hold a face, or tap **Nudge** with the message box empty.
 
@@ -118,6 +118,8 @@ If several pings arrive, they're shown one at a time. Click **N more waiting · 
 
 ## Your status: meeting, lunch, do not disturb
 
+> 🎬 In the app (Help page) this section has an animated demo.
+
 Let people know you're busy before they ping you.
 
 1. On a computer, click the line above your name at the bottom of the sidebar (it says *Available · set a status*). On a phone, tap **More**, then **Set status**.
@@ -135,6 +137,8 @@ While a status is on, a bar at the top of every page reminds you. Click **I'm ba
 <a id="inbox"></a>
 
 ## Inbox
+
+> 🎬 In the app (Help page) this section has an animated demo.
 
 The Inbox lists every ping sent to you. The number next to **Inbox** (in the sidebar, or on the bottom bar on a phone) is how many you haven't read.
 
