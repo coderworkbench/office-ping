@@ -11,6 +11,7 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 **For everyone**
 
 - [Getting started](#getting-started)
+- [Open Office Ping automatically at start-up](#start-automatically)
 - [Sending a ping](#sending)
 - [Receiving a ping](#receiving)
 - [Your status: meeting, lunch, do not disturb](#status)
@@ -46,7 +47,65 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 
 **Finding your way around.** On a computer, every page is in the dark sidebar on the left; HR and admins find Groups, Templates and the admin pages under **Manage** (click it to open). On a phone or tablet, the main pages (Overview, People, Inbox, History) are in the bar at the bottom of the screen, and everything else, including your status, Help, Change password and Sign out, is under **More**.
 
-> 💡 **Keep Office Ping open.** You only receive alerts while an Office Ping tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: right-click the tab and choose **Pin**, or install it as an app: in Chrome, menu → **Install Office Ping**; in Edge, menu → **Apps → Install Office Ping**.
+> 💡 **Keep Office Ping open.** You only receive alerts while an Office Ping window or tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: make it open by itself when your computer starts (see *Open Office Ping automatically at start-up*).
+
+<a id="start-automatically"></a>
+
+## Open Office Ping automatically at start-up
+
+You only get pings while Office Ping is open. Set it up once and it opens by itself, in its own window, every time you start or restart your computer. It takes a minute, needs no administrator rights, and works with Google Chrome or Microsoft Edge.
+
+### Windows
+
+1. Click **Download the Windows setup file** below.
+2. Open your **Downloads** folder, right-click **office-ping-windows.ps1** and choose **Run with PowerShell**. If Windows asks whether to run it, choose **Open** or **Run anyway**.
+3. Office Ping opens. From now on it opens by itself (minimised, on the taskbar) each time you sign in.
+
+[⬇ Download the Windows setup file](https://ping.tejgyan.org/autostart/windows.ps1)
+
+Prefer typing? Open **PowerShell** and paste:
+
+```
+irm https://ping.tejgyan.org/autostart/windows.ps1 | iex
+```
+
+### Mac
+
+1. Open **Terminal**: press **⌘ Space**, type *Terminal* and press **Return**.
+2. Paste this line and press **Return**:
+
+```
+curl -fsSL https://ping.tejgyan.org/autostart/mac.sh | bash
+```
+
+Office Ping opens. macOS may show a notice that a background item was added; that's Office Ping.
+
+### Linux
+
+1. Open a **Terminal** (usually **Ctrl + Alt + T**).
+2. Paste this line and press **Enter**:
+
+```
+curl -fsSL https://ping.tejgyan.org/autostart/linux.sh | bash
+```
+
+Office Ping opens, and it's also in your app menu as **Office Ping**.
+
+> 💡 **Minimise, don't close.** Keep the Office Ping window open in the background. If you close it, you won't get pings until you open it again (or restart your computer).
+
+### Turning it off
+
+- **Windows:** press **Win + R**, type *shell:startup*, press **Enter**, and delete **Office Ping** from the folder that opens.
+- **Mac:** run the same line with *--remove* at the end, as below.
+- **Linux:** run the same line with *--remove* at the end, as below.
+
+```
+curl -fsSL https://ping.tejgyan.org/autostart/mac.sh | bash -s -- --remove
+```
+
+```
+curl -fsSL https://ping.tejgyan.org/autostart/linux.sh | bash -s -- --remove
+```
 
 <a id="sending"></a>
 

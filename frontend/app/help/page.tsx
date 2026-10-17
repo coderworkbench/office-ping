@@ -1,7 +1,7 @@
 'use client';
-import { Fragment, ReactNode } from 'react';
+import { Fragment, ReactNode, useEffect, useState } from 'react';
 import { Guard } from '../../components/Guard';
-import { PageHeader } from '../../components/ui';
+import { Icon, PageHeader } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import manual from '../../content/manual.json';
 import { DemoPlayer } from '../../components/help/DemoPlayer';
@@ -17,6 +17,10 @@ type Block =
   | { steps: string[] }
   | { list: string[] }
   | { tip: string }
+  | { h3: string }
+  /** A command to copy; {origin} becomes this site's address. */
+  | { code: string }
+  | { download: { label: string; href: string; file: string } }
   | { table: { head: string[]; rows: string[][] } };
 type Section = { id: string; title: string; audience: Audience; demos?: string[]; blocks: Block[] };
 
@@ -121,6 +125,13 @@ function BlockView({ block }: { block: Block }) {
       {block.list.map((t, i) => <li key={i}><Inline text={t} /></li>)}
     </ul>
   );
+  if ('h3' in block) return <h3 className="!mt-6 text-base font-bold text-ink">{block.h3}</h3>;
+  if ('code' in block) return <CopyCommand command={block.code} />;
+  if ('download' in block) return (
+    <a href={block.download.href} download={block.download.file} className="btn-primary inline-flex">
+      <Icon name="download" size={16} /> {block.download.label}
+    </a>
+  );
   if ('tip' in block) return (
     <div className="flex gap-3 rounded-xl border border-gold-fill/40 bg-gold-soft px-4 py-3 text-sm text-ink">
       <span aria-hidden>💡</span>
@@ -149,6 +160,27 @@ function BlockView({ block }: { block: Block }) {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+// A one-line command with a Copy button. {origin} is this site's address, so
+// the commands work wherever Office Ping is hosted.
+function CopyCommand({ command }: { command: string }) {
+  const [origin, setOrigin] = useState('https://ping.tejgyan.org');
+  const [copied, setCopied] = useState(false);
+  useEffect(() => { setOrigin(window.location.origin); }, []);
+  const text = command.replaceAll('{origin}', origin);
+  async function copy() {
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
+  }
+  return (
+    <div className="flex items-stretch overflow-hidden rounded-xl border border-line bg-surface-2">
+      <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap px-3 py-2.5 font-mono text-[13px] text-ink">{text}</code>
+      <button type="button" onClick={copy} aria-label={copied ? 'Copied' : 'Copy command'}
+              className="shrink-0 border-l border-line px-3 text-sm font-semibold text-brand hover:bg-inset">
+        {copied ? '✓ Copied' : 'Copy'}
+      </button>
     </div>
   );
 }

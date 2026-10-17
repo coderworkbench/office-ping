@@ -9,6 +9,10 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manual = JSON.parse(readFileSync(join(root, 'frontend/content/manual.json'), 'utf8'));
 
+// Commands and downloads in the app use the address it's opened at; this
+// Markdown copy uses the production address.
+const ORIGIN = process.env.OFFICE_PING_URL || 'https://ping.tejgyan.org';
+
 const AUDIENCE = { all: 'For everyone', hr: 'For HR and admins', admin: 'For admins' };
 const slug = (s) => s.id;
 const cell = (s) => s.replace(/\|/g, '\\|');
@@ -18,6 +22,9 @@ function block(b) {
   if ('steps' in b) return b.steps.map((t, i) => `${i + 1}. ${t}`).join('\n');
   if ('list' in b) return b.list.map((t) => `- ${t}`).join('\n');
   if ('tip' in b) return `> 💡 ${b.tip}`;
+  if ('h3' in b) return `### ${b.h3}`;
+  if ('code' in b) return '```\n' + b.code.replaceAll('{origin}', ORIGIN) + '\n```';
+  if ('download' in b) return `[⬇ ${b.download.label}](${ORIGIN}${b.download.href})`;
   if ('table' in b) {
     const { head, rows } = b.table;
     return [

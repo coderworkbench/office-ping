@@ -47,6 +47,20 @@ a reminder, and the sender gets a notice. Each delivery escalates once.
 Set it to `0` to turn this off. There is no phone or e-mail escalation (no SMS
 gateway or mail server is configured).
 
+## Opening Office Ping at sign-in
+
+`frontend/public/autostart/` holds the setup files the Help page offers:
+`windows.ps1` (a Startup-folder shortcut), `mac.sh` (a LaunchAgent) and
+`linux.sh` (an XDG autostart entry plus an app-menu launcher). Each opens
+`<site>/dashboard` with Chrome/Edge/Chromium/Brave `--app=…` at sign-in, needs
+no admin rights, and undoes itself with `-Remove` / `--remove`. The address
+defaults to `https://ping.tejgyan.org`; another deployment changes that line
+in the three files (or users set `OFFICE_PING_URL`). The Help page's
+copy-paste commands use whatever address the app is opened at.
+
+For many machines at once, IT can push the same thing centrally, for example
+a Group Policy logon shortcut to `msedge.exe --app=https://ping.tejgyan.org/dashboard`.
+
 ## Exporting history
 
 Admins can download any History view as CSV (**History → Export CSV**, or

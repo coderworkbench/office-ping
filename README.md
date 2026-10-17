@@ -26,6 +26,7 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 - **Quick replies**: answer with *On my way*, *Coming in 2 min*, *In a meeting* or *Can't right now*; the sender sees the reply instantly.
 - **Tidy inbox**: repeated pings collapse into one row (*👋 Nudge ×8*), and unanswered urgent pings are pinned to the top.
 - **Installable PWA** with its own icons and manifest.
+- **Opens at sign-in**: one-click setup files for Windows, macOS and Linux (Help → *Open Office Ping automatically at start-up*) open Office Ping in its own window whenever a computer starts, so nobody misses pings.
 
 **People and presence**
 - **Live presence**: see who is online right now, with a heartbeat-based status.
