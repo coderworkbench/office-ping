@@ -5,12 +5,17 @@ import { apiFetch, pingErrorMessage } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { listOf, useApi } from '../lib/useApi';
 import { senderNotice } from '../lib/status';
+import { homeTemplates } from '../lib/templates';
 import { Icon } from './ui';
 import { PersonSelect, Person } from './PersonSelect';
 type Group = { id: number; name: string; member_count: number };
 type Template = { id: number; title: string; message: string };
 
-export function PingComposer({ onSent, autoFocus }: { onSent?: () => void; autoFocus?: boolean } = {}) {
+export function PingComposer({ onSent, autoFocus, homeOnly = false }: {
+  onSent?: () => void; autoFocus?: boolean;
+  /** Overview: only the (up to) three templates chosen for the home screen. */
+  homeOnly?: boolean;
+} = {}) {
   const { user } = useAuth();
   const [mode, setMode] = useState<'user' | 'group'>('user');
   const [recipient, setRecipient] = useState<number | ''>('');
@@ -23,7 +28,8 @@ export function PingComposer({ onSent, autoFocus }: { onSent?: () => void; autoF
 
   const canGroup = user && user.role !== 'MEMBER';
   const people = listOf<Person>(useApi('/api/users/', { intervalMs: 60000 }).data);
-  const templates = listOf<Template>(useApi('/api/templates/').data);
+  const allTemplates = listOf<Template>(useApi('/api/templates/').data);
+  const templates = homeOnly ? homeTemplates(allTemplates) : allTemplates;
   const groups = listOf<Group>(useApi(canGroup ? '/api/groups/' : null).data);
 
   const selectedPerson = people.find(p => p.id === recipient);

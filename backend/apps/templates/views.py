@@ -23,10 +23,12 @@ class MessageTemplateViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         t = serializer.save()
-        record_audit(self.request, "TEMPLATE_UPDATED", target=str(t.id))
+        record_audit(self.request, "TEMPLATE_UPDATED", target=str(t.id),
+                     metadata={"show_on_home": t.show_on_home})
 
     def perform_destroy(self, instance):
         tid = instance.id
         instance.is_active = False
-        instance.save(update_fields=["is_active"])
+        instance.show_on_home = False   # frees its home-screen slot
+        instance.save(update_fields=["is_active", "show_on_home"])
         record_audit(self.request, "TEMPLATE_DELETED", target=str(tid))

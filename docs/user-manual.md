@@ -57,14 +57,14 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 **From the Overview page** (the first page after signing in):
 
 1. Start typing a name, team or email in the search box and pick the person.
-2. Click a quick template (for example *Please come to my desk*), or type your own message (up to 500 characters).
+2. Click one of the quick templates (for example *Please come to my desk*), or type your own message (up to 500 characters). HR and admins choose which three appear here.
 3. Tick **Mark urgent** only if it really can't wait.
 4. Click **Send ping**.
 
 **On a phone**, the Overview is one screen with everything you need:
 
 - **Tap a face** in the row under the search box to choose that person (it gets a gold ring), or type a name in the search box. HR and admins can switch the search box between **Person** and **Group**.
-- **Tap a quick message** to fill in the message box, or type your own.
+- **Tap one of the three quick messages** to fill in the message box, or type your own.
 - Tap **Send**. It stays just above the keyboard while you type.
 - **To nudge**, press and hold a face, or tap **Nudge** with the message box empty.
 
@@ -241,8 +241,10 @@ A group ping counts as **one** ping toward the limit of 5 a minute, however many
 Templates are the ready-made messages everyone sees as one-click buttons when sending a ping.
 
 - On the **Templates** page, enter a short title and the message, then click **Add**.
-- Click **Delete** to remove one.
-- Keep the list short (about 12–15) and the messages brief, so the buttons stay easy to scan.
+- Turn on **Home screen** for up to **3** templates. Those are the quick buttons on everyone's Overview, on computers and phones. Until you choose, the first three are shown.
+- Every template is still available in **Quick ping** (Ctrl + K) and in the window that opens from **Ping** on the People page.
+- Click **Delete** to remove one; that also frees its home-screen place.
+- Keep the titles short (a few words), so the buttons stay easy to read.
 
 <a id="users"></a>
 

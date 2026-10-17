@@ -529,10 +529,10 @@ export const phone: Demo = {
   steps: [
     { caption: 'On a phone, the Overview is one screen: who, quick messages, message and Send.', ms: 2400 },
     { caption: 'Tap a face to choose that person.', ms: 1600, cursor: { ...ph(15, 23), click: true } },
-    { caption: 'Tap one of the quick messages, or type your own.', ms: 1700, cursor: { ...ph(25, 35.5), click: true } },
-    { caption: 'Tap Send. It stays above the keyboard while you type.', ms: 1900, cursor: { ...ph(76, 78), click: true } },
+    { caption: 'Tap one of the three quick messages, or type your own.', ms: 1700, cursor: { ...ph(25, 35.5), click: true } },
+    { caption: 'Tap Send. It stays above the keyboard while you type.', ms: 1900, cursor: { ...ph(76, 71), click: true } },
     { caption: 'Press and hold a face to send a 👋 Nudge straight away.', ms: 2400, cursor: { ...ph(59, 23), click: true } },
-    { caption: 'With the message box empty, the button says Nudge and sends one too.', ms: 2600, cursor: { ...ph(76, 78), click: true } },
+    { caption: 'With the message box empty, the button says Nudge and sends one too.', ms: 2600, cursor: { ...ph(76, 71), click: true } },
   ],
   Stage: ({ step }) => {
     const picked = step >= 1 && step <= 3 ? 'Rahul' : null;
@@ -572,15 +572,14 @@ export const phone: Demo = {
           <At x={5} y={33} w={44} h={5.5} className={chip(step >= 2 && step <= 3) + ' ' + TSm}>Come here</At>
           <At x={51} y={33} w={44} h={5.5} className={chip() + ' ' + TSm}>My desk</At>
           <At x={5} y={40} w={56} h={5.5} className={chip() + ' ' + TSm}>Meeting room</At>
-          <At x={63} y={40} w={32} h={5.5} className={chip() + ' ' + TSm}>Call me</At>
-          <At x={5} y={48} w={90} h={18} className={'rounded-[1cqw] border border-line bg-surface p-[1cqw] ' + TSm + (msg ? ' text-ink' : ' text-ink-3')}>
+          <At x={5} y={48} w={90} h={14} className={'rounded-[1cqw] border border-line bg-surface p-[1cqw] ' + TSm + (msg ? ' text-ink' : ' text-ink-3')}>
             {msg || 'Message… (leave empty to send a 👋 Nudge)'}
           </At>
-          <At x={5} y={69} w={90} h={4} show={!!fb} className={'font-bold text-success ' + TSm}>{fb}</At>
-          <At x={5} y={75} w={50} h={6} className={'flex items-center gap-[0.6cqw] whitespace-nowrap font-semibold text-ink-2 ' + TSm}>
+          <At x={5} y={63} w={90} h={4} show={!!fb} className={'font-bold text-success ' + TSm}>{fb}</At>
+          <At x={5} y={68} w={50} h={6} className={'flex items-center gap-[0.6cqw] whitespace-nowrap font-semibold text-ink-2 ' + TSm}>
             <span className="relative h-[2cqw] w-[3.4cqw] rounded-full bg-line"><span className="absolute left-[0.2cqw] top-[0.2cqw] h-[1.6cqw] w-[1.6cqw] rounded-full bg-surface" /></span>⚡ Urgent
           </At>
-          <At x={56} y={74} w={40} h={8} className={'grid place-items-center rounded-full font-bold ' + TSm + ' ' +
+          <At x={56} y={67.5} w={40} h={7} className={'grid place-items-center rounded-full font-bold ' + TSm + ' ' +
             ((step === 3 || step === 5) ? 'bg-brand text-gold-fill' : 'bg-gold-fill text-on-gold')}>
             {msg ? 'Send ➤' : 'Nudge ➤'}
           </At>

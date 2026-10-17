@@ -48,7 +48,7 @@ function Inner() {
           (elevated ? 'lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-8' : '')}>
           <div className="min-w-0">
             <RecentRecipients />
-            <PingComposer />
+            <PingComposer homeOnly />
           </div>
           {elevated && (
             <aside aria-labelledby="office-now" className="min-w-0 lg:border-l lg:border-line lg:pl-8">

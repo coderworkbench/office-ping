@@ -4,9 +4,10 @@
 // screen, no scrolling. It fills the space between the top bar and the tab
 // bar, and its Send bar stays above the on-screen keyboard.
 //
-//   search (with Person / Group inside) · recent avatars · quick messages
-//   (wrapping onto rows) · a 3-line message box · Urgent + Send. While you
-//   type a message the avatar row steps aside to make room for the keyboard.
+//   search (with Person / Group inside) · recent avatars · the three quick
+//   messages chosen for the home screen · a small message box · Urgent + Send,
+//   kept together at the top. While you type a message the avatar row steps
+//   aside to make room for the keyboard.
 //
 // Tap an avatar to choose it; long-press it to send a 👋 Nudge straight away.
 // Sending with an empty message to a person also sends a Nudge.
@@ -18,13 +19,13 @@ import { listOf, useApi } from '../lib/useApi';
 import { describeStatus, Status, statusEmoji } from '../lib/status';
 import { Avatar, Icon } from './ui';
 import { NotificationPermissionBanner } from './NotificationPermissionBanner';
+import { homeTemplates, Template } from '../lib/templates';
 
 type Person = {
   id: number; full_name: string; department?: string; email?: string;
   is_online: boolean; status: Status | null;
 };
 type Group = { id: number; name: string; member_count: number };
-type Template = { id: number; title: string; message: string };
 type Mode = 'user' | 'group';
 
 const NUDGE = '👋 Nudge';
@@ -38,7 +39,7 @@ export function MobileHome() {
     .filter(p => p.id !== user?.id);
   const sent = listOf<any>(useApi('/api/pings/?scope=sent',
     { refreshOn: ['op:sent', 'op:ping_status'], intervalMs: 30000 }).data);
-  const templates = listOf<Template>(useApi('/api/templates/').data);
+  const templates = homeTemplates(listOf<Template>(useApi('/api/templates/').data));
   const groups = listOf<Group>(useApi(canGroup ? '/api/groups/' : null).data);
 
   const [mode, setMode] = useState<Mode>('user');
@@ -228,31 +229,29 @@ export function MobileHome() {
         </p>
       )}
 
-      {/* Quick messages wrap onto rows; on a short screen the box shrinks and scrolls. */}
+      {/* The (up to) three quick messages chosen for the home screen, in small type. */}
       {templates.length > 0 && (
         <div role="group" aria-label="Quick messages" data-tour="composer-templates"
-             className="flex min-h-[40px] shrink flex-wrap content-start gap-2 overflow-y-auto">
+             className="flex shrink-0 flex-wrap gap-1.5">
           {templates.map(t => (
             <button key={t.id} type="button" aria-pressed={templateId === t.id}
                     onClick={() => { setTemplateId(t.id); setMessage(t.message); }}
-                    className={'chip-btn !min-h-[40px] max-w-full ' + (templateId === t.id ? 'is-active' : '')}>
+                    className={'chip-btn !min-h-[32px] max-w-full !px-2.5 !py-1 !text-xs ' + (templateId === t.id ? 'is-active' : '')}>
               <span className="truncate">{t.title}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Message: about three lines; gives way when the keyboard needs room. */}
-      <div className="relative min-h-[64px] shrink basis-[108px]">
+      {/* Message: two or three lines; gives way when the keyboard needs room. */}
+      <div className="relative min-h-[56px] shrink basis-[84px]">
         <textarea value={message} maxLength={500}
                   onChange={e => { setMessage(e.target.value); setTemplateId(null); }}
                   placeholder={mode === 'user' ? 'Message… (leave empty to send a 👋 Nudge)' : 'Message for the group…'}
                   aria-label="Message"
-                  className="input h-full resize-none pb-6" />
-        <span className="pointer-events-none absolute bottom-2 right-3 text-xs tabular-nums text-ink-3">{message.length}/500</span>
+                  className="input h-full resize-none !py-2 pb-5" />
+        <span className="pointer-events-none absolute bottom-1.5 right-3 text-[11px] tabular-nums text-ink-3">{message.length}/500</span>
       </div>
-
-      <div className="flex-1" aria-hidden />
 
       {feedback && (
         <p aria-live="polite" className={'shrink-0 truncate text-sm font-semibold ' + (feedback.ok ? 'text-success' : 'text-rose-deep')}>
@@ -263,18 +262,18 @@ export function MobileHome() {
       {/* Urgent + Send */}
       <div className="flex shrink-0 items-center justify-between gap-3">
         <label data-tour="composer-urgent"
-               className={'inline-flex min-h-[44px] cursor-pointer items-center gap-2 whitespace-nowrap text-sm font-semibold ' +
+               className={'inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 whitespace-nowrap text-[13px] font-semibold ' +
                  (urgent ? 'text-rose-deep' : 'text-ink-2')}>
           <input type="checkbox" className="peer sr-only" checked={urgent}
                  onChange={e => setUrgent(e.target.checked)} />
-          <span aria-hidden className={'relative h-6 w-10 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-gold-fill ' + (urgent ? 'bg-live' : 'bg-line')}>
-            <span className={'absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-all ' + (urgent ? 'left-[18px]' : 'left-0.5')} />
+          <span aria-hidden className={'relative h-5 w-9 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-gold-fill ' + (urgent ? 'bg-live' : 'bg-line')}>
+            <span className={'absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-all ' + (urgent ? 'left-[18px]' : 'left-0.5')} />
           </span>
           ⚡ Urgent
         </label>
         <button type="button" onClick={() => send()} disabled={busy} data-tour="composer-send"
-                className="btn-primary h-12 rounded-full px-7 text-base">
-          {sendLabel} <Icon name="send" size={16} />
+                className="btn-primary !min-h-[40px] h-10 rounded-full px-5 text-[15px]">
+          {sendLabel} <Icon name="send" size={15} />
         </button>
       </div>
     </div>
