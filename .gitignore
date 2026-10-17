@@ -12,3 +12,9 @@ node_modules/
 
 # Local browser-automation output
 .playwright-mcp/
+
+# Database backups hold password hashes and messages: never commit them
+*.sql
+*.sql.gz
+office-ping-backups/
+docker-compose.override.yml

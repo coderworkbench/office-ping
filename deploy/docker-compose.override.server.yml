@@ -1,0 +1,7 @@
+# For a server where the host's nginx terminates HTTPS (see
+# docs/disaster-recovery.md): copy to docker-compose.override.yml so only the
+# host nginx can reach the app.
+services:
+  nginx:
+    ports: !override
+      - "127.0.0.1:8080:80"

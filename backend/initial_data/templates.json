@@ -1,0 +1,7 @@
+[
+  {"title": "Meeting starts in 5 minutes", "message": "Meeting starts in 5 minutes", "show_on_home": false},
+  {"title": "Please come to my desk", "message": "Please come to my desk", "show_on_home": false},
+  {"title": "Please come to the meeting room", "message": "Please come to the meeting room", "show_on_home": false},
+  {"title": "Please join the meeting now (we're waiting)", "message": "Please join the meeting now (we're waiting)", "show_on_home": false},
+  {"title": "Please see me when you're free", "message": "Please see me when you're free", "show_on_home": false}
+]

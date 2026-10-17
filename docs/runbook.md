@@ -328,6 +328,9 @@ That's it — nothing else to install.
 
 ## 9. Backups
 
+> The maintained way is `scripts/backup.sh` / `scripts/restore.sh`; see
+> [disaster-recovery.md](disaster-recovery.md). The notes below describe the same idea by hand.
+
 ### What to back up
 
 1. The Postgres volume `officeping_postgres_data` — the only durable state.

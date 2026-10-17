@@ -1,4 +1,4 @@
-.PHONY: setup dev down migrate makemigrations seed test lint format logs shell manual
+.PHONY: setup dev down migrate makemigrations backup restore fresh-install seed test lint format logs shell manual
 
 setup:
 	cp -n .env.example .env || true
@@ -39,3 +39,14 @@ shell:
 # Regenerate docs/user-manual.md from frontend/content/manual.json
 manual:
 	node scripts/export-manual.mjs
+
+# Backups and recovery (docs/disaster-recovery.md)
+backup:
+	scripts/backup.sh --keep-days 30
+
+restore:
+	@test -n "$(FILE)" || (echo "Usage: make restore FILE=path/to/officeping-<date>.sql.gz" && exit 1)
+	scripts/restore.sh "$(FILE)"
+
+fresh-install:
+	scripts/fresh-install.sh

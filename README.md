@@ -50,6 +50,7 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 **Deployment**
 - **One `docker compose` stack**: Postgres, Redis, Django/Daphne, Next.js, nginx and a small escalation worker.
 - **Built for a LAN**: no external services or cloud accounts needed. See [deployment-lan.md](docs/deployment-lan.md).
+- **Backups and recovery**: `scripts/backup.sh` (daily via cron) and `scripts/restore.sh` bring everything back on a fresh server; `scripts/fresh-install.sh` starts clean with the repo's templates and a new admin. See [disaster-recovery.md](docs/disaster-recovery.md).
 
 ## Screenshots
 
@@ -138,6 +139,7 @@ See `docs/` for deeper topics:
 - [websocket.md](docs/websocket.md)
 - [administration.md](docs/administration.md)
 - [troubleshooting.md](docs/troubleshooting.md)
+- [disaster-recovery.md](docs/disaster-recovery.md): backups, and rebuilding the server from the repo plus one backup file
 
 ## Tests
 
