@@ -180,6 +180,14 @@ body {
   body:has(.op-mobile-home :is(input, textarea):focus) .op-tabbar { display: none; }
   body:has(.op-mobile-home :is(input, textarea):focus) .op-mobile-home { bottom: env(safe-area-inset-bottom); }
   .op-mobile-home:has(textarea:focus) .op-recent { display: none; }
+  .op-mobile-home:has(:is(input, textarea):focus) .op-label { display: none; }
+}
+@media (max-width: 639px) and (max-height: 680px) {
+  .op-mobile-home .op-label { display: none; }
+}
+/* Keyboard open on a small phone: keep the message box and Send in view. */
+@media (max-width: 639px) and (max-height: 500px) {
+  .op-mobile-home:has(textarea:focus) .op-quick { display: none; }
 }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

@@ -4,10 +4,11 @@
 // screen, no scrolling. It fills the space between the top bar and the tab
 // bar, and its Send bar stays above the on-screen keyboard.
 //
-//   search (with Person / Group inside) · recent avatars · the three quick
-//   messages chosen for the home screen · a small message box · Urgent + Send,
-//   kept together at the top. While you type a message the avatar row steps
-//   aside to make room for the keyboard.
+//   Who (search with Person / Group inside, recent avatars) · the three quick
+//   messages chosen for the home screen · a message box that takes the spare
+//   height (within limits) · Urgent + Send at the bottom. Spacing scales with
+//   the screen height; on short screens the section labels drop out, and while
+//   you type a message the avatar row steps aside for the keyboard.
 //
 // Tap an avatar to choose it; long-press it to send a 👋 Nudge straight away.
 // Sending with an empty message to a person also sends a Nudge.
@@ -127,7 +128,7 @@ export function MobileHome() {
   const sendLabel = busy ? 'Sending…' : empty && mode === 'user' && !urgent ? 'Nudge' : 'Send';
 
   return (
-    <div className="op-mobile-home flex flex-col gap-2.5 bg-page px-4 pb-2 pt-3"
+    <div className="op-mobile-home flex flex-col gap-[clamp(10px,2.2dvh,18px)] bg-page px-4 pb-3 pt-4"
          style={keyboard ? { bottom: keyboard } : undefined}>
       <NotificationPermissionBanner compact />
       {user?.status && (
@@ -138,7 +139,8 @@ export function MobileHome() {
 
       {/* WHO: search with Person / Group inside */}
       <div className="relative" data-tour="composer-search">
-        <div className="flex h-11 items-center rounded-xl border border-line bg-surface shadow-sm focus-within:border-gold-fill focus-within:ring-2 focus-within:ring-gold-fill/40">
+        <Label>Who</Label>
+        <div className="flex h-12 items-center rounded-xl border border-line bg-surface shadow-sm focus-within:border-gold-fill focus-within:ring-2 focus-within:ring-gold-fill/40">
           <Icon name="search" size={18} className="ml-3 shrink-0 text-ink-3" />
           <input
             ref={searchRef}
@@ -215,8 +217,8 @@ export function MobileHome() {
         ))}
         <li>
           <button type="button" onClick={() => searchRef.current?.focus()} aria-label="Find someone else"
-                  className="flex w-14 flex-col items-center gap-1">
-            <span className="grid h-11 w-11 place-items-center rounded-full border border-dashed border-ink-3/60 text-xl text-ink-2">+</span>
+                  className="flex w-16 flex-col items-center gap-1">
+            <span className="grid h-[52px] w-[52px] place-items-center rounded-full border border-dashed border-ink-3/60 text-xl text-ink-2">+</span>
             <span className="text-xs text-ink-2">More</span>
           </button>
         </li>
@@ -229,28 +231,33 @@ export function MobileHome() {
         </p>
       )}
 
-      {/* The (up to) three quick messages chosen for the home screen, in small type. */}
+      {/* The (up to) three quick messages chosen for the home screen. */}
       {templates.length > 0 && (
-        <div role="group" aria-label="Quick messages" data-tour="composer-templates"
-             className="flex shrink-0 flex-wrap gap-1.5">
-          {templates.map(t => (
-            <button key={t.id} type="button" aria-pressed={templateId === t.id}
-                    onClick={() => { setTemplateId(t.id); setMessage(t.message); }}
-                    className={'chip-btn !min-h-[32px] max-w-full !px-2.5 !py-1 !text-xs ' + (templateId === t.id ? 'is-active' : '')}>
-              <span className="truncate">{t.title}</span>
-            </button>
-          ))}
+        <div className="op-quick shrink-0">
+          <Label>Quick messages</Label>
+          <div role="group" aria-label="Quick messages" data-tour="composer-templates" className="flex flex-wrap gap-2">
+            {templates.map(t => (
+              <button key={t.id} type="button" aria-pressed={templateId === t.id}
+                      onClick={() => { setTemplateId(t.id); setMessage(t.message); }}
+                      className={'chip-btn !min-h-[36px] max-w-full !px-3 ' + (templateId === t.id ? 'is-active' : '')}>
+                <span className="truncate">{t.title}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Message: two or three lines; gives way when the keyboard needs room. */}
-      <div className="relative min-h-[56px] shrink basis-[84px]">
-        <textarea value={message} maxLength={500}
-                  onChange={e => { setMessage(e.target.value); setTemplateId(null); }}
-                  placeholder={mode === 'user' ? 'Message… (leave empty to send a 👋 Nudge)' : 'Message for the group…'}
-                  aria-label="Message"
-                  className="input h-full resize-none !py-2 pb-5" />
-        <span className="pointer-events-none absolute bottom-1.5 right-3 text-[11px] tabular-nums text-ink-3">{message.length}/500</span>
+      {/* Message: takes the spare height, up to about 40% of the screen. */}
+      <div className="flex max-h-[40dvh] min-h-[64px] flex-1 flex-col">
+        <Label>Message</Label>
+        <div className="relative min-h-0 flex-1">
+          <textarea value={message} maxLength={500}
+                    onChange={e => { setMessage(e.target.value); setTemplateId(null); }}
+                    placeholder={mode === 'user' ? 'Type a message, or leave it empty to send a 👋 Nudge' : 'Message for the group…'}
+                    aria-label="Message"
+                    className="input h-full resize-none pb-6" />
+          <span className="pointer-events-none absolute bottom-2 right-3 text-xs tabular-nums text-ink-3">{message.length}/500</span>
+        </div>
       </div>
 
       {feedback && (
@@ -259,25 +266,30 @@ export function MobileHome() {
         </p>
       )}
 
-      {/* Urgent + Send */}
-      <div className="flex shrink-0 items-center justify-between gap-3">
+      {/* Urgent + Send, at the bottom of the screen */}
+      <div className="mt-auto flex shrink-0 items-center justify-between gap-3">
         <label data-tour="composer-urgent"
-               className={'inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 whitespace-nowrap text-[13px] font-semibold ' +
+               className={'inline-flex min-h-[44px] cursor-pointer items-center gap-2 whitespace-nowrap text-sm font-semibold ' +
                  (urgent ? 'text-rose-deep' : 'text-ink-2')}>
           <input type="checkbox" className="peer sr-only" checked={urgent}
                  onChange={e => setUrgent(e.target.checked)} />
-          <span aria-hidden className={'relative h-5 w-9 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-gold-fill ' + (urgent ? 'bg-live' : 'bg-line')}>
-            <span className={'absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-all ' + (urgent ? 'left-[18px]' : 'left-0.5')} />
+          <span aria-hidden className={'relative h-6 w-10 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-gold-fill ' + (urgent ? 'bg-live' : 'bg-line')}>
+            <span className={'absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-all ' + (urgent ? 'left-[18px]' : 'left-0.5')} />
           </span>
           ⚡ Urgent
         </label>
         <button type="button" onClick={() => send()} disabled={busy} data-tour="composer-send"
-                className="btn-primary !min-h-[40px] h-10 rounded-full px-5 text-[15px]">
-          {sendLabel} <Icon name="send" size={15} />
+                className="btn-primary h-12 rounded-full px-7 text-base">
+          {sendLabel} <Icon name="send" size={16} />
         </button>
       </div>
     </div>
   );
+}
+
+// Small section heading; hidden on short screens (see .op-label in globals.css).
+function Label({ children }: { children: string }) {
+  return <h2 className="op-label eyebrow mb-1.5">{children}</h2>;
 }
 
 // A round avatar with the first name below. Long-press support is optional.
@@ -300,14 +312,14 @@ function AvatarButton({ name, online, status, selected, group, onTap, onLongPres
             onPointerDown={start} onPointerUp={cancel} onPointerLeave={cancel} onPointerCancel={cancel}
             onContextMenu={e => e.preventDefault()}
             onClick={() => { if (fired.current) { fired.current = false; return; } onTap(); }}
-            className="flex w-14 select-none flex-col items-center gap-1 [-webkit-touch-callout:none]">
+            className="flex w-16 select-none flex-col items-center gap-1 [-webkit-touch-callout:none]">
       <span className={'relative rounded-full transition-shadow ' + (selected ? 'ring-[3px] ring-gold-fill ring-offset-2 ring-offset-page' : '')}>
         {group
-          ? <span className="grid h-11 w-11 place-items-center rounded-full bg-brand-soft text-brand"><Icon name="group" size={20} /></span>
-          : <Avatar name={name} size={44} online={online} />}
+          ? <span className="grid h-[52px] w-[52px] place-items-center rounded-full bg-brand-soft text-brand"><Icon name="group" size={22} /></span>
+          : <Avatar name={name} size={52} online={online} />}
         {status && <span className="absolute -right-1 -top-1 text-sm" aria-hidden>{statusEmoji(status)}</span>}
       </span>
-      <span className={'w-full truncate text-center text-xs ' + (selected ? 'font-bold text-ink' : 'text-ink-2')}>{first}</span>
+      <span className={'w-full truncate text-center text-[13px] ' + (selected ? 'font-bold text-ink' : 'text-ink-2')}>{first}</span>
     </button>
   );
 }
