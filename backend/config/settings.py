@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.groups",
     "apps.notifications",
+    "apps.chat",
     "apps.templates",
     "apps.audit",
     "apps.common",
