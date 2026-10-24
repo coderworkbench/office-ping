@@ -55,7 +55,9 @@ def summaries(user, conversation_id=None):
     lasts = Message.objects.in_bulk([m.last_id for m in mine if m.last_id])
     rows = []
     for m in mine:
-        other = others[m.conversation_id]
+        other = others.get(m.conversation_id)
+        if other is None:  # the other person was deleted outright
+            continue
         last = lasts.get(m.last_id)
         at = m.conversation.last_message_at
         rows.append({

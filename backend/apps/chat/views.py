@@ -68,7 +68,7 @@ class ConversationViewSet(viewsets.ViewSet):
             return self._send(request, member)
         qs = Message.objects.filter(conversation_id=member.conversation_id)
         before = request.query_params.get("before", "")
-        if before.isdigit():
+        if before.isascii() and before.isdigit():
             qs = qs.filter(id__lt=int(before))
         page = list(qs.order_by("-id")[:PAGE + 1])
         return Response({"results": [message_dict(m) for m in reversed(page[:PAGE])],

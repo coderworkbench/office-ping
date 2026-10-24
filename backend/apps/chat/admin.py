@@ -23,3 +23,10 @@ class MessageAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    # Deleting a message would reset read markers (SET_NULL), so it is view-only.
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

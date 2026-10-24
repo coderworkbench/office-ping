@@ -33,3 +33,10 @@ def test_message_admin_never_shows_the_text():
     ma = admin.site._registry[Message]
     for attr in ("list_display", "fields", "search_fields", "readonly_fields"):
         assert "body" not in (getattr(ma, attr) or ())
+
+
+def test_message_admin_is_view_only():
+    ma = admin.site._registry[Message]
+    assert ma.has_change_permission(None) is False
+    assert ma.has_delete_permission(None) is False
+    assert ma.has_add_permission(None) is False

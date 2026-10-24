@@ -125,6 +125,11 @@ def test_messages_come_in_pages_of_30_oldest_first(member_a, member_b, pushed):
     assert [m["body"] for m in older["results"]] == [f"m{i}" for i in range(5)]
     assert older["has_more"] is False
 
+    # a non-ASCII "digit" is not a cursor: it behaves like no cursor, not a 500
+    r = c.get(f"{URL}{cid}/messages/?before=\u00b2")
+    assert r.status_code == 200
+    assert r.data["results"] == page["results"]
+
 
 @pytest.mark.django_db
 def test_message_body_is_trimmed_and_checked(member_a, member_b, pushed):
@@ -237,6 +242,17 @@ def test_unread_total_counts_messages_from_others(member_a, member_b, hr_user, p
     say(member_b, with_hr, "my own reply doesn't count")
     assert api_as(member_b).get("/api/chat/unread/").data == {"unread_total": 2}
     assert api_as(member_a).get("/api/chat/unread/").data == {"unread_total": 0}
+
+
+@pytest.mark.django_db
+def test_list_survives_the_other_person_being_deleted(member_a, member_b, hr_user, pushed):
+    gone = open_chat(member_a, member_b)
+    kept = open_chat(member_a, hr_user)
+    say(member_b, gone, "bye")
+    member_b.delete()
+    _, order = listing(member_a)
+    assert order == [kept]
+    assert api_as(member_a).get("/api/chat/unread/").status_code == 200
 
 
 # ---------- Muting ----------
