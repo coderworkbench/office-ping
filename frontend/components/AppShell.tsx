@@ -16,6 +16,7 @@ import { Avatar, Icon } from './ui';
 import { Logo } from './Logo';
 import { Tour } from './Tour';
 import { QuickPing, QUICK_PING_EVENT, ShortcutHint } from './QuickPing';
+import { ChatDock } from './chat/ChatDock';
 import { StatusDialog } from './StatusDialog';
 import { describeStatus } from '../lib/status';
 import { useLiveStatus } from './NotificationsRuntime';
@@ -261,6 +262,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <StatusDialog open={statusOpen} onClose={() => setStatusOpen(false)} />
       <QuickPing />
+      <ChatDock />
       <Tour />
     </div>
   );

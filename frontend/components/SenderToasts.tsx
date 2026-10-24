@@ -44,7 +44,7 @@ export function SenderToasts() {
   if (!toasts.length) return null;
   return (
     <div aria-live="polite"
-         className="pointer-events-none fixed inset-x-4 bottom-24 z-[90] flex flex-col items-center gap-2 lg:inset-x-auto lg:bottom-6 lg:right-6 lg:items-end">
+         className="pointer-events-none fixed inset-x-4 bottom-24 z-[90] flex flex-col items-center gap-2 lg:inset-x-auto lg:bottom-20 lg:right-6 lg:items-end">
       {toasts.map(t => (
         <div key={t.id}
              className={'pointer-events-auto w-full max-w-sm rounded-2xl border bg-surface p-4 shadow-lg animate-slideIn ' +

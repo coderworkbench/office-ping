@@ -209,7 +209,7 @@ export function Tour() {
   if (offer && !active) {
     return (
       <div role="dialog" aria-label="Take the tour"
-           className="fixed bottom-24 right-4 z-[80] w-[min(340px,calc(100vw-32px))] rounded-2xl border border-line bg-surface p-4 shadow-lg animate-slideIn lg:bottom-6 lg:right-6">
+           className="fixed bottom-24 right-4 z-[80] w-[min(340px,calc(100vw-32px))] rounded-2xl border border-line bg-surface p-4 shadow-lg animate-slideIn lg:bottom-20 lg:right-6">
         <div className="flex items-start gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gold-soft text-xl" aria-hidden>🧭</span>
           <div className="min-w-0">
