@@ -63,13 +63,14 @@ self.addEventListener('notificationclick', (event) => {
   const url = data.url || '/notifications';
   event.waitUntil((async () => {
     const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-    // Prefer an already-open Office Ping window → bring it to the front and
-    // show this ping's pop-up first (the page already has it queued).
+    // Prefer an already-open Office Ping window: bring it to the front.
     for (const w of wins) {
       try {
         const u = new URL(w.url);
         if (u.origin === self.location.origin) {
-          w.postMessage({ type: 'focus-ping', ping_id: data.ping_id });
+          // Chat: open that conversation. Ping: show its pop-up first (the page already has it queued).
+          if (url.startsWith('/messages')) w.postMessage({ type: 'open-url', url });
+          else w.postMessage({ type: 'focus-ping', ping_id: data.ping_id });
           return w.focus();
         }
       } catch {}
