@@ -28,6 +28,12 @@ WebSocket, PWA with desktop notifications, and acknowledgement tracking.
 - **Installable PWA** with its own icons and manifest.
 - **Opens at sign-in**: one-click setup files for Windows, macOS and Linux (Help → *Open Office Ping automatically at start-up*) open Office Ping in its own window whenever a computer starts, so nobody misses pings.
 
+**Chat**
+- **Messages**: quiet one-to-one chat alongside pings. On a computer, a LinkedIn-style bar in the bottom-right corner opens your chats in small windows; on a phone, Messages has its own tab.
+- **Seen and typing…**: read receipts and a typing indicator, live over the same connection as pings.
+- **Never noisy**: no pop-up or sound, a desktop notification only when the chat isn't in front of you, nothing while you're in a meeting or on Do Not Disturb, and a per-chat mute. Need attention now? **Ping** from inside the chat.
+- **Private**: only the two people can read a chat; the audit log records that a chat started, never its content. `CHAT_RATE` limits messages per minute (default 30).
+
 **People and presence**
 - **Live presence**: see who is online right now, with a heartbeat-based status.
 - **Status and Do Not Disturb**: *In a meeting*, *Do not disturb*, *Out for lunch* or *Away*, with an end time. Senders see it before they ping; in a meeting or DND, normal pings wait quietly in the inbox while urgent ones still break through.

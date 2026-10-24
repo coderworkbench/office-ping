@@ -14,6 +14,7 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 - [Open Office Ping automatically at start-up](#start-automatically)
 - [Sending a ping](#sending)
 - [Receiving a ping](#receiving)
+- [Messages (chat)](#messages)
 - [Your status: meeting, lunch, do not disturb](#status)
 - [Inbox](#inbox)
 - [History and ping status](#history)
@@ -45,7 +46,7 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 
 > 💡 **Want a quick walkthrough?** Click **Show me around** at the top of the Help page for a one-minute guided tour of the real screens. Sections below also have short animated demos.
 
-**Finding your way around.** On a computer, every page is in the dark sidebar on the left; HR and admins find Groups, Templates and the admin pages under **Manage** (click it to open). On a phone or tablet, the main pages (Overview, People, Inbox, History) are in the bar at the bottom of the screen, and everything else, including your status, Help, Change password and Sign out, is under **More**.
+**Finding your way around.** On a computer, every page is in the dark sidebar on the left; HR and admins find Groups, Templates and the admin pages under **Manage** (click it to open). On a phone or tablet, the main pages (Overview, People, Inbox, Messages) are in the bar at the bottom of the screen, and everything else, including History, your status, Help, Change password and Sign out, is under **More**.
 
 > 💡 **Keep Office Ping open.** You only receive alerts while an Office Ping window or tab is open somewhere. Minimised or in the background is fine. If it's closed, pings wait in your Inbox until you open it again. Easiest: make it open by itself when your computer starts (see *Open Office Ping automatically at start-up*).
 
@@ -173,6 +174,32 @@ If several pings arrive, they're shown one at a time. Click **N more waiting · 
 
 > 💡 Signed in on two computers, or in two tabs? Each one shows the ping, but once you acknowledge it on one, it disappears from the others.
 
+<a id="messages"></a>
+
+## Messages (chat)
+
+**Messages** is a quiet one-to-one chat for things that don't need an answer this minute. Unlike a ping, a message never pops up in the middle of the screen or plays a sound: you get a red number on **Messages**, and a desktop notification if Office Ping is in the background.
+
+### Start a chat
+
+1. On the **People** page, click **Message** next to the person. Or open **Messages**, click **New message** and pick them.
+2. Type your message. On a computer, press **Enter** to send (**Shift + Enter** starts a new line). On a phone, tap the send button.
+3. **Seen** appears under your last message once they've read it, and you see *typing…* while they write back.
+
+On a computer, your chats are also in the **Messages** bar in the bottom-right corner of every page. Click it to see them, and click a chat to open it in a small window while you carry on working.
+
+### When it needs attention now
+
+Click **Ping** at the top of a chat to send that person a ping instead. It pops up on their screen until they acknowledge it.
+
+### Notifications and Do Not Disturb
+
+- You get a desktop notification for a new message only when that chat isn't already open in front of you.
+- While your status is **In a meeting** or **Do not disturb**, messages arrive silently, with no notification.
+- To silence one chat, click the bell at the top of it. The red number still shows.
+
+> 💡 **Who can read my chats?** In Office Ping, only you and the other person. The audit log records that a chat was started, never what was said. Chat is a work tool, so write as you would in any work message.
+
 <a id="status"></a>
 
 ## Your status: meeting, lunch, do not disturb
@@ -262,7 +289,7 @@ Passwords need at least 8 characters and can't be a common password, only number
 
 *For HR and admins*
 
-HR and admins see live numbers next to the message box on the Overview page (on a phone, at the top of the **History** tab). Click any card to open the matching list.
+HR and admins see live numbers next to the message box on the Overview page (on a phone, at the top of **History**, under **More**). Click any card to open the matching list.
 
 | Card | Counts |
 |---|---|
