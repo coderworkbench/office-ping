@@ -19,6 +19,7 @@ import { QuickPing, QUICK_PING_EVENT, ShortcutHint } from './QuickPing';
 import { StatusDialog } from './StatusDialog';
 import { describeStatus } from '../lib/status';
 import { useLiveStatus } from './NotificationsRuntime';
+import { useChat } from '../lib/chat';
 
 type Role = 'ADMIN' | 'HR' | 'MEMBER';
 type NavItem = { href: string; label: string; icon: any; roles?: Role[]; badge?: number };
@@ -31,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState<boolean | null>(null);
   const [statusOpen, setStatusOpen] = useState(false);
+  const chatUnread = useChat().unreadTotal;
 
   // The Manage section remembers whether it was left open.
   useEffect(() => {
@@ -79,6 +81,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         { href: '/dashboard',     label: 'Overview', icon: 'dashboard' },
         { href: '/people',        label: 'People',   icon: 'users' },
         { href: '/notifications', label: 'Inbox',    icon: 'inbox', badge: unread },
+        { href: '/messages',      label: 'Messages', icon: 'chat',  badge: chatUnread },
         { href: '/history',       label: 'History',  icon: 'history' },
         { href: '/help',          label: 'Help',     icon: 'help' },
       ],
@@ -98,11 +101,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   ];
 
   // Bottom tab bar: the four daily destinations + More (§18.2: 3–5 tabs).
+  // History lives under More.
   const tabs: NavItem[] = [
     { href: '/dashboard',     label: 'Overview', icon: 'dashboard' },
     { href: '/people',        label: 'People',   icon: 'users' },
     { href: '/notifications', label: 'Inbox',    icon: 'inbox', badge: unread },
-    { href: '/history',       label: 'History',  icon: 'history' },
+    { href: '/messages',      label: 'Messages', icon: 'chat',  badge: chatUnread },
   ];
   const tabHrefs = new Set(tabs.map(t => t.href));
   const moreItems = groups.flatMap(g => g.items).filter(i => allowed(i) && !tabHrefs.has(i.href));
@@ -217,7 +221,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Content ───────────────────────────────────────────────────── */}
       <main className="lg:pl-72">
-        <div className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-12 lg:pt-8">
+        <div className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-8">
           {children}
         </div>
       </main>
