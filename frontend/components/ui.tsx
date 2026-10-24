@@ -176,6 +176,20 @@ const paths: Record<string, ReactNode> = {
     <path d="M9 14 4 9l5-5" />
     <path d="M4 9h10a6 6 0 0 1 6 6v5" />
   </>,
+  chat:    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />,
+  compose: <>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+  </>,
+  back:    <path d="M15 18l-6-6 6-6" />,
+  bellOff: <>
+    <path d="M9 17a3 3 0 0 0 6 0" />
+    <path d="M18 14.2V11a6 6 0 0 0-9.3-5" />
+    <path d="M6 11v3.2a2 2 0 0 1-.6 1.4L4 17h13" />
+    <path d="M3 3l18 18" />
+  </>,
+  x:       <path d="M18 6 6 18M6 6l12 12" />,
+  minus:   <path d="M5 12h14" />,
 };
 
 export function Icon({ name, size = 18, className = '' }:

@@ -13,12 +13,13 @@
 // Tap an avatar to choose it; long-press it to send a 👋 Nudge straight away.
 // Sending with an empty message to a person also sends a Nudge.
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { apiFetch, pingErrorMessage } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { listOf, useApi } from '../lib/useApi';
 import { describeStatus, Status, statusEmoji } from '../lib/status';
 import { Avatar, Icon } from './ui';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import { NotificationPermissionBanner } from './NotificationPermissionBanner';
 import { homeTemplates, Template } from '../lib/templates';
 
@@ -322,22 +323,4 @@ function AvatarButton({ name, online, status, selected, group, onTap, onLongPres
       <span className={'w-full truncate text-center text-[13px] ' + (selected ? 'font-bold text-ink' : 'text-ink-2')}>{first}</span>
     </button>
   );
-}
-
-// Height of the on-screen keyboard where the browser overlays it (iOS), so
-// the Send bar can sit above it. 0 where the page is resized instead.
-function useKeyboardInset() {
-  const [inset, setInset] = useState(0);
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const update = () => {
-      const covered = window.innerHeight - vv.height - vv.offsetTop;
-      setInset(covered > 80 ? Math.round(covered) : 0);
-    };
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    return () => { vv.removeEventListener('resize', update); vv.removeEventListener('scroll', update); };
-  }, []);
-  return inset;
 }
