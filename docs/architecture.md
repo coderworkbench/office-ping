@@ -15,6 +15,7 @@
   `escalate_urgent` command run by the `escalator` service.
 - `apps.audit` — `AuditLog` with helpers and middleware. Only admins can read.
 - `apps.common` — role-based permission classes and the aggregate dashboard.
+- `chat`: one-to-one chat. `Conversation` (one per pair, `direct_key`), `ConversationMember` (read marker, mute) and `Message`. REST under `/api/chat/`; new messages and read receipts are pushed through the same `user.<id>` channel groups as pings (`apps/chat/broadcast.py`). Message text never goes to the audit log or Django admin.
 
 ## Request flow — individual ping
 
@@ -64,6 +65,8 @@ group pings are exempt. Refusals are `429` with `Retry-After`, and a
 `PING_BLOCKED` audit entry is written at most once per period per pair.
 
 Chosen scope depends on the authenticated user; clients cannot bypass.
+
+Chat messages have their own limit, `CHAT_RATE` (default `30/minute`, scope `chat_send`). Only sending counts; reading and marking as read don't.
 
 ## Permissions
 
