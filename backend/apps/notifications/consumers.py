@@ -1,7 +1,8 @@
 """WebSocket consumers.
 
 Two logical channels, both namespaced per-user:
-  - /ws/notifications/   — pushes new pings; receives client ACKs (delivered)
+  - /ws/notifications/   — pushes new pings and chat events; receives client
+                           ACKs (delivered/seen) and chat typing signals
   - /ws/presence/        — heartbeat + online/away/offline updates
 
 Each authenticated user is placed into a group `user.<id>`; the server sends
@@ -51,6 +52,8 @@ class _UserScopedMixin:
 
 class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
     async def connect(self):
+        # conversation id → other members' ids (None: not a member), for typing.
+        self._chat_peers = {}
         await super().connect()
         if self.channel_name:  # accepted
             # Send pings that arrived while this user had no browser connected
@@ -59,11 +62,15 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
                 await self.send_json({"type": "notification", "payload": item})
 
     async def receive_json(self, content, **kwargs):
-        """Client ACKs:
+        """Client messages:
           { "type": "ack_delivered", "delivery_id": 123 }
           { "type": "ack_seen", "delivery_id": 123 }
+          { "type": "chat_typing", "conversation_id": 5 }
         """
         kind = content.get("type")
+        if kind == "chat_typing":
+            await self._chat_typing(content.get("conversation_id"))
+            return
         did = content.get("delivery_id")
         if not kind or not did:
             return
@@ -83,6 +90,31 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
     async def ping_handled(self, event):
         """The recipient acknowledged a ping on some device: clear it everywhere."""
         await self.send_json({"type": "ping_handled", "payload": event["payload"]})
+
+    async def chat_message(self, event):
+        """A chat message in one of this user's conversations (see apps/chat)."""
+        await self.send_json({"type": "chat_message", "payload": event["payload"]})
+
+    async def chat_read(self, event):
+        await self.send_json({"type": "chat_read", "payload": event["payload"]})
+
+    async def chat_typing(self, event):
+        await self.send_json({"type": "chat_typing", "payload": event["payload"]})
+
+    async def _chat_typing(self, conversation_id):
+        """Tell the other member(s) this user is typing. Membership is looked
+        up once per conversation per connection; outsiders are ignored."""
+        if type(conversation_id) is not int:
+            return
+        if conversation_id not in self._chat_peers:
+            from apps.chat.services import peer_ids
+            self._chat_peers[conversation_id] = await database_sync_to_async(peer_ids)(
+                conversation_id, self.user.id)
+        for uid in self._chat_peers[conversation_id] or []:
+            await self.channel_layer.group_send(user_group_name(uid), {
+                "type": "chat.typing",
+                "payload": {"conversation_id": conversation_id, "user_id": self.user.id},
+            })
 
     @database_sync_to_async
     def _mark_delivered(self, delivery_id):
