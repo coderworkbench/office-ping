@@ -196,7 +196,7 @@ Click **Ping** at the top of a chat to send that person a ping instead. It pops 
 
 - You get a desktop notification for a new message only when that chat isn't already open in front of you.
 - While your status is **In a meeting** or **Do not disturb**, messages arrive silently, with no notification.
-- To silence one chat, click the bell at the top of it. The red number still shows.
+- To silence one chat, click the bell next to **Ping** (*Mute this chat*). The red number still shows.
 
 > 💡 **Who can read my chats?** In Office Ping, only you and the other person. The audit log records that a chat was started, never what was said. Chat is a work tool, so write as you would in any work message.
 

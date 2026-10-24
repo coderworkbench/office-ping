@@ -261,7 +261,7 @@
           "list": [
             "You get a desktop notification for a new message only when that chat isn't already open in front of you.",
             "While your status is **In a meeting** or **Do not disturb**, messages arrive silently, with no notification.",
-            "To silence one chat, click the bell at the top of it. The red number still shows."
+            "To silence one chat, click the bell next to **Ping** (*Mute this chat*). The red number still shows."
           ]
         },
         {
