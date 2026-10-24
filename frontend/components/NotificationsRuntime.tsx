@@ -84,7 +84,7 @@ export function NotificationsRuntime() {
         if (p.message.sender_id !== uid && !p.quiet && shouldNotify(p.conversation_id)) {
           const body = p.message.body.length > 140 ? p.message.body.slice(0, 139) + '…' : p.message.body;
           await showNotification(p.sender_name, body, {
-            tag: `chat-${p.conversation_id}`, url: `/messages?c=${p.conversation_id}`, sticky: false,
+            tag: `chat-${p.conversation_id}`, url: `/messages?c=${p.conversation_id}`, sticky: false, silent: true,
           });
         }
       } else if (msg.type === 'chat_read') {

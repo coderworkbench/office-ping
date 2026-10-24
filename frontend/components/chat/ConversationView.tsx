@@ -6,7 +6,7 @@
 import { Fragment, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   EMPTY_THREAD, discardMessage, loadOlder, loadThread, markRead, retryMessage,
-  sendMessage, sendTyping, setFocused, setMuted, useChat,
+  sendMessage, sendTyping, setFocused, setMuted, useChat, windowActive,
 } from '../../lib/chat';
 import { PingDialog } from '../PingDialog';
 import { Avatar, Icon } from '../ui';
@@ -30,15 +30,19 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   useEffect(() => { if (!t.loaded) loadThread(id).catch(() => {}); }, [id, t.loaded]);
   useEffect(() => { setFocused(id, true); return () => setFocused(id, false); }, [id]);
 
-  // On screen and unread: mark the newest message read (again when the tab comes back).
+  // On screen and unread: mark the newest message read (again when the tab or window comes back).
   const newest = t.messages[t.messages.length - 1];
   const unread = conv?.unread || 0;
   useEffect(() => {
     if (!unread || !newest) return;
-    const read = () => { if (document.visibilityState === 'visible') markRead(id, newest.id); };
+    const read = () => { if (windowActive()) markRead(id, newest.id); };
     read();
     document.addEventListener('visibilitychange', read);
-    return () => document.removeEventListener('visibilitychange', read);
+    window.addEventListener('focus', read);
+    return () => {
+      document.removeEventListener('visibilitychange', read);
+      window.removeEventListener('focus', read);
+    };
   }, [id, unread, newest]);
 
   // Stay on the newest message unless they scrolled up; keep the view still
@@ -60,7 +64,7 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
     atBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
     if (el.scrollTop < 40 && t.hasMore && !t.loadingOlder) {
       olderFrom.current = el.scrollHeight;
-      loadOlder(id);
+      loadOlder(id).then(ok => { if (!ok) olderFrom.current = null; });
     }
   }
 

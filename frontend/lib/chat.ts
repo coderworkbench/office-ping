@@ -47,6 +47,8 @@ const listeners = new Set<() => void>();
 let socketSend: ((msg: object) => void) | null = null;
 const readUpTo = new Map<number, number>();
 const typingSentAt = new Map<number, number>();
+// Bumped by resetChat: a reply that arrives after sign-out/sign-in belongs to the old session and is dropped.
+let session = 0;
 
 function set(patch: Partial<State>) {
   state = { ...state, ...patch };
@@ -88,6 +90,7 @@ function mergeMessages(a: ChatMessage[], b: ChatMessage[]) {
 
 /** Start over for a signed-in user, or clear everything on sign-out. */
 export function resetChat(me: number | null) {
+  session++;
   readUpTo.clear();
   typingSentAt.clear();
   state = { ...INITIAL, me };
@@ -106,14 +109,18 @@ export async function resyncChat() {
 // ---------- Loading ----------
 
 export async function loadConversations() {
-  setConversations(await apiFetch<Conversation[]>('/api/chat/conversations/'));
+  const s = session;
+  const list = await apiFetch<Conversation[]>('/api/chat/conversations/');
+  if (s === session) setConversations(list);
 }
 
 /** Open (or create) the chat with a person; returns its id. */
 export async function openChatWith(userId: number): Promise<number> {
+  const s = session;
   const c = await apiFetch<Conversation>('/api/chat/conversations/', {
     method: 'POST', body: JSON.stringify({ user_id: userId }),
   });
+  if (s !== session) return c.id;
   if (state.conversations) setConversations([c, ...state.conversations.filter(x => x.id !== c.id)]);
   else await loadConversations();
   return c.id;
@@ -121,8 +128,10 @@ export async function openChatWith(userId: number): Promise<number> {
 
 /** Add one conversation to the list (e.g. a link to a chat started elsewhere). False if it isn't theirs. */
 export async function fetchConversation(id: number): Promise<boolean> {
+  const s = session;
   try {
     const c = await apiFetch<Conversation>(`/api/chat/conversations/${id}/`);
+    if (s !== session) return false;
     setConversations([c, ...(state.conversations || []).filter(x => x.id !== id)]);
     return true;
   } catch { return false; }
@@ -132,7 +141,9 @@ type Page = { results: ChatMessage[]; has_more: boolean };
 
 /** The newest page of a conversation, merged into what is already loaded. */
 export async function loadThread(id: number) {
+  const s = session;
   const d = await apiFetch<Page>(`/api/chat/conversations/${id}/messages/`);
+  if (s !== session) return;
   const t = thread(id);
   const newest = t.messages[t.messages.length - 1];
   // More than a page arrived while away: start from the new page rather than leave a gap.
@@ -144,15 +155,20 @@ export async function loadThread(id: number) {
   });
 }
 
-export async function loadOlder(id: number) {
+/** Older messages; false if none were added (nothing to load, or it failed and they can scroll again). */
+export async function loadOlder(id: number): Promise<boolean> {
   const t = thread(id);
-  if (!t.hasMore || t.loadingOlder || !t.messages.length) return;
+  if (!t.hasMore || t.loadingOlder || !t.messages.length) return false;
+  const s = session;
   setThread(id, { loadingOlder: true });
   try {
     const d = await apiFetch<Page>(`/api/chat/conversations/${id}/messages/?before=${t.messages[0].id}`);
-    setThread(id, { messages: mergeMessages(thread(id).messages, d.results), hasMore: d.has_more });
-  } finally {
-    setThread(id, { loadingOlder: false });
+    if (s !== session) return false;
+    setThread(id, { messages: mergeMessages(thread(id).messages, d.results), hasMore: d.has_more, loadingOlder: false });
+    return true;
+  } catch {
+    if (s === session) setThread(id, { loadingOlder: false });
+    return false;
   }
 }
 
@@ -167,12 +183,14 @@ export async function sendMessage(id: number, body: string) {
 }
 
 async function deliver(id: number, p: Pending) {
+  const s = session;
   try {
     const m = await apiFetch<ChatMessage>(`/api/chat/conversations/${id}/messages/`, {
       method: 'POST', body: JSON.stringify({ body: p.body, client_id: p.client_id }),
     });
-    receiveMessage(m, p.client_id);
+    if (s === session) receiveMessage(m, p.client_id);
   } catch (e) {
+    if (s !== session) return;
     // Rate limit, deactivated account, invalid text: say why. Anything else: just "Not sent".
     const error = e instanceof ApiError && [400, 403, 429].includes(e.status) ? apiErrorMessage(e, 'Not sent') : 'Not sent';
     setThread(id, { pending: thread(id).pending.map(x => x.client_id === p.client_id ? { ...x, error } : x) });
@@ -213,7 +231,7 @@ export function receiveMessage(m: ChatMessage, clientId?: string) {
     return;
   }
   if (c.last_message && c.last_message.id >= m.id) return;   // already counted
-  const onScreen = state.focused.includes(id) && document.visibilityState === 'visible';
+  const onScreen = state.focused.includes(id) && windowActive();
   patchConversation(id, {
     last_message: m, last_message_at: m.created_at,
     unread: fromOther && !onScreen ? c.unread + 1 : c.unread,
@@ -241,10 +259,15 @@ export function onTyping(p: { conversation_id: number; user_id: number }) {
   }, TYPING_SHOWN_MS);
 }
 
+/** The tab is visible and the window has focus: the person is looking at it. */
+export function windowActive() {
+  return document.visibilityState === 'visible' && document.hasFocus();
+}
+
 /** Desktop notification for a new message? Not for muted chats or one already in front of them. */
 export function shouldNotify(id: number) {
   if (findConversation(id)?.muted) return false;
-  return document.visibilityState !== 'visible' || !state.focused.includes(id);
+  return !windowActive() || !state.focused.includes(id);
 }
 
 // ---------- Reading, muting, typing, focus ----------
@@ -253,9 +276,11 @@ export function markRead(id: number, messageId: number) {
   if ((readUpTo.get(id) || 0) >= messageId) return;
   readUpTo.set(id, messageId);
   patchConversation(id, { unread: 0 });
+  const s = session;
   apiFetch<{ unread_total: number }>(`/api/chat/conversations/${id}/read/`, {
     method: 'POST', body: JSON.stringify({ message_id: messageId }),
-  }).then(r => set({ unreadTotal: r.unread_total }), () => { readUpTo.delete(id); });
+  }).then(r => { if (s === session) set({ unreadTotal: r.unread_total }); },
+          () => { if (s === session) readUpTo.delete(id); });
 }
 
 export async function setMuted(id: number, muted: boolean) {

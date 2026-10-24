@@ -21,7 +21,7 @@ export function ConversationList({ activeId, onOpen }: {
       <div className="relative px-3 py-2">
         <Icon name="search" size={16}
               className="pointer-events-none absolute left-6 top-1/2 -translate-y-1/2 text-ink-3" />
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search messages…"
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search chats…"
                aria-label="Search chats" className="input h-10 pl-9 text-sm" />
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
