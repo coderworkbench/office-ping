@@ -54,8 +54,11 @@ const STOPS: Stop[] = [
     title: 'People', body: "See who's online and who's busy, and Nudge or Ping anyone in one click." },
   { id: 'inbox', targets: ['[data-tour="nav-inbox"]'],
     title: 'Inbox', body: 'Pings sent to you land here, unanswered urgent ones first. The number shows how many you haven’t read.' },
-  { id: 'history', targets: ['[data-tour="nav-history"]'],
-    title: 'History', body: 'Check whether your pings were delivered and acknowledged, see replies, and search or filter past pings.' },
+  { id: 'messages', targets: ['[data-tour="nav-messages"]'],
+    title: 'Messages', body: 'Quiet one-to-one chat: no pop-up and no sound, just a red number, so it never interrupts like a ping does.' },
+  { id: 'history', targets: ['[data-tour="nav-history"]', '[data-tour="nav-more"]'],
+    title: 'History', body: 'Check whether your pings were delivered and acknowledged, see replies, and search or filter past pings.',
+    phoneBody: 'Under More: check whether your pings were delivered and acknowledged, see replies, and search past pings.' },
   { id: 'groups', targets: ['[data-tour="nav-groups"]', '[data-tour="nav-manage"]', '[data-tour="nav-more"]'], roles: ['HR', 'ADMIN'],
     title: 'Groups and templates', body: 'Create teams to ping together, and manage the quick messages everyone sees. They’re under Manage in the sidebar, or More on a phone.' },
   { id: 'users', targets: ['[data-tour="nav-users"]', '[data-tour="nav-manage"]', '[data-tour="nav-more"]'], roles: ['ADMIN'],
@@ -206,7 +209,7 @@ export function Tour() {
   if (offer && !active) {
     return (
       <div role="dialog" aria-label="Take the tour"
-           className="fixed bottom-24 right-4 z-[80] w-[min(340px,calc(100vw-32px))] rounded-2xl border border-line bg-surface p-4 shadow-lg animate-slideIn lg:bottom-6 lg:right-6">
+           className="fixed bottom-24 right-4 z-[80] w-[min(340px,calc(100vw-32px))] rounded-2xl border border-line bg-surface p-4 shadow-lg animate-slideIn lg:bottom-20 lg:right-6">
         <div className="flex items-start gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gold-soft text-xl" aria-hidden>🧭</span>
           <div className="min-w-0">

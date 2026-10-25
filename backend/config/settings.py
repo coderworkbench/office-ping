@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.groups",
     "apps.notifications",
+    "apps.chat",
     "apps.templates",
     "apps.audit",
     "apps.common",
@@ -144,6 +145,8 @@ REST_FRAMEWORK = {
         # Sending pings (a group ping counts once). Override in .env.
         "ping_send": config("PING_RATE", default="5/minute"),
         "ping_send_elevated": config("PING_RATE_ELEVATED", default="5/minute"),
+        # Chat messages each person may send. Override in .env.
+        "chat_send": config("CHAT_RATE", default="30/minute"),
     },
 }
 

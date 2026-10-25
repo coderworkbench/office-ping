@@ -1,7 +1,9 @@
 'use client';
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Guard } from '../../components/Guard';
-import { apiFetch, pingErrorMessage } from '../../lib/api';
+import { apiErrorMessage, apiFetch, pingErrorMessage } from '../../lib/api';
+import { startChat } from '../../lib/chat';
 import { useAuth } from '../../lib/auth';
 import { listOf, useApi } from '../../lib/useApi';
 import { NudgeHint } from '../../components/NudgeHint';
@@ -27,6 +29,12 @@ function Inner() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ text: string; ok: boolean } | null>(null);
   const [dialogTarget, setDialogTarget] = useState<Person | null>(null);
+  const router = useRouter();
+
+  async function message(p: Person) {
+    try { await startChat(p.id, url => router.push(url)); }
+    catch (e) { flash(apiErrorMessage(e, `Couldn't open a chat with ${p.full_name}`), false); }
+  }
 
   const list = useMemo(() => {
     if (!people) return [];
@@ -143,6 +151,14 @@ function Inner() {
                     className="btn-ghost btn-sm !px-2.5 sm:!px-3.5"
                   >
                     Nudge
+                  </button>
+                  <button
+                    onClick={() => message(p)}
+                    title="Chat quietly: no pop-up"
+                    aria-label={`Message ${p.full_name}`}
+                    className="btn-ghost btn-sm !px-2.5 sm:!px-3.5"
+                  >
+                    <Icon name="chat" size={16} /><span className="hidden sm:inline">Message</span>
                   </button>
                   <button
                     onClick={() => setDialogTarget(p)}

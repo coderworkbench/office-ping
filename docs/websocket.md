@@ -31,12 +31,41 @@ Server → client messages:
   everywhere.
 - `ping_status` goes to the sender.
 
+Chat (see `apps/chat`):
+
+```json
+{ "type": "chat_message",
+  "payload": {
+    "conversation_id": 5, "sender_name": "Mem A", "client_id": "lq3x9a1b2c",
+    "quiet": false,
+    "message": { "id": 812, "conversation_id": 5, "sender_id": 12,
+                 "body": "Lunch?", "created_at": "..." } } }
+
+{ "type": "chat_read",
+  "payload": { "conversation_id": 5, "user_id": 47, "message_id": 812 } }
+
+{ "type": "chat_typing", "payload": { "conversation_id": 5, "user_id": 12 } }
+```
+
+- `chat_message` goes to both members (the sender's other tabs and devices
+  too). `client_id` is whatever the sending tab passed to the REST call, so
+  it can replace its "Sending…" bubble. `quiet` is true when that recipient
+  is *In a meeting* or *Do not disturb*: no desktop notification.
+- `chat_read` goes to both members when someone's read marker moves forward.
+- `chat_typing` goes only to the other member.
+
 Client → server messages:
 
 ```json
 { "type": "ack_delivered", "delivery_id": 7 }
 { "type": "ack_seen",      "delivery_id": 7 }
+{ "type": "chat_typing",   "conversation_id": 5 }
 ```
+
+`chat_typing` is sent at most once every 3 seconds while typing. The server
+checks membership once per conversation per connection and drops anything
+else. Messages themselves are sent over REST
+(`POST /api/chat/conversations/<id>/messages/`), never over the socket.
 
 Backend never trusts a user-supplied `recipient_id` — the consumer only
 accepts ACKs for `PingDelivery` rows where `recipient_id == scope.user.id`.

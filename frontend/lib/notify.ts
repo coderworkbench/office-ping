@@ -40,6 +40,8 @@ export async function showNotification(
     sticky?: boolean;
     /** Alert again even though a notification with this tag is showing. */
     renotify?: boolean;
+    /** No sound or vibration (chat). */
+    silent?: boolean;
   } = {}
 ) {
   if (typeof window === 'undefined') return;
@@ -57,6 +59,7 @@ export async function showNotification(
         // Pings stay on screen until clicked; closed by closeNotification() once handled in-app.
         requireInteraction: opts.sticky !== false,
         renotify: !!opts.renotify,
+        silent: !!opts.silent,
         data: { url: opts.url || '/notifications', ping_id: opts.pingId },
       } as NotificationOptions);
       return;
@@ -65,7 +68,7 @@ export async function showNotification(
     }
   }
   try {
-    new Notification(title, { body, tag: opts.tag || 'office-ping', requireInteraction: opts.sticky !== false });
+    new Notification(title, { body, tag: opts.tag || 'office-ping', requireInteraction: opts.sticky !== false, silent: !!opts.silent });
   } catch {}
 }
 

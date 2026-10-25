@@ -24,6 +24,7 @@ class AuditLog(models.Model):
         PING_ACKNOWLEDGED = "PING_ACKNOWLEDGED"
         PING_ESCALATED = "PING_ESCALATED"
         PINGS_EXPORTED = "PINGS_EXPORTED"
+        CHAT_STARTED = "CHAT_STARTED"
 
     actor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
