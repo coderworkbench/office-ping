@@ -45,3 +45,21 @@ def read(conversation_id, user_id, message_id):
     payload = {"conversation_id": conversation_id, "user_id": user_id, "message_id": message_id}
     for uid in ConversationMember.objects.filter(conversation_id=conversation_id).values_list("user_id", flat=True):
         _send(uid, {"type": "chat.read", "payload": payload})
+
+
+def reacted(msg, reactor, emoji, reactions):
+    """Both members see the change; the author may get a quiet notification."""
+    name = reactor.get_full_name() or reactor.username
+    preview = msg.body if len(msg.body) <= 80 else msg.body[:79] + "…"
+    for m in ConversationMember.objects.filter(conversation_id=msg.conversation_id).select_related("user"):
+        _send(m.user_id, {"type": "chat.reaction", "payload": {
+            "conversation_id": msg.conversation_id,
+            "message_id": msg.id,
+            "user_id": reactor.id,
+            "emoji": emoji,
+            "reactions": reactions,
+            "reactor_name": name,
+            "message_sender_id": msg.sender_id,
+            "message_preview": preview,
+            "quiet": m.user.wants_quiet,
+        }})

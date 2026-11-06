@@ -101,6 +101,9 @@ class NotificationConsumer(_UserScopedMixin, AsyncJsonWebsocketConsumer):
     async def chat_typing(self, event):
         await self.send_json({"type": "chat_typing", "payload": event["payload"]})
 
+    async def chat_reaction(self, event):
+        await self.send_json({"type": "chat_reaction", "payload": event["payload"]})
+
     async def _chat_typing(self, conversation_id):
         """Tell the other member(s) this user is typing. Membership is looked
         up once per conversation per connection; outsiders are ignored."""

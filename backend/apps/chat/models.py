@@ -58,3 +58,19 @@ class Message(models.Model):
 
     def __str__(self) -> str:
         return f"Message({self.id} in {self.conversation_id})"
+
+
+class MessageReaction(models.Model):
+    """One emoji per person per message, as in WhatsApp: a new pick replaces it."""
+
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="reactions")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                             related_name="chat_reactions")
+    emoji = models.CharField(max_length=16)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("message", "user")]
+
+    def __str__(self) -> str:
+        return f"Reaction({self.emoji} on {self.message_id} by {self.user_id})"

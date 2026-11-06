@@ -150,6 +150,8 @@ REST_FRAMEWORK = {
         "ping_send_elevated": config("PING_RATE_ELEVATED", default="5/minute"),
         # Chat messages each person may send. Override in .env.
         "chat_send": config("CHAT_RATE", default="30/minute"),
+        # Chat reactions, counted apart from messages.
+        "chat_react": config("CHAT_REACT_RATE", default="60/minute"),
     },
 }
 
