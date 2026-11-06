@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='ping',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('recipient__isnull', False), ('group__isnull', True)), models.Q(('recipient__isnull', True), ('group__isnull', False)), _connector='OR'), name='ping_recipient_xor_group'),
+            constraint=models.CheckConstraint(condition=models.Q(models.Q(('recipient__isnull', False), ('group__isnull', True)), models.Q(('recipient__isnull', True), ('group__isnull', False)), _connector='OR'), name='ping_recipient_xor_group'),
         ),
         migrations.AddIndex(
             model_name='pingdelivery',
