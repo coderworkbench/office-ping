@@ -55,7 +55,7 @@ const STOPS: Stop[] = [
   { id: 'inbox', targets: ['[data-tour="nav-inbox"]'],
     title: 'Inbox', body: 'Pings sent to you land here, unanswered urgent ones first. The number shows how many you haven’t read.' },
   { id: 'messages', targets: ['[data-tour="nav-messages"]'],
-    title: 'Messages', body: 'One-to-one chat: a short soft sound and a red number, but no pop-up, so it never interrupts like a ping does.' },
+    title: 'Messages', body: 'One-to-one chat with emoji and reactions: a short soft sound and a red number, but no pop-up, so it never interrupts like a ping does.' },
   { id: 'history', targets: ['[data-tour="nav-history"]', '[data-tour="nav-more"]'],
     title: 'History', body: 'Check whether your pings were delivered and acknowledged, see replies, and search or filter past pings.',
     phoneBody: 'Under More: check whether your pings were delivered and acknowledged, see replies, and search past pings.' },

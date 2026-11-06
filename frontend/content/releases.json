@@ -2,6 +2,16 @@
   "intro": "What changed in each version of Office Ping, newest first.",
   "releases": [
     {
+      "version": "1.6.0",
+      "date": "2026-11-06",
+      "title": "Emoji and reactions in chat",
+      "changes": [
+        { "kind": "new", "text": "An emoji button next to the message box, with about 150 emojis in five tabs." },
+        { "kind": "new", "text": "React to a message with 👍 ❤️ 😂 😮 😢 🙏 or **＋** for more: point at it on a computer, or press and hold on a phone. One reaction each; pick again to change or remove it." },
+        { "kind": "new", "text": "A quiet desktop notification when someone reacts to your message, unless that chat is open, muted, or you're *In a meeting* or on *Do not disturb*." }
+      ]
+    },
+    {
       "version": "1.5.0",
       "date": "2026-11-06",
       "title": "A sound for chat messages",

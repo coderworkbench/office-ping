@@ -4,6 +4,14 @@
 
 What changed in each version of Office Ping, newest first. The same list is in the app: **Help → What's new**.
 
+## 1.6.0 — 2026-11-06
+
+**Emoji and reactions in chat**
+
+- **New:** An emoji button next to the message box, with about 150 emojis in five tabs.
+- **New:** React to a message with 👍 ❤️ 😂 😮 😢 🙏 or **＋** for more: point at it on a computer, or press and hold on a phone. One reaction each; pick again to change or remove it.
+- **New:** A quiet desktop notification when someone reacts to your message, unless that chat is open, muted, or you're *In a meeting* or on *Do not disturb*.
+
 ## 1.5.0 — 2026-11-06
 
 **A sound for chat messages**

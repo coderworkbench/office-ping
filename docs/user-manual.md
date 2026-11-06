@@ -184,7 +184,14 @@ If several pings arrive, they're shown one at a time. Click **N more waiting · 
 
 1. On the **People** page, click **Message** next to the person. Or open **Messages**, click **New message** and pick them.
 2. Type your message. On a computer, press **Enter** to send (**Shift + Enter** starts a new line). On a phone, tap the send button.
-3. **Seen** appears under your last message once they've read it, and you see *typing…* while they write back.
+3. For an emoji, click the 🙂 next to the message box and pick one; it goes where your cursor is. (You can also use **Windows + .** or your phone's keyboard.)
+4. **Seen** appears under your last message once they've read it, and you see *typing…* while they write back.
+
+### React to a message
+
+- On a computer, point at a message and click the 🙂 beside it. On a phone, press and hold the message.
+- Pick 👍 ❤️ 😂 😮 😢 🙏, or **＋** for more. Your reaction shows under the message for both of you.
+- Each person has one reaction per message: pick another to change it, or the same one (or the reaction under the message) to remove it.
 
 On a computer, your chats are also in the **Messages** bar in the bottom-right corner of every page. Click it to see them, and click a chat to open it in a small window while you carry on working.
 
@@ -195,6 +202,7 @@ Click **Ping** at the top of a chat to send that person a ping instead. It pops 
 ### Notifications and Do Not Disturb
 
 - You get the message sound and a desktop notification only when that chat isn't already open in front of you. Several messages in a row make one sound.
+- When someone reacts to one of your messages you get a quiet desktop notification (no sound), with the same rules.
 - While your status is **In a meeting** or **Do not disturb**, messages arrive silently, with no sound or notification.
 - To silence one chat, click the bell next to **Ping** (*Mute this chat*): no sound or notification. The red number still shows.
 
