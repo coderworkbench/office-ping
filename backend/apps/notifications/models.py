@@ -58,7 +58,7 @@ class Ping(models.Model):
         ]
         constraints = [
             models.CheckConstraint(
-                check=(models.Q(recipient__isnull=False) & models.Q(group__isnull=True))
+                condition=(models.Q(recipient__isnull=False) & models.Q(group__isnull=True))
                 | (models.Q(recipient__isnull=True) & models.Q(group__isnull=False)),
                 name="ping_recipient_xor_group",
             ),
