@@ -85,3 +85,115 @@ def test_loading_messages_costs_the_same_queries_however_many_have_reactions(mem
         m = say(member_a, cid, f"more {i}")
         MessageReaction.objects.create(message_id=m["id"], user=member_b, emoji="😂")
     assert queries() == few
+
+
+def react(me, cid, message_id, emoji):
+    return api_as(me).post(f"{URL}{cid}/react/", {"message_id": message_id, "emoji": emoji}, format="json")
+
+
+# ---------- Reacting ----------
+
+@pytest.mark.django_db
+def test_react_sets_replaces_and_removes(member_a, member_b, pushed):
+    cid = open_chat(member_a, member_b)
+    m = say(member_a, cid, "Report done?")
+    r = react(member_b, cid, m["id"], "👍")
+    assert r.status_code == 200, r.data
+    assert r.data == {"message_id": m["id"], "reactions": [{"user_id": member_b.id, "emoji": "👍"}]}
+    assert react(member_b, cid, m["id"], "❤️").data["reactions"] == [{"user_id": member_b.id, "emoji": "❤️"}]
+    react(member_a, cid, m["id"], "🙏")
+    r = react(member_b, cid, m["id"], None)
+    assert r.data["reactions"] == [{"user_id": member_a.id, "emoji": "🙏"}]
+    # Removing a reaction that isn't there is fine.
+    assert react(member_b, cid, m["id"], None).status_code == 200
+    assert MessageReaction.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_reacting_changes_no_unread_count_or_chat_order(member_a, member_b, hr_user, pushed):
+    cid = open_chat(member_a, member_b)
+    m = say(member_b, cid, "older chat")
+    newer = open_chat(member_a, hr_user)
+    say(hr_user, newer, "newer chat")
+    react(member_b, cid, m["id"], "👍")
+    r = api_as(member_a).get(URL)
+    assert [c["id"] for c in r.data] == [newer, cid]
+    assert {c["id"]: c["unread"] for c in r.data} == {newer: 1, cid: 1}
+
+
+@pytest.mark.django_db
+def test_react_refuses_outsiders_and_messages_from_other_chats(member_a, member_b, hr_user, pushed):
+    cid = open_chat(member_a, member_b)
+    other = open_chat(member_a, hr_user)
+    m = say(member_a, cid)
+    elsewhere = say(member_a, other)
+    assert react(hr_user, cid, m["id"], "👍").status_code == 404
+    r = react(member_b, cid, elsewhere["id"], "👍")
+    assert r.status_code == 400 and "message_id" in r.data
+    assert react(member_b, cid, 999999, "👍").status_code == 400
+    r = api_as(member_b).post(f"{URL}{cid}/react/", {"message_id": m["id"]}, format="json")
+    assert r.status_code == 400 and "emoji" in r.data
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("emoji", ["", "ok", "1", "👍 ", "<b>", "&", "\"", "👍" * 17])
+def test_react_takes_only_a_short_emoji(member_a, member_b, pushed, emoji):
+    cid = open_chat(member_a, member_b)
+    m = say(member_a, cid)
+    r = react(member_b, cid, m["id"], emoji)
+    assert r.status_code == 400 and "emoji" in r.data
+    assert not MessageReaction.objects.exists()
+
+
+@pytest.mark.django_db
+def test_cannot_react_when_the_other_person_is_deactivated(member_a, member_b, pushed):
+    cid = open_chat(member_a, member_b)
+    m = say(member_b, cid)
+    member_b.is_active = False
+    member_b.save()
+    assert react(member_a, cid, m["id"], "👍").status_code == 403
+
+
+@pytest.mark.django_db
+def test_a_reaction_is_pushed_to_both_people(member_a, member_b, pushed):
+    cid = open_chat(member_a, member_b)
+    m = say(member_a, cid, "Can you send the report?")
+    member_a.status_kind = "DND"
+    member_a.save()
+    pushed.clear()
+    react(member_b, cid, m["id"], "👍")
+    assert sorted(uid for uid, _ in pushed) == sorted([member_a.id, member_b.id])
+    for uid, event in pushed:
+        assert event["type"] == "chat.reaction"
+        assert event["payload"] == {
+            "conversation_id": cid, "message_id": m["id"], "user_id": member_b.id, "emoji": "👍",
+            "reactions": [{"user_id": member_b.id, "emoji": "👍"}], "reactor_name": "Mem B",
+            "message_sender_id": member_a.id, "message_preview": "Can you send the report?",
+            "quiet": uid == member_a.id,
+        }
+    pushed.clear()
+    react(member_b, cid, m["id"], None)
+    assert [(e["payload"]["emoji"], e["payload"]["reactions"]) for _, e in pushed] == [(None, [])] * 2
+
+
+@pytest.mark.django_db
+def test_the_pushed_preview_is_cut_to_80_characters(member_a, member_b, pushed):
+    cid = open_chat(member_a, member_b)
+    m = say(member_a, cid, "x" * 200)
+    pushed.clear()
+    react(member_b, cid, m["id"], "👍")
+    assert pushed[0][1]["payload"]["message_preview"] == "x" * 79 + "…"
+
+
+@pytest.mark.django_db
+def test_reacting_has_its_own_rate_limit(member_a, member_b, pushed, monkeypatch):
+    monkeypatch.setitem(ScopedRateThrottle.THROTTLE_RATES, "chat_react", "2/minute")
+    cid = open_chat(member_a, member_b)
+    m = say(member_a, cid)
+    assert react(member_b, cid, m["id"], "👍").status_code == 200
+    assert react(member_b, cid, m["id"], "❤️").status_code == 200
+    r = react(member_b, cid, m["id"], "😂")
+    assert r.status_code == 429
+    assert "You can send 2 reactions a minute." in str(r.data["detail"])
+    # Sending messages has its own budget.
+    say(member_b, cid, "still here")

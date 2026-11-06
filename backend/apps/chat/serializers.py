@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -54,3 +56,18 @@ class ReadSerializer(serializers.Serializer):
 
 class MuteSerializer(serializers.Serializer):
     muted = serializers.BooleanField()
+
+
+# The emoji set lives in the frontend; here we only keep text and markup out.
+NOT_EMOJI = re.compile(r"""[A-Za-z0-9\s<>&"']""")
+
+
+class ReactSerializer(serializers.Serializer):
+    message_id = serializers.IntegerField()
+    # null removes the caller's reaction.
+    emoji = serializers.CharField(max_length=16, allow_null=True, trim_whitespace=False)
+
+    def validate_emoji(self, value):
+        if value is not None and NOT_EMOJI.search(value):
+            raise serializers.ValidationError("Pick an emoji.")
+        return value

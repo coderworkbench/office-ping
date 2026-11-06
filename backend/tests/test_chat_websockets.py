@@ -48,6 +48,12 @@ def read(me, cid, message_id):
     assert r.status_code == 200, r.data
 
 
+@sync_to_async
+def react(me, cid, message_id, emoji):
+    r = api_as(me).post(f"{URL}{cid}/react/", {"message_id": message_id, "emoji": emoji},
+                        format="json")
+    assert r.status_code == 200, r.data
+
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
 async def test_a_message_reaches_both_people_live(member_a, member_b):
@@ -74,6 +80,21 @@ async def test_reading_tells_both_people(member_a, member_b):
         msg = await sock.receive_json_from(timeout=2)
         assert msg == {"type": "chat_read", "payload": {
             "conversation_id": cid, "user_id": member_b.id, "message_id": m["id"]}}
+    for sock in (a, b):
+        await sock.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+async def test_a_reaction_reaches_both_people_live(member_a, member_b):
+    cid = await open_chat(member_a, member_b)
+    m = await say(member_a, cid, "Lunch?")
+    a, b = await open_socket(member_a), await open_socket(member_b)
+    await react(member_b, cid, m["id"], "👍")
+    for sock in (a, b):
+        msg = await sock.receive_json_from(timeout=2)
+        assert msg["type"] == "chat_reaction"
+        assert msg["payload"]["reactions"] == [{"user_id": member_b.id, "emoji": "👍"}]
     for sock in (a, b):
         await sock.disconnect()
 
