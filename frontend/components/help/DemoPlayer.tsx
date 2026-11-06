@@ -8,7 +8,7 @@
 // meaning for screen readers. Coordinates are percentages of the stage, which
 // keeps a 16:10 ratio; text inside uses container units so it scales with it.
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { JSX, ReactNode, useEffect, useRef, useState } from 'react';
 import { Icon } from '../ui';
 
 export type DemoStep = {
@@ -156,7 +156,7 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-function useInView(ref: React.RefObject<HTMLElement>) {
+function useInView(ref: React.RefObject<HTMLElement | null>) {
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
