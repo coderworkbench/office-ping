@@ -3,7 +3,7 @@
 // One conversation: header, messages and composer. Used by the desktop dock's
 // small windows (variant "window") and the /messages page (variant "page").
 
-import { Fragment, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, HTMLAttributes, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   EMPTY_THREAD, discardMessage, loadOlder, loadThread, markRead, react, retryMessage,
   sendMessage, sendTyping, setFocused, setMuted, useChat, windowActive,
@@ -12,6 +12,7 @@ import { PingDialog } from '../PingDialog';
 import { Avatar, Icon } from '../ui';
 import { EmojiPicker } from './EmojiPicker';
 import { clockTime, dayLabel, linkify, presenceLine } from './format';
+import { ReactButton, ReactionBar, ReactionPill, useLongPress } from './Reactions';
 
 type IconName = Parameters<typeof Icon>[0]['name'];
 
@@ -28,13 +29,15 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   const isTyping = (typing[id] || 0) > Date.now();
   const [pingOpen, setPingOpen] = useState(false);
   const [picker, setPicker] = useState<Picker>(null);
+  const [bar, setBar] = useState<number | null>(null);   // message whose quick bar is open
+  const longPress = useLongPress(setBar);
   const scroller = useRef<HTMLDivElement>(null);
   const atBottom = useRef(true);
   const olderFrom = useRef<number | null>(null);   // scrollHeight before older messages were added
 
   useEffect(() => { if (!t.loaded) loadThread(id).catch(() => {}); }, [id, t.loaded]);
   useEffect(() => { setFocused(id, true); return () => setFocused(id, false); }, [id]);
-  useEffect(() => { setPicker(null); }, [id]);
+  useEffect(() => { setPicker(null); setBar(null); }, [id]);
 
   // On screen and unread: mark the newest message read (again when the tab or window comes back).
   const newest = t.messages[t.messages.length - 1];
@@ -85,6 +88,7 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   /** Your current emoji again removes it; any other sets or replaces it. */
   const pickReaction = (messageId: number, emoji: string) =>
     react(id, messageId, myEmoji(messageId) === emoji ? null : emoji);
+  const canReact = other.is_active;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-surface">
@@ -125,10 +129,27 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
         {t.messages.map((m, i) => {
           const prev = t.messages[i - 1];
           const newDay = !prev || new Date(prev.created_at).toDateString() !== new Date(m.created_at).toDateString();
+          const mine = m.sender_id === me;
+          const current = myEmoji(m.id);
+          const error = t.reactionError?.messageId === m.id ? t.reactionError.text : null;
           return (
             <Fragment key={m.id}>
               {newDay && <DayDivider label={dayLabel(m.created_at)} />}
-              <Bubble mine={m.sender_id === me} time={clockTime(m.created_at)}>{linkify(m.body)}</Bubble>
+              <Bubble mine={mine} time={clockTime(m.created_at)}
+                      press={canReact ? longPress(m.id) : undefined}
+                      side={canReact ? <ReactButton onClick={() => setBar(m.id)} /> : null}
+                      overlay={bar === m.id ? (
+                        <ReactionBar mine={mine} current={current} onClose={() => setBar(null)}
+                                     onPick={e => { pickReaction(m.id, e); setBar(null); }}
+                                     onMore={() => { setBar(null); setPicker({ react: m.id }); }} />
+                      ) : null}
+                      pill={m.reactions.length ? (
+                        <ReactionPill reactions={m.reactions} me={me} otherName={firstName} mine={mine}
+                                      onClick={() => current ? react(id, m.id, null) : canReact && setBar(m.id)} />
+                      ) : null}>
+                {linkify(m.body)}
+              </Bubble>
+              {error && <p className={'mb-1 text-[12px] font-semibold text-rose-deep ' + (mine ? 'text-right' : '')}>{error}</p>}
               {m === lastMine && seen && <p className="mb-1 text-right text-[11px] font-semibold text-ink-3">Seen</p>}
             </Fragment>
           );
@@ -239,15 +260,29 @@ function Composer({ id, name, picker, setPicker, onReactPick }: {
   );
 }
 
-function Bubble({ mine, time, faded, children }: { mine: boolean; time: string; faded?: boolean; children: ReactNode }) {
+function Bubble({ mine, time, faded, children, pill, side, overlay, press }: {
+  mine: boolean; time: string; faded?: boolean; children: ReactNode;
+  /** Reactions, hanging off the bubble's bottom edge. */
+  pill?: ReactNode;
+  /** The react button beside the bubble. */
+  side?: ReactNode;
+  /** The quick reaction bar, above (or below) the bubble. */
+  overlay?: ReactNode;
+  press?: HTMLAttributes<HTMLDivElement>;
+}) {
   return (
-    <div className={'my-1 flex ' + (mine ? 'justify-end' : 'justify-start')}>
-      <div className={'max-w-[80%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-[14px] leading-snug ' +
-        (mine ? 'rounded-br-md bg-gold-fill text-on-gold' : 'rounded-bl-md border border-line bg-surface-2 text-ink') +
-        (faded ? ' opacity-60' : '')}>
+    <div className={'group relative my-1 flex items-center gap-1 ' + (mine ? 'flex-row-reverse' : '')}>
+      <div {...press}
+           className={'relative max-w-[80%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-[14px] leading-snug ' +
+             (mine ? 'rounded-br-md bg-gold-fill text-on-gold' : 'rounded-bl-md border border-line bg-surface-2 text-ink') +
+             (faded ? ' opacity-60' : '') + (pill ? ' mb-4' : '') +
+             (press ? ' [-webkit-touch-callout:none] [@media(pointer:coarse)]:select-none' : '')}>
         {children}
         {time && <span className={'ml-2 inline-block text-[10px] ' + (mine ? 'text-on-gold/70' : 'text-ink-3')}>{time}</span>}
+        {pill}
       </div>
+      {side}
+      {overlay}
     </div>
   );
 }
