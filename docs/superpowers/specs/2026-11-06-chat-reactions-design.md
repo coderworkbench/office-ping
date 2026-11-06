@@ -72,10 +72,6 @@ New scope `chat_react`, `config("CHAT_REACT_RATE", default="60/minute")`,
 only on `react`. It doesn't use the `chat_send` budget. The 429 message
 follows the existing wording ("You can send 60 reactions a minute.").
 
-### Django admin
-
-The message admin (view-only) shows a message's reactions read-only.
-
 ## Real-time
 
 New row for the socket table:
@@ -116,12 +112,15 @@ New row for the socket table:
 
 ### `components/chat/EmojiPicker.tsx`
 
-- Tabs along the top, an emoji grid below; each emoji is a button with an
-  `aria-label` (its name).
-- Popover anchored to its trigger on desktop; bottom sheet on phones
-  (<640 px), reusing the app's sheet styling.
-- Escape and an outside click close it. Focus returns to the trigger.
-- Props: `onPick(emoji)`, `onClose()`, `keepOpen?` (composer mode).
+- Tabs along the top, an emoji grid below; each emoji is a button labelled
+  with the emoji itself (screen readers speak its name).
+- Always a panel just above the message box, full width in a dock window or
+  on a phone, 320 px wide on larger screens. One place for both modes, so it
+  is never cut off by the top of the message list.
+- Escape and a press outside close it.
+- Props: `label`, `onPick(emoji)`, `onClose()`, `boundary?` (the element a
+  press must land outside of to close it; the composer passes its form so
+  the 🙂 button and the text box don't close it).
 
 ### Composer
 
@@ -136,8 +135,12 @@ New row for the socket table:
   opens the quick bar.
 - Touch: a long press (500 ms, cancelled by movement) on a bubble opens the
   quick bar; the text-selection menu is suppressed for that press.
-- Quick bar: the six emojis plus ＋. ＋ swaps the bar for the picker (closes
-  after one pick). Your current reaction is highlighted in the bar.
+- Quick bar: the six emojis plus ＋, above the bubble (below it when there
+  is no room at the top of the list). ＋ closes the bar and opens the picker
+  above the message box in reaction mode (closes after one pick). Your
+  current reaction is highlighted in the bar.
+- Reacting needs the other person's account to be active (as for sending),
+  so the react controls are hidden for a deactivated person.
 - Picking: your current emoji removes it; any other sets or replaces it.
 - Pending ("Sending…") and failed bubbles can't be reacted to.
 
