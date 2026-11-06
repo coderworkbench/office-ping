@@ -192,6 +192,7 @@ If several pings arrive, they're shown one at a time. Click **N more waiting · 
 - On a computer, point at a message and click the 🙂 beside it. On a phone, press and hold the message.
 - Pick 👍 ❤️ 😂 😮 😢 🙏, or **＋** for more. Your reaction shows under the message for both of you.
 - Each person has one reaction per message: pick another to change it, or the same one (or the reaction under the message) to remove it.
+- On a phone, the same bar has **Copy** to copy the message.
 
 On a computer, your chats are also in the **Messages** bar in the bottom-right corner of every page. Click it to see them, and click a chat to open it in a small window while you carry on working.
 

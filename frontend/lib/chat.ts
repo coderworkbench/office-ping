@@ -88,7 +88,8 @@ function withoutKey<T>(o: Record<number, T>, key: number) {
 }
 function mergeMessages(a: ChatMessage[], b: ChatMessage[]) {
   const byId = new Map<number, ChatMessage>();
-  [...a, ...b].forEach(m => byId.set(m.id, m));
+  // An older server may omit reactions; the UI always expects a list.
+  [...a, ...b].forEach(m => byId.set(m.id, m.reactions ? m : { ...m, reactions: [] }));
   return Array.from(byId.values()).sort((x, y) => x.id - y.id);
 }
 

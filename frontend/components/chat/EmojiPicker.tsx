@@ -46,7 +46,7 @@ export function useDismiss(ref: RefObject<HTMLElement | null>, onClose: () => vo
   const close = useRef(onClose);
   close.current = onClose;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close.current(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !e.isComposing) close.current(); };
     const onDown = (e: PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) close.current();
     };
