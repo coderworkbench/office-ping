@@ -17,9 +17,17 @@ def person_dict(user):
     return {k: data[k] for k in PERSON_FIELDS}
 
 
-def message_dict(m):
+def reaction_list(m):
+    """A message's reactions, oldest first. Prefetch `reactions` when listing many."""
+    rows = sorted(m.reactions.all(), key=lambda r: (r.created_at, r.id))
+    return [{"user_id": r.user_id, "emoji": r.emoji} for r in rows]
+
+
+def message_dict(m, reactions=None):
     return {"id": m.id, "conversation_id": m.conversation_id, "sender_id": m.sender_id,
-            "body": m.body, "created_at": m.created_at.isoformat()}
+            "body": m.body, "created_at": m.created_at.isoformat(),
+            # A new message, or a chat-list preview, has none to show.
+            "reactions": reactions if reactions is not None else []}
 
 
 class OpenConversationSerializer(serializers.Serializer):

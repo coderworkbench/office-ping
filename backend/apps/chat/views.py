@@ -10,7 +10,7 @@ from apps.notifications.views import PingRateLimited, parse_rate
 from . import broadcast, services
 from .models import ConversationMember, Message
 from .serializers import (MuteSerializer, OpenConversationSerializer, ReadSerializer,
-                          SendMessageSerializer, message_dict)
+                          SendMessageSerializer, message_dict, reaction_list)
 
 PAGE = 30
 
@@ -66,12 +66,14 @@ class ConversationViewSet(viewsets.ViewSet):
         member = self._member(pk)
         if request.method == "POST":
             return self._send(request, member)
-        qs = Message.objects.filter(conversation_id=member.conversation_id)
+        qs = Message.objects.filter(
+            conversation_id=member.conversation_id).prefetch_related("reactions")
         before = request.query_params.get("before", "")
         if before.isascii() and before.isdigit():
             qs = qs.filter(id__lt=int(before))
         page = list(qs.order_by("-id")[:PAGE + 1])
-        return Response({"results": [message_dict(m) for m in reversed(page[:PAGE])],
+        return Response({"results": [message_dict(m, reaction_list(m))
+                                     for m in reversed(page[:PAGE])],
                          "has_more": len(page) > PAGE})
 
     def _send(self, request, member):
