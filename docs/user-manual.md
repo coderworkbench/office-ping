@@ -178,7 +178,7 @@ If several pings arrive, they're shown one at a time. Click **N more waiting · 
 
 ## Messages (chat)
 
-**Messages** is a quiet one-to-one chat for things that don't need an answer this minute. Unlike a ping, a message never pops up in the middle of the screen or plays a sound: you get a red number on **Messages**, and a desktop notification if Office Ping is in the background.
+**Messages** is a quiet one-to-one chat for things that don't need an answer this minute. Unlike a ping, a message never pops up in the middle of the screen: you hear a short soft sound (not the ping chime), get a red number on **Messages**, and see a desktop notification if Office Ping is in the background.
 
 ### Start a chat
 
@@ -194,9 +194,9 @@ Click **Ping** at the top of a chat to send that person a ping instead. It pops 
 
 ### Notifications and Do Not Disturb
 
-- You get a desktop notification for a new message only when that chat isn't already open in front of you.
-- While your status is **In a meeting** or **Do not disturb**, messages arrive silently, with no notification.
-- To silence one chat, click the bell next to **Ping** (*Mute this chat*). The red number still shows.
+- You get the message sound and a desktop notification only when that chat isn't already open in front of you. Several messages in a row make one sound.
+- While your status is **In a meeting** or **Do not disturb**, messages arrive silently, with no sound or notification.
+- To silence one chat, click the bell next to **Ping** (*Mute this chat*): no sound or notification. The red number still shows.
 
 > 💡 **Who can read my chats?** In Office Ping, only you and the other person. The audit log records that a chat was started, never what was said. Chat is a work tool, so write as you would in any work message.
 

@@ -11,6 +11,7 @@ import { closeNotification, registerServiceWorker, showNotification } from '../l
 import { apiFetch } from '../lib/api';
 import { useRouter } from 'next/navigation';
 import { onRead, onTyping, receiveMessage, resetChat, resyncChat, setChatSocket, shouldNotify } from '../lib/chat';
+import { playMessageSound } from '../lib/sound';
 
 // Connection state of the live socket, for the "Live" badge.
 type LiveStatus = 'connecting' | 'open' | 'closed';
@@ -80,8 +81,10 @@ export function NotificationsRuntime() {
       } else if (msg.type === 'chat_message') {
         const p = msg.payload;
         receiveMessage(p.message, p.client_id);
-        // Quiet by design: no pop-up, no sound, not sticky, one notification per chat.
+        // Lighter than a ping: no pop-up, not sticky, one notification per chat,
+        // and a short sound of our own (so the OS notification stays silent).
         if (p.message.sender_id !== uid && !p.quiet && shouldNotify(p.conversation_id)) {
+          try { playMessageSound(); } catch {}
           const body = p.message.body.length > 140 ? p.message.body.slice(0, 139) + '…' : p.message.body;
           await showNotification(p.sender_name, body, {
             tag: `chat-${p.conversation_id}`, url: `/messages?c=${p.conversation_id}`, sticky: false, silent: true,
