@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -17,9 +19,17 @@ def person_dict(user):
     return {k: data[k] for k in PERSON_FIELDS}
 
 
-def message_dict(m):
+def reaction_list(m):
+    """A message's reactions, oldest first. Prefetch `reactions` when listing many."""
+    rows = sorted(m.reactions.all(), key=lambda r: (r.created_at, r.id))
+    return [{"user_id": r.user_id, "emoji": r.emoji} for r in rows]
+
+
+def message_dict(m, reactions=None):
     return {"id": m.id, "conversation_id": m.conversation_id, "sender_id": m.sender_id,
-            "body": m.body, "created_at": m.created_at.isoformat()}
+            "body": m.body, "created_at": m.created_at.isoformat(),
+            # A new message, or a chat-list preview, has none to show.
+            "reactions": reactions if reactions is not None else []}
 
 
 class OpenConversationSerializer(serializers.Serializer):
@@ -46,3 +56,18 @@ class ReadSerializer(serializers.Serializer):
 
 class MuteSerializer(serializers.Serializer):
     muted = serializers.BooleanField()
+
+
+# The emoji set lives in the frontend; here we only keep text and markup out.
+NOT_EMOJI = re.compile(r"""[A-Za-z0-9\s<>&"']""")
+
+
+class ReactSerializer(serializers.Serializer):
+    message_id = serializers.IntegerField()
+    # null removes the caller's reaction.
+    emoji = serializers.CharField(max_length=16, allow_null=True, trim_whitespace=False)
+
+    def validate_emoji(self, value):
+        if value is not None and NOT_EMOJI.search(value):
+            raise serializers.ValidationError("Pick an emoji.")
+        return value

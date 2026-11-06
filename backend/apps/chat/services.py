@@ -1,10 +1,10 @@
 """Chat queries and writes, shared by the REST views and the socket consumer."""
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import BigIntegerField, Count, F, IntegerField, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 
-from .models import Conversation, ConversationMember, Message
-from .serializers import PREVIEW, message_dict, person_dict
+from .models import Conversation, ConversationMember, Message, MessageReaction
+from .serializers import PREVIEW, message_dict, person_dict, reaction_list
 
 
 def open_direct(me, other):
@@ -100,3 +100,19 @@ def peer_ids(conversation_id, user_id):
     if user_id not in ids:
         return None
     return [i for i in ids if i != user_id]
+
+
+def set_reaction(member, message, emoji):
+    """Set or replace the member's reaction on a message, or remove it
+    (emoji None). Returns the message's reactions afterwards."""
+    mine = MessageReaction.objects.filter(message=message, user_id=member.user_id)
+    if emoji is None:
+        mine.delete()
+    else:
+        try:
+            with transaction.atomic():
+                MessageReaction.objects.update_or_create(
+                    message=message, user_id=member.user_id, defaults={"emoji": emoji})
+        except IntegrityError:  # the same person reacting twice at once
+            mine.update(emoji=emoji)
+    return reaction_list(message)

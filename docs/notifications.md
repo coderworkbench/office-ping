@@ -62,15 +62,16 @@ the reply is also stored on the delivery and shown in History.
 
 ## Chat messages
 
-Chat (`apps/chat`) uses the same socket but is deliberately quiet:
+Chat (`apps/chat`) uses the same socket but is deliberately lighter than a ping:
 
 | | Ping | Chat message |
 |---|---|---|
 | In-app | Centre pop-up until acknowledged | None; unread badge on Messages and the dock |
-| Sound | Chime (distinct for urgent) | None |
+| Sound | Bell chime; alarm for urgent (`lib/sound.ts`) | Short soft "blip-blip", at most once every 3 s; the OS notification itself is silent |
+| Reactions | — | Silent desktop notification for a reaction to your own message (`chat_reaction`), same rules as messages; removals never notify |
 | Desktop notification | Sticky (`requireInteraction`) | Not sticky; one per chat (tag `chat-<id>`), replaced by newer messages |
-| In a meeting / DND | Normal pings go quietly to the inbox; urgent still pop up | Never notifies (`quiet` in the payload) |
-| Shown when | Always (unless quiet) | Only if the chat isn't on screen in a visible tab, and isn't muted |
+| In a meeting / DND | Normal pings go quietly to the inbox; urgent still pop up | No sound or notification (`quiet` in the payload) |
+| Sound and notification when | Always (unless quiet) | Only if the chat isn't on screen in a visible tab, and isn't muted |
 
 Clicking a chat notification opens `/messages?c=<id>` (the service worker
 posts `open-url` to an open window). The notification closes on every device

@@ -36,7 +36,7 @@ logs:
 shell:
 	docker compose exec backend python manage.py shell
 
-# Regenerate docs/user-manual.md from frontend/content/manual.json
+# Regenerate docs/user-manual.md and CHANGELOG.md from frontend/content/*.json
 manual:
 	node scripts/export-manual.mjs
 

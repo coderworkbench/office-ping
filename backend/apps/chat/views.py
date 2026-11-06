@@ -9,8 +9,8 @@ from apps.audit.utils import record_audit
 from apps.notifications.views import PingRateLimited, parse_rate
 from . import broadcast, services
 from .models import ConversationMember, Message
-from .serializers import (MuteSerializer, OpenConversationSerializer, ReadSerializer,
-                          SendMessageSerializer, message_dict)
+from .serializers import (MuteSerializer, OpenConversationSerializer, ReactSerializer,
+                          ReadSerializer, SendMessageSerializer, message_dict, reaction_list)
 
 PAGE = 30
 
@@ -24,14 +24,19 @@ class ConversationViewSet(viewsets.ViewSet):
     throttle_scope = "chat_send"
 
     def get_throttles(self):
-        # Only sending a message counts against CHAT_RATE.
+        # Only sending (CHAT_RATE) and reacting (CHAT_REACT_RATE) are limited.
         if self.action == "messages" and self.request.method == "POST":
-            return super().get_throttles()
-        return []
+            self.throttle_scope = "chat_send"
+        elif self.action == "react":
+            self.throttle_scope = "chat_react"
+        else:
+            return []
+        return super().get_throttles()
 
     def throttled(self, request, wait):
         num, period, _ = parse_rate(ScopedRateThrottle.THROTTLE_RATES.get(self.throttle_scope))
-        noun = "message" if num == 1 else "messages"
+        word = "reaction" if self.throttle_scope == "chat_react" else "message"
+        noun = word if num == 1 else word + "s"
         raise PingRateLimited(wait=wait, detail=f"You can send {num} {noun} a {period}.")
 
     def _member(self, pk):
@@ -39,6 +44,11 @@ class ConversationViewSet(viewsets.ViewSet):
             return ConversationMember.objects.get(conversation_id=pk, user=self.request.user)
         except ConversationMember.DoesNotExist:
             raise NotFound()
+
+    def _refuse_if_deactivated(self, member):
+        if ConversationMember.objects.filter(conversation_id=member.conversation_id,
+                                             user__is_active=False).exists():
+            raise PermissionDenied("This person's account is deactivated.")
 
     def list(self, request):
         return Response(services.summaries(request.user))
@@ -66,20 +76,20 @@ class ConversationViewSet(viewsets.ViewSet):
         member = self._member(pk)
         if request.method == "POST":
             return self._send(request, member)
-        qs = Message.objects.filter(conversation_id=member.conversation_id)
+        qs = Message.objects.filter(
+            conversation_id=member.conversation_id).prefetch_related("reactions")
         before = request.query_params.get("before", "")
         if before.isascii() and before.isdigit():
             qs = qs.filter(id__lt=int(before))
         page = list(qs.order_by("-id")[:PAGE + 1])
-        return Response({"results": [message_dict(m) for m in reversed(page[:PAGE])],
+        return Response({"results": [message_dict(m, reaction_list(m))
+                                     for m in reversed(page[:PAGE])],
                          "has_more": len(page) > PAGE})
 
     def _send(self, request, member):
         s = SendMessageSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        if ConversationMember.objects.filter(conversation_id=member.conversation_id,
-                                             user__is_active=False).exists():
-            raise PermissionDenied("This person's account is deactivated.")
+        self._refuse_if_deactivated(member)
         msg = services.send_message(member, s.validated_data["body"])
         broadcast.message_sent(msg, s.validated_data["client_id"])
         return Response(message_dict(msg), status=status.HTTP_201_CREATED)
@@ -95,6 +105,21 @@ class ConversationViewSet(viewsets.ViewSet):
         if services.mark_read(member, mid):
             broadcast.read(member.conversation_id, request.user.id, mid)
         return Response({"unread_total": services.unread_total(request.user)})
+
+    @action(detail=True, methods=["post"])
+    def react(self, request, pk=None):
+        member = self._member(pk)
+        s = ReactSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        msg = (Message.objects.filter(pk=s.validated_data["message_id"],
+                                      conversation_id=member.conversation_id).first())
+        if msg is None:
+            raise ValidationError({"message_id": "That message isn't in this chat."})
+        self._refuse_if_deactivated(member)
+        emoji = s.validated_data["emoji"]
+        reactions = services.set_reaction(member, msg, emoji)
+        broadcast.reacted(msg, request.user, emoji, reactions)
+        return Response({"message_id": msg.id, "reactions": reactions})
 
     @action(detail=True, methods=["post"])
     def mute(self, request, pk=None):

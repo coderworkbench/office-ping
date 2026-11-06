@@ -1,7 +1,8 @@
-// Ping sounds, made with WebAudio so there are no files to ship.
-// Normal: a rising three-note bell ("ping-ping-PING"), played twice.
-// Urgent: a hi–lo alarm, three times over.
-// Both sit around 1–1.6 kHz, where laptop speakers are loudest, and go
+// Ping and message sounds, made with WebAudio so there are no files to ship.
+// Normal ping: a rising three-note bell ("ping-ping-PING"), played twice.
+// Urgent ping: a hi–lo alarm, three times over.
+// Chat message: a soft "blip-blip" that slides up in pitch.
+// All sit around 1–1.6 kHz, where laptop speakers are loudest, and go
 // through a compressor so they can be loud without crackling.
 
 type Priority = 'NORMAL' | 'URGENT';
@@ -45,10 +46,23 @@ export function primeSound(): () => void {
 }
 
 export function playPingSound(priority: Priority) {
+  start((c, t) => (priority === 'URGENT' ? alarm : bells)(c, t));
+}
+
+// A chat message: a short soft "blip-blip", quieter than any ping. A burst
+// of messages makes one sound, not one each.
+let lastMessageSound = 0;
+export function playMessageSound() {
+  if (Date.now() - lastMessageSound < 3000) return;
+  lastMessageSound = Date.now();
+  start(blips);
+}
+
+function start(sound: (c: AudioContext, t: number) => void) {
   if (typeof window === 'undefined') return;
   const c = audio();
   if (!c) return;
-  const play = () => (priority === 'URGENT' ? alarm : bells)(c, c.currentTime + 0.03);
+  const play = () => sound(c, c.currentTime + 0.03);
   if (c.state === 'running') return play();
   // Not unlocked yet: resume() waits for the next click, and a chime
   // that late would be confusing, so only play if it starts straight away.
@@ -67,6 +81,27 @@ function alarm(c: AudioContext, t: number) {
   for (const start of [0, 0.8, 1.6]) {
     [1568, 1047, 1568, 1047].forEach((f, i) => buzz(c, f, t + start + i * 0.16, 0.14, 0.35));
   }
+}
+
+function blips(c: AudioContext, t: number) {
+  blip(c, 700, 1050, t, 0.1, 0.4);
+  blip(c, 900, 1350, t + 0.13, 0.12, 0.4);
+}
+
+// A short tone that slides up in pitch: a "bubble", unlike the ping bells.
+function blip(c: AudioContext, from: number, to: number, t: number, dur: number, level: number) {
+  const env = c.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(level, t + 0.008);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  env.connect(out!);
+  const o = c.createOscillator();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(from, t);
+  o.frequency.exponentialRampToValueAtTime(to, t + dur * 0.6);
+  o.connect(env);
+  o.start(t);
+  o.stop(t + dur + 0.02);
 }
 
 // A struck bell: quick attack, ringing decay, with overtones for a bright edge.

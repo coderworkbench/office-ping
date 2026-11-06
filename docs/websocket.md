@@ -45,6 +45,10 @@ Chat (see `apps/chat`):
   "payload": { "conversation_id": 5, "user_id": 47, "message_id": 812 } }
 
 { "type": "chat_typing", "payload": { "conversation_id": 5, "user_id": 12 } }
+{ "type": "chat_reaction",
+  "payload": { "conversation_id": 5, "message_id": 812, "user_id": 47, "emoji": "👍",
+               "reactions": [{ "user_id": 47, "emoji": "👍" }], "reactor_name": "Rahul S",
+               "message_sender_id": 12, "message_preview": "Can you send the report?", "quiet": false } }
 ```
 
 - `chat_message` goes to both members (the sender's other tabs and devices
@@ -53,6 +57,10 @@ Chat (see `apps/chat`):
   is *In a meeting* or *Do not disturb*: no desktop notification.
 - `chat_read` goes to both members when someone's read marker moves forward.
 - `chat_typing` goes only to the other member.
+- `chat_reaction` goes to both members when someone sets, changes or removes
+  a reaction (`emoji` is null on removal). `reactions` is the message's full
+  list afterwards, so clients replace rather than patch. Reactions are set
+  over REST (`POST /api/chat/conversations/<id>/react/`).
 
 Client → server messages:
 

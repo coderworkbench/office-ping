@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-// Writes docs/user-manual.md from frontend/content/manual.json, the same
-// source the in-app Help page (/help) renders. Run after editing the manual:
+// Writes docs/user-manual.md from frontend/content/manual.json and
+// CHANGELOG.md from frontend/content/releases.json, the same sources the
+// in-app Help page (/help) and Release history (/help/releases) render.
+// Run after editing either:
 //   node scripts/export-manual.mjs      (or: make manual)
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -57,3 +59,32 @@ for (const s of manual.sections) {
 
 writeFileSync(join(root, 'docs/user-manual.md'), out.join('\n\n') + '\n');
 console.log('Wrote docs/user-manual.md');
+
+// Release history → CHANGELOG.md. Fails on a malformed entry so a bad
+// release note never ships.
+const { releases } = JSON.parse(readFileSync(join(root, 'frontend/content/releases.json'), 'utf8'));
+const KIND = { new: 'New', improved: 'Improved', fixed: 'Fixed', security: 'Security' };
+const versions = new Set();
+releases.forEach((r, i) => {
+  const where = `releases.json: ${r.version || `entry ${i + 1}`}`;
+  if (!/^\d+\.\d+\.\d+$/.test(r.version)) throw new Error(`${where}: version must look like 1.2.3`);
+  if (versions.has(r.version)) throw new Error(`${where}: version listed twice`);
+  versions.add(r.version);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date)) throw new Error(`${where}: date must be YYYY-MM-DD`);
+  if (i && r.date > releases[i - 1].date) throw new Error(`${where}: newest release goes first`);
+  if (!r.title || !r.changes?.length) throw new Error(`${where}: needs a title and changes`);
+  for (const c of r.changes) if (!KIND[c.kind]) throw new Error(`${where}: unknown kind "${c.kind}"`);
+});
+
+const changelog = [
+  `<!-- Generated from frontend/content/releases.json by scripts/export-manual.mjs. Edit the JSON, not this file. -->`,
+  `# Release history`,
+  `What changed in each version of Office Ping, newest first. The same list is in the app: **Help → What's new**.`,
+  ...releases.map((r) => [
+    `## ${r.version} — ${r.date}`,
+    `**${r.title}**`,
+    r.changes.map((c) => `- **${KIND[c.kind]}:** ${c.text}`).join('\n'),
+  ].join('\n\n')),
+];
+writeFileSync(join(root, 'CHANGELOG.md'), changelog.join('\n\n') + '\n');
+console.log('Wrote CHANGELOG.md');
