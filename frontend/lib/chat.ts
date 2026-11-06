@@ -2,7 +2,7 @@
 
 // Chat state shared by the desktop dock and the /messages page.
 // NotificationsRuntime feeds socket events in (receiveMessage, onRead,
-// onTyping) and resyncs after every (re)connect; components read the state
+// onTyping, onReaction) and resyncs after every (re)connect; components read the state
 // with useChat() and change it only through the functions below.
 
 import { useSyncExternalStore } from 'react';
@@ -13,8 +13,10 @@ export type ChatPerson = {
   id: number; full_name: string; department: string; designation: string;
   is_online: boolean; is_active: boolean; last_seen_at: string | null; status: Status | null;
 };
+export type Reaction = { user_id: number; emoji: string };
 export type ChatMessage = {
   id: number; conversation_id: number; sender_id: number; body: string; created_at: string;
+  reactions: Reaction[];
 };
 export type Conversation = {
   id: number; other: ChatPerson;
@@ -26,6 +28,8 @@ export type Pending = { client_id: string; body: string; error: string | null };
 export type Thread = {
   messages: ChatMessage[]; pending: Pending[];
   hasMore: boolean; loaded: boolean; loadingOlder: boolean;
+  /** Why the last reaction didn't stick; shown under that message for a few seconds. */
+  reactionError: { messageId: number; text: string } | null;
 };
 
 type State = {
@@ -38,7 +42,9 @@ type State = {
 };
 
 const INITIAL: State = { me: null, conversations: null, threads: {}, typing: {}, unreadTotal: 0, focused: [] };
-export const EMPTY_THREAD: Thread = { messages: [], pending: [], hasMore: false, loaded: false, loadingOlder: false };
+export const EMPTY_THREAD: Thread = {
+  messages: [], pending: [], hasMore: false, loaded: false, loadingOlder: false, reactionError: null,
+};
 const TYPING_SHOWN_MS = 5000;
 const TYPING_EVERY_MS = 3000;
 
@@ -257,6 +263,42 @@ export function onTyping(p: { conversation_id: number; user_id: number }) {
   setTimeout(() => {
     if (state.typing[p.conversation_id] === until) set({ typing: withoutKey(state.typing, p.conversation_id) });
   }, TYPING_SHOWN_MS);
+}
+
+function setReactions(id: number, messageId: number, reactions: Reaction[]) {
+  const t = state.threads[id];
+  if (!t || !t.messages.some(m => m.id === messageId)) return;
+  setThread(id, { messages: t.messages.map(m => m.id === messageId ? { ...m, reactions } : m) });
+}
+
+/** Someone (maybe us, on another device) reacted: the payload has the full list. */
+export function onReaction(p: { conversation_id: number; message_id: number; reactions: Reaction[] }) {
+  setReactions(p.conversation_id, p.message_id, p.reactions);
+}
+
+/** Set, replace or (emoji null) remove our reaction. Shown at once; undone if the server says no. */
+export async function react(id: number, messageId: number, emoji: string | null) {
+  const me = state.me;
+  const before = thread(id).messages.find(m => m.id === messageId)?.reactions;
+  if (me === null || !before) return;
+  const others = before.filter(r => r.user_id !== me);
+  setReactions(id, messageId, emoji ? [...others, { user_id: me, emoji }] : others);
+  const s = session;
+  try {
+    const r = await apiFetch<{ message_id: number; reactions: Reaction[] }>(`/api/chat/conversations/${id}/react/`, {
+      method: 'POST', body: JSON.stringify({ message_id: messageId, emoji }),
+    });
+    if (s === session) setReactions(id, messageId, r.reactions);
+  } catch (e) {
+    if (s !== session) return;
+    setReactions(id, messageId, before);
+    const text = e instanceof ApiError && [400, 403, 404, 429].includes(e.status)
+      ? apiErrorMessage(e, "Couldn't react") : "Couldn't react";
+    setThread(id, { reactionError: { messageId, text } });
+    setTimeout(() => {
+      if (thread(id).reactionError?.messageId === messageId) setThread(id, { reactionError: null });
+    }, 4000);
+  }
 }
 
 /** The tab is visible and the window has focus: the person is looking at it. */
