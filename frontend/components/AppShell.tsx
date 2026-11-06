@@ -18,6 +18,7 @@ import { Tour } from './Tour';
 import { QuickPing, QUICK_PING_EVENT, ShortcutHint } from './QuickPing';
 import { ChatDock } from './chat/ChatDock';
 import { StatusDialog } from './StatusDialog';
+import { LATEST } from '../lib/releases';
 import { describeStatus } from '../lib/status';
 import { useLiveStatus } from './NotificationsRuntime';
 import { useChat } from '../lib/chat';
@@ -129,7 +130,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Logo size={36} />
           <span className="leading-tight">
             <span className="block text-[15px] font-bold">Office Ping</span>
-            <span className="block text-[10px] uppercase tracking-[0.14em] text-white/60">Internal · v1</span>
+            <span className="block text-[10px] uppercase tracking-[0.14em] text-white/60">Internal · v{LATEST.version}</span>
           </span>
         </Link>
 

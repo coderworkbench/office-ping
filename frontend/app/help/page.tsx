@@ -1,11 +1,14 @@
 'use client';
-import { Fragment, ReactNode, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { Guard } from '../../components/Guard';
 import { Icon, PageHeader } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import manual from '../../content/manual.json';
 import { DemoPlayer } from '../../components/help/DemoPlayer';
 import { DEMOS } from '../../components/help/demos';
+import { Inline } from '../../components/help/Inline';
+import { LATEST } from '../../lib/releases';
 
 // The manual's text lives in content/manual.json (also exported to
 // docs/user-manual.md by scripts/export-manual.mjs). Sections are shown only
@@ -51,9 +54,14 @@ function Inner() {
         title="How Office Ping works"
         lead={<Inline text={manual.intro} />}
         actions={
-          <button className="btn-primary" onClick={() => window.dispatchEvent(new Event('op:tour'))}>
-            <span aria-hidden>🧭</span> Show me around
-          </button>
+          <>
+            <Link href="/help/releases" className="btn-secondary" title="Release history">
+              <span aria-hidden>✨</span> What's new · v{LATEST.version}
+            </Link>
+            <button className="btn-primary" onClick={() => window.dispatchEvent(new Event('op:tour'))}>
+              <span aria-hidden>🧭</span> Show me around
+            </button>
+          </>
         }
       />
 
@@ -182,20 +190,5 @@ function CopyCommand({ command }: { command: string }) {
         {copied ? '✓ Copied' : 'Copy'}
       </button>
     </div>
-  );
-}
-
-// Minimal inline formatting: **bold** and *italic*.
-function Inline({ text }: { text: string }): ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) return <strong key={i} className="font-bold text-ink">{part.slice(2, -2)}</strong>;
-        // Sunbeam ships no italic face (§3.1), so *emphasis* is semibold brand ink.
-        if (part.startsWith('*') && part.endsWith('*') && part.length > 2) return <span key={i} className="font-semibold text-brand">{part.slice(1, -1)}</span>;
-        return <Fragment key={i}>{part}</Fragment>;
-      })}
-    </>
   );
 }

@@ -1,0 +1,72 @@
+{
+  "intro": "What changed in each version of Office Ping, newest first.",
+  "releases": [
+    {
+      "version": "1.5.0",
+      "date": "2026-11-06",
+      "title": "A sound for chat messages",
+      "changes": [
+        { "kind": "new", "text": "A new chat message plays a short, soft *blip-blip*, quieter than a ping and easy to tell apart from it." },
+        { "kind": "new", "text": "No sound for the chat you already have open, for chats you've muted, or while you're *In a meeting* or on *Do not disturb*. Several messages in a row make one sound." }
+      ]
+    },
+    {
+      "version": "1.4.0",
+      "date": "2026-11-06",
+      "title": "A louder ping sound and security updates",
+      "changes": [
+        { "kind": "improved", "text": "Pings are much louder and easier to recognize: a rising three-note bell for normal pings and a sharp alarm for urgent ones." },
+        { "kind": "fixed", "text": "Pings that arrived before you'd clicked in the Office Ping window made no sound. Now one click anywhere in the window turns sound on for the day." },
+        { "kind": "security", "text": "Updated the software Office Ping is built on to fix known security issues." }
+      ]
+    },
+    {
+      "version": "1.3.0",
+      "date": "2026-10-25",
+      "title": "Messages: one-to-one chat",
+      "changes": [
+        { "kind": "new", "text": "**Messages** in the sidebar and phone tab bar: a one-to-one chat for things that don't need an answer this minute." },
+        { "kind": "new", "text": "Start a chat from **People** (**Message**) or with **New message**. See *typing…* while they write and **Seen** once they've read it." },
+        { "kind": "new", "text": "On a computer, a **Messages** bar in the bottom-right corner keeps your chats one click away on every page." },
+        { "kind": "new", "text": "**Ping** at the top of a chat sends that person a ping when it can't wait. The bell mutes a chat." }
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-10-17",
+      "title": "Your status, quick replies and urgent reminders",
+      "changes": [
+        { "kind": "new", "text": "Set a status (*In a meeting*, *Do not disturb*, *Out for lunch*, *Away from desk*) with an end time. In a meeting or on Do not disturb, normal pings wait quietly in your Inbox." },
+        { "kind": "new", "text": "Quick replies when you acknowledge a ping, shown to the sender straight away and in History." },
+        { "kind": "new", "text": "An urgent ping nobody has acknowledged after 5 minutes pops up again, and the sender is told." },
+        { "kind": "new", "text": "Press **Ctrl + K** or **/** to ping someone from any page. History has search and filters; admins can export it as CSV." },
+        { "kind": "new", "text": "Office Ping can open by itself when your computer starts (see *Help*)." },
+        { "kind": "new", "text": "HR and admins choose which three templates appear on everyone's Overview." },
+        { "kind": "improved", "text": "A phone Overview that fits on one screen, with people, quick messages and Send together." },
+        { "kind": "improved", "text": "Repeated pings collapse into one (*Nudge ×8*) and can be acknowledged together." },
+        { "kind": "security", "text": "Limits on how often pings can be sent, and sign-in is locked for a while after repeated wrong passwords." }
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-10-16",
+      "title": "Pop-up pings, Help and a new look",
+      "changes": [
+        { "kind": "new", "text": "A ping now pops up in the middle of the screen and stays until you click **Acknowledge** or **Later**. Urgent pings jump the queue." },
+        { "kind": "new", "text": "The **Help** page: a user manual with animated demos, and a guided tour (**Show me around**)." },
+        { "kind": "improved", "text": "The TGF Sunbeam look, and every page now works on phones and tablets." },
+        { "kind": "fixed", "text": "Pings no longer show up more than once, and acknowledging on one device clears the pop-up on the others." }
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-10-15",
+      "title": "First release",
+      "changes": [
+        { "kind": "new", "text": "Send a ping to a person or a group, normal or urgent, and see when it's delivered and acknowledged." },
+        { "kind": "new", "text": "Inbox, History, groups and message templates, with desktop notifications." },
+        { "kind": "new", "text": "Change your own password; admins can reset someone else's." }
+      ]
+    }
+  ]
+}
