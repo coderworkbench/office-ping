@@ -275,7 +275,7 @@ Passwords need at least 8 characters and can't be a common password, only number
 | Problem | What to do |
 |---|---|
 | I don't get pop-ups or notifications | Make sure an Office Ping tab is open, and that your status isn't *In a meeting* or *Do not disturb* (those keep normal pings quiet). Check notifications are allowed: click the lock icon left of the address → **Notifications → Allow**. Turn off Windows *Focus assist* / *Do not disturb* (or macOS *Focus*). |
-| I hear no sound | Check your computer's volume and that the browser tab isn't muted (right-click the tab). |
+| I hear no sound | Click once anywhere in the Office Ping window: browsers keep a page silent until you've clicked it, so a window that opened by itself when the computer started can't play sound yet. Also check your computer's volume and that the browser tab isn't muted (right-click the tab). |
 | I show as offline | You're shown online while Office Ping is open. It updates within a minute. |
 | I can't sign in | Check Caps Lock. If you've forgotten your password, ask an admin to reset it. |
 | "Too many failed sign-ins. Try again in …" | After 5 wrong passwords, sign-in for that username pauses for 15 minutes. Wait, or ask an admin to reset your password. |

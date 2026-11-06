@@ -418,7 +418,7 @@
               ],
               [
                 "I hear no sound",
-                "Check your computer's volume and that the browser tab isn't muted (right-click the tab)."
+                "Click once anywhere in the Office Ping window: browsers keep a page silent until you've clicked it, so a window that opened by itself when the computer started can't play sound yet. Also check your computer's volume and that the browser tab isn't muted (right-click the tab)."
               ],
               [
                 "I show as offline",

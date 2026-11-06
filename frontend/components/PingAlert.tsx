@@ -11,6 +11,7 @@ import { apiFetch } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { closeNotification } from '../lib/notify';
 import { QUICK_REPLIES } from '../lib/replies';
+import { playPingSound, primeSound } from '../lib/sound';
 import { Avatar } from './ui';
 
 type Payload = {
@@ -46,7 +47,7 @@ export function PingAlert() {
         if (prev.some(x => x.ping_id === p.ping_id)) return prev;
         return p.priority === 'URGENT' ? [q, ...prev] : [...prev, q];
       });
-      try { chime(p.priority); } catch {}
+      try { playPingSound(p.priority); } catch {}
       updateBadge();
     };
     // The service worker posts this when a desktop notification is clicked.
@@ -65,7 +66,9 @@ export function PingAlert() {
     window.addEventListener('op:ping', onPing);
     window.addEventListener('op:ping_handled', onHandled);
     navigator.serviceWorker?.addEventListener('message', onSwMessage);
+    const unprime = primeSound();
     return () => {
+      unprime();
       window.removeEventListener('op:ping', onPing);
       window.removeEventListener('op:ping_handled', onHandled);
       navigator.serviceWorker?.removeEventListener('message', onSwMessage);
@@ -229,29 +232,4 @@ async function updateBadge() {
     const nav: any = navigator;
     if (nav.setAppBadge) await nav.setAppBadge(r.unread);
   } catch {}
-}
-
-// Very small chime using WebAudio — no asset shipping needed.
-function chime(priority: 'NORMAL' | 'URGENT') {
-  if (typeof window === 'undefined') return;
-  const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
-  if (!AC) return;
-  const ctx = new AC();
-  const g = ctx.createGain();
-  g.gain.value = 0.05;
-  g.connect(ctx.destination);
-  const beep = (freq: number, start: number, dur: number) => {
-    const o = ctx.createOscillator();
-    o.type = 'sine';
-    o.frequency.value = freq;
-    o.connect(g);
-    o.start(ctx.currentTime + start);
-    o.stop(ctx.currentTime + start + dur);
-  };
-  if (priority === 'URGENT') {
-    beep(880, 0, 0.12); beep(660, 0.14, 0.12); beep(880, 0.28, 0.15);
-  } else {
-    beep(660, 0, 0.1); beep(880, 0.12, 0.14);
-  }
-  setTimeout(() => ctx.close().catch(() => {}), 800);
 }
