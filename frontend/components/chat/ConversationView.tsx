@@ -5,14 +5,18 @@
 
 import { Fragment, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
-  EMPTY_THREAD, discardMessage, loadOlder, loadThread, markRead, retryMessage,
+  EMPTY_THREAD, discardMessage, loadOlder, loadThread, markRead, react, retryMessage,
   sendMessage, sendTyping, setFocused, setMuted, useChat, windowActive,
 } from '../../lib/chat';
 import { PingDialog } from '../PingDialog';
 import { Avatar, Icon } from '../ui';
+import { EmojiPicker } from './EmojiPicker';
 import { clockTime, dayLabel, linkify, presenceLine } from './format';
 
 type IconName = Parameters<typeof Icon>[0]['name'];
+
+/** What the emoji panel above the message box is doing, if open. */
+type Picker = null | 'compose' | { react: number };
 
 export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   id: number; variant: 'window' | 'page';
@@ -23,12 +27,14 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   const t = threads[id] || EMPTY_THREAD;
   const isTyping = (typing[id] || 0) > Date.now();
   const [pingOpen, setPingOpen] = useState(false);
+  const [picker, setPicker] = useState<Picker>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const atBottom = useRef(true);
   const olderFrom = useRef<number | null>(null);   // scrollHeight before older messages were added
 
   useEffect(() => { if (!t.loaded) loadThread(id).catch(() => {}); }, [id, t.loaded]);
   useEffect(() => { setFocused(id, true); return () => setFocused(id, false); }, [id]);
+  useEffect(() => { setPicker(null); }, [id]);
 
   // On screen and unread: mark the newest message read (again when the tab or window comes back).
   const newest = t.messages[t.messages.length - 1];
@@ -74,6 +80,11 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   const firstName = other.full_name.split(' ')[0];
   const lastMine = [...t.messages].reverse().find(m => m.sender_id === me);
   const seen = !!lastMine && (conv.other_last_read_id || 0) >= lastMine.id && !t.pending.length;
+  const myEmoji = (messageId: number) =>
+    t.messages.find(m => m.id === messageId)?.reactions.find(r => r.user_id === me)?.emoji ?? null;
+  /** Your current emoji again removes it; any other sets or replaces it. */
+  const pickReaction = (messageId: number, emoji: string) =>
+    react(id, messageId, myEmoji(messageId) === emoji ? null : emoji);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-surface">
@@ -137,7 +148,7 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
       </div>
 
       {other.is_active
-        ? <Composer id={id} name={firstName} />
+        ? <Composer id={id} name={firstName} picker={picker} setPicker={setPicker} onReactPick={pickReaction} />
         : <p className="border-t border-line px-4 py-3 text-sm text-ink-3">This person&apos;s account is deactivated.</p>}
 
       <PingDialog open={pingOpen} recipientId={other.id} recipientName={other.full_name}
@@ -146,9 +157,13 @@ export function ConversationView({ id, variant, onBack, onMinimize, onClose }: {
   );
 }
 
-function Composer({ id, name }: { id: number; name: string }) {
+function Composer({ id, name, picker, setPicker, onReactPick }: {
+  id: number; name: string; picker: Picker; setPicker: (p: Picker) => void;
+  onReactPick: (messageId: number, emoji: string) => void;
+}) {
   const [text, setText] = useState('');
   const box = useRef<HTMLTextAreaElement>(null);
+  const form = useRef<HTMLFormElement>(null);
   // With a mouse, Enter sends and the box takes focus on open. On touch
   // screens Enter is a new line (Send is the button) and the keyboard
   // doesn't pop up uninvited.
@@ -170,9 +185,42 @@ function Composer({ id, name }: { id: number; name: string }) {
     setText('');
   }
 
+  /** Put the emoji where the cursor is (over any selection) and keep typing after it. */
+  function insert(emoji: string) {
+    const el = box.current;
+    const start = el?.selectionStart ?? text.length;
+    const end = el?.selectionEnd ?? text.length;
+    const next = text.slice(0, start) + emoji + text.slice(end);
+    if (next.length > 4000) return;
+    setText(next);
+    sendTyping(id);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      // On a phone, focusing would bring the keyboard up over the picker.
+      if (finePointer) el.focus({ preventScroll: true });
+      el.setSelectionRange(start + emoji.length, start + emoji.length);
+    });
+  }
+
+  const reacting = picker && picker !== 'compose' ? picker.react : null;
+
   return (
-    <form onSubmit={e => { e.preventDefault(); submit(); }}
-          className="flex shrink-0 items-end gap-2 border-t border-line p-2">
+    <form ref={form} onSubmit={e => { e.preventDefault(); submit(); }}
+          className="relative flex shrink-0 items-end gap-1.5 border-t border-line p-2">
+      {picker === 'compose' && (
+        <EmojiPicker label="Emoji" boundary={form} onPick={insert}
+                     onClose={() => { setPicker(null); if (finePointer) box.current?.focus({ preventScroll: true }); }} />
+      )}
+      {reacting !== null && (
+        <EmojiPicker label="React with an emoji" onClose={() => setPicker(null)}
+                     onPick={e => { onReactPick(reacting, e); setPicker(null); }} />
+      )}
+      <button type="button" onClick={() => setPicker(picker === 'compose' ? null : 'compose')}
+              aria-label="Emoji" aria-expanded={picker === 'compose'} title="Emoji"
+              className={'grid h-10 w-10 shrink-0 place-items-center rounded-full hover:bg-inset ' +
+                (picker === 'compose' ? 'bg-inset text-brand' : 'text-ink-2')}>
+        <Icon name="smile" size={20} />
+      </button>
       <textarea ref={box} rows={1} value={text} maxLength={4000}
                 onChange={e => { setText(e.target.value); if (e.target.value.trim()) sendTyping(id); }}
                 onKeyDown={e => {
