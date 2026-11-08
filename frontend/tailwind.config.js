@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-// Sunbeam design system (TGF), bound to Tailwind as in UI_DESIGN_SYSTEM.md §24.1.
+// Sunbeam design system, bound to Tailwind.
 // Colour values live in styles/globals.css as RGB triples so `bg-gold-fill/40`
 // works; never put hex here.
 const rgb = (v) => `rgb(var(--${v}) / <alpha-value>)`;

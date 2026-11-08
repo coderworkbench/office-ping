@@ -25,7 +25,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent / "frontend" / "public"
 ICONS = ROOT / "icons"
 ICONS.mkdir(parents=True, exist_ok=True)
 
-# Palette — Sunbeam (TGF design system): a --gold-fill tile, mark in --on-gold.
+# Palette — Sunbeam design system: a --gold-fill tile, mark in --on-gold.
 GOLD        = (246, 198, 44)   # #F6C62C  --gold-fill
 GOLD_BRIGHT = (250, 212, 92)   # #FAD45C  --gold-bright
 BRAND       = (58, 47, 5)      # #3A2F05  --brand / --on-gold

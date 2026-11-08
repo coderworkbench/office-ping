@@ -6,9 +6,9 @@ setup:
 
 dev:
 	docker compose up -d
-	@echo "App:   http://localhost"
-	@echo "API:   http://localhost/api/"
-	@echo "Admin: http://localhost/admin/"
+	@echo "App:          http://localhost:8080"
+	@echo "API:          http://localhost:8080/api/"
+	@echo "Django admin: http://localhost:8080/django-admin/"
 
 down:
 	docker compose down
@@ -26,9 +26,11 @@ seed:
 test:
 	docker compose exec backend pytest
 
+# Frontend checks run on the host (the production image has no ESLint): needs
+# Node.js 20 and `npm install` in frontend/ once.
 lint:
 	docker compose exec backend python -m compileall -q apps config
-	docker compose exec frontend npm run lint
+	cd frontend && npm run lint && npm run typecheck
 
 logs:
 	docker compose logs -f --tail=200

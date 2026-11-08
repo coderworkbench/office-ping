@@ -1,20 +1,52 @@
+# Secrets and local configuration: copy .env.example instead
 .env
-*.pyc
-__pycache__/
-.pytest_cache/
-backend/staticfiles/
-backend/db.sqlite3
+.env.*
+!.env.example
+docker-compose.override.yml
 
-node_modules/
-.next/
-*.tsbuildinfo
-.DS_Store
-
-# Local browser-automation output
-.playwright-mcp/
+# Private keys and certificates (mount them; never commit them)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+nginx/certs/
 
 # Database backups hold password hashes and messages: never commit them
 *.sql
 *.sql.gz
+*.dump
 office-ping-backups/
-docker-compose.override.yml
+
+# Python
+*.pyc
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+.coverage
+htmlcov/
+backend/staticfiles/
+backend/db.sqlite3
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+frontend/playwright-report/
+frontend/test-results/
+
+# Logs
+*.log
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local tool output
+.playwright-mcp/
+.superpowers/

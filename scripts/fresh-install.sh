@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Start Office Ping from scratch when there's no backup to restore:
 #
-#   git clone https://github.com/mangeshchavan/office-ping.git && cd office-ping
-#   DOMAIN=ping.tejgyan.org scripts/fresh-install.sh
+#   git clone https://github.com/coderworkbench/office-ping.git && cd office-ping
+#   DOMAIN=ping.example.com scripts/fresh-install.sh
 #
 # Creates .env with new secrets if there is none, starts the app, loads the
 # message templates kept in the repo (backend/initial_data/templates.json)

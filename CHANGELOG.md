@@ -56,7 +56,7 @@ What changed in each version of Office Ping, newest first. The same list is in t
 
 - **New:** A ping now pops up in the middle of the screen and stays until you click **Acknowledge** or **Later**. Urgent pings jump the queue.
 - **New:** The **Help** page: a user manual with animated demos, and a guided tour (**Show me around**).
-- **Improved:** The TGF Sunbeam look, and every page now works on phones and tablets.
+- **Improved:** The Sunbeam look, and every page now works on phones and tablets.
 - **Fixed:** Pings no longer show up more than once, and acknowledging on one device clears the pop-up on the others.
 
 ## 1.0.0 — 2026-10-15

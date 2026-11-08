@@ -7,12 +7,12 @@ say()  { printf '\n==> %s\n' "$*"; }
 fail() { printf '\nError: %s\n' "$*" >&2; exit 1; }
 
 # Create .env with fresh secrets if there isn't one. DOMAIN (e.g.
-# ping.tejgyan.org) sets the allowed host and HTTPS origins.
+# ping.example.com) sets the allowed host and HTTPS origins.
 ensure_env() {
   [ -f .env ] && return 0
   local domain="${DOMAIN:-}"
   if [ -z "$domain" ] && [ -t 0 ]; then
-    read -r -p "Domain people will open (e.g. ping.tejgyan.org; leave empty for local only): " domain
+    read -r -p "Domain people will open (e.g. ping.example.com; leave empty for local only): " domain
   fi
   say "Creating .env with new secrets"
   local hosts="localhost,127.0.0.1" origins="http://localhost:8080"

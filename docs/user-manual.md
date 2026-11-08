@@ -39,7 +39,7 @@ The same manual is in the app: click **Help** in the sidebar. There, each person
 
 ## Getting started
 
-1. Open **https://ping.tejgyan.org** in Chrome or Edge.
+1. Open Office Ping's address (the one IT gave you) in Chrome or Edge.
 2. Sign in with the username and password your admin gave you. There is no sign-up page: an admin creates every account.
 3. When the banner at the top of the page asks, click **Enable**, then **Allow** in the browser's pop-up. This lets pings show as desktop notifications.
 4. Change the password your admin gave you (see *Your password*).
@@ -62,12 +62,12 @@ You only get pings while Office Ping is open. Set it up once and it opens by its
 2. Open your **Downloads** folder, right-click **office-ping-windows.ps1** and choose **Run with PowerShell**. If Windows asks whether to run it, choose **Open** or **Run anyway**.
 3. Office Ping opens. From now on it opens by itself (minimised, on the taskbar) each time you sign in.
 
-[⬇ Download the Windows setup file](https://ping.tejgyan.org/autostart/windows.ps1)
+[⬇ Download the Windows setup file](https://ping.example.com/autostart/windows.ps1)
 
 Prefer typing? Open **PowerShell** and paste:
 
 ```
-irm https://ping.tejgyan.org/autostart/windows.ps1 | iex
+$env:OFFICE_PING_URL='https://ping.example.com'; irm https://ping.example.com/autostart/windows.ps1 | iex
 ```
 
 ### Mac
@@ -76,7 +76,7 @@ irm https://ping.tejgyan.org/autostart/windows.ps1 | iex
 2. Paste this line and press **Return**:
 
 ```
-curl -fsSL https://ping.tejgyan.org/autostart/mac.sh | bash
+curl -fsSL https://ping.example.com/autostart/mac.sh | OFFICE_PING_URL=https://ping.example.com bash
 ```
 
 Office Ping opens. macOS may show a notice that a background item was added; that's Office Ping.
@@ -87,7 +87,7 @@ Office Ping opens. macOS may show a notice that a background item was added; tha
 2. Paste this line and press **Enter**:
 
 ```
-curl -fsSL https://ping.tejgyan.org/autostart/linux.sh | bash
+curl -fsSL https://ping.example.com/autostart/linux.sh | OFFICE_PING_URL=https://ping.example.com bash
 ```
 
 Office Ping opens, and it's also in your app menu as **Office Ping**.
@@ -101,11 +101,11 @@ Office Ping opens, and it's also in your app menu as **Office Ping**.
 - **Linux:** run the same line with *--remove* at the end, as below.
 
 ```
-curl -fsSL https://ping.tejgyan.org/autostart/mac.sh | bash -s -- --remove
+curl -fsSL https://ping.example.com/autostart/mac.sh | bash -s -- --remove
 ```
 
 ```
-curl -fsSL https://ping.tejgyan.org/autostart/linux.sh | bash -s -- --remove
+curl -fsSL https://ping.example.com/autostart/linux.sh | bash -s -- --remove
 ```
 
 <a id="sending"></a>

@@ -1,17 +1,15 @@
 #!/bin/bash
 # Office Ping: open automatically when you log in to your Mac.
 #
-#   Run (Terminal):  curl -fsSL https://ping.tejgyan.org/autostart/mac.sh | bash
-#   Undo:            curl -fsSL https://ping.tejgyan.org/autostart/mac.sh | bash -s -- --remove
+#   Run (Terminal):  curl -fsSL https://<your-site>/autostart/mac.sh | OFFICE_PING_URL=https://<your-site> bash
+#   Undo:            curl -fsSL https://<your-site>/autostart/mac.sh | bash -s -- --remove
 #
 # It adds a login item (a LaunchAgent in ~/Library/LaunchAgents) that opens
 # Office Ping in its own Chrome or Edge window each time you log in, and opens
 # it now. Nothing is installed and no administrator password is needed.
 set -euo pipefail
 
-URL="${OFFICE_PING_URL:-https://ping.tejgyan.org}"
-URL="${URL%/}"
-LABEL="org.tejgyan.officeping"
+LABEL="com.officeping.autostart"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 
 if [ "${1:-}" = "--remove" ]; then
@@ -20,6 +18,18 @@ if [ "${1:-}" = "--remove" ]; then
   echo "Done. Office Ping will no longer open when you log in."
   exit 0
 fi
+
+# The site's address comes from OFFICE_PING_URL (the Help page's command sets
+# it); ask for it when run by hand in Terminal.
+URL="${OFFICE_PING_URL:-}"
+if [ -z "$URL" ] && [ -t 0 ]; then
+  read -r -p "Office Ping address (what you type in the browser, e.g. https://ping.example.com): " URL
+fi
+URL="${URL%/}"
+case "$URL" in
+  http://*|https://*) ;;
+  *) echo "Please run this again with the site's address, e.g.: OFFICE_PING_URL=https://ping.example.com bash mac.sh"; exit 1 ;;
+esac
 
 BIN=""
 for app in "Google Chrome" "Microsoft Edge" "Brave Browser" "Chromium"; do

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-time preparation of a new Ubuntu server for Office Ping (run as root):
 #
-#   sudo DOMAIN=ping.tejgyan.org APP_USER=$USER bash scripts/server-setup.sh
+#   sudo DOMAIN=ping.example.com APP_USER=$USER bash scripts/server-setup.sh
 #
 # Installs Docker + Compose, git, curl, nginx and certbot; lets APP_USER run
 # Docker; and adds an nginx site for DOMAIN that forwards to the app on
@@ -11,7 +11,7 @@
 # scripts/fresh-install.sh (docs/disaster-recovery.md has the whole list).
 set -euo pipefail
 
-DOMAIN="${DOMAIN:?set DOMAIN, e.g. DOMAIN=ping.tejgyan.org}"
+DOMAIN="${DOMAIN:?set DOMAIN, e.g. DOMAIN=ping.example.com}"
 APP_USER="${APP_USER:-${SUDO_USER:-}}"
 APP_PORT="${APP_PORT:-8080}"
 [ "$(id -u)" -eq 0 ] || { echo "Please run with sudo."; exit 1; }
@@ -73,7 +73,7 @@ fi
 
 echo
 echo "Done. Next (as ${APP_USER}, after logging out and back in so Docker works):"
-echo "  git clone https://github.com/mangeshchavan/office-ping.git && cd office-ping"
+echo "  git clone https://github.com/coderworkbench/office-ping.git && cd office-ping"
 echo "  cp deploy/docker-compose.override.server.yml docker-compose.override.yml"
 echo "  DOMAIN=${DOMAIN} scripts/restore.sh <backup.sql.gz>     # or scripts/fresh-install.sh"
 echo "Then, once DNS for ${DOMAIN} points here:  sudo certbot --nginx -d ${DOMAIN} --redirect"
