@@ -64,7 +64,7 @@
       "changes": [
         { "kind": "new", "text": "A ping now pops up in the middle of the screen and stays until you click **Acknowledge** or **Later**. Urgent pings jump the queue." },
         { "kind": "new", "text": "The **Help** page: a user manual with animated demos, and a guided tour (**Show me around**)." },
-        { "kind": "improved", "text": "The TGF Sunbeam look, and every page now works on phones and tablets." },
+        { "kind": "improved", "text": "The Sunbeam look, and every page now works on phones and tablets." },
         { "kind": "fixed", "text": "Pings no longer show up more than once, and acknowledging on one device clears the pop-up on the others." }
       ]
     },

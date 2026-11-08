@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Bring Office Ping back from a backup, e.g. on a new server after a crash:
 #
-#   git clone https://github.com/mangeshchavan/office-ping.git && cd office-ping
-#   DOMAIN=ping.tejgyan.org scripts/restore.sh /path/to/officeping-<date>.sql.gz
+#   git clone https://github.com/coderworkbench/office-ping.git && cd office-ping
+#   DOMAIN=ping.example.com scripts/restore.sh /path/to/officeping-<date>.sql.gz
 #
 # Everyone's accounts and passwords, groups, templates and history come back
 # as they were in the backup. It creates .env with new secrets if there is

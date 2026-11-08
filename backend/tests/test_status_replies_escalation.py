@@ -145,7 +145,9 @@ def test_escalation_can_be_turned_off(auth, member_a, member_b, settings):
     assert escalate_due() == 0
 
 
-@pytest.mark.django_db
+# transaction=True: the command calls close_old_connections(), which would
+# close the connection a plain django_db test runs inside of.
+@pytest.mark.django_db(transaction=True)
 def test_escalate_command_runs_once(auth, member_a, member_b, settings, capsys):
     from django.core.management import call_command
     settings.URGENT_ESCALATE_AFTER_MINUTES = 5

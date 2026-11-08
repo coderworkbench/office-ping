@@ -53,13 +53,13 @@ gateway or mail server is configured).
 `windows.ps1` (a Startup-folder shortcut), `mac.sh` (a LaunchAgent) and
 `linux.sh` (an XDG autostart entry plus an app-menu launcher). Each opens
 `<site>/dashboard` with Chrome/Edge/Chromium/Brave `--app=…` at sign-in, needs
-no admin rights, and undoes itself with `-Remove` / `--remove`. The address
-defaults to `https://ping.tejgyan.org`; another deployment changes that line
-in the three files (or users set `OFFICE_PING_URL`). The Help page's
-copy-paste commands use whatever address the app is opened at.
+no admin rights, and undoes itself with `-Remove` / `--remove`. The scripts
+take the site's address from `OFFICE_PING_URL`; the Help page's copy-paste
+commands set it to whatever address the app is opened at, and the downloaded
+Windows file asks for it when run by double-click.
 
 For many machines at once, IT can push the same thing centrally, for example
-a Group Policy logon shortcut to `msedge.exe --app=https://ping.tejgyan.org/dashboard`.
+a Group Policy logon shortcut to `msedge.exe --app=https://<your-site>/dashboard`.
 
 ## Exporting history
 

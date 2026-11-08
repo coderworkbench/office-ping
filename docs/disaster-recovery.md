@@ -35,7 +35,7 @@ Add `--copy-to user@host:dir` (that machine needs your SSH key), or copy the
 newest file off regularly, for example from another machine:
 
 ```bash
-scp tgf-dev:'office-ping-backups/officeping-*.sql.gz' ~/office-ping-backups/
+scp your-server:'office-ping-backups/officeping-*.sql.gz' ~/office-ping-backups/
 ```
 
 > [!WARNING]
@@ -52,8 +52,8 @@ On a new Ubuntu server (any provider, or a spare machine on the office network):
 
 1. **Prepare the server** (once, as an admin user):
    ```bash
-   git clone https://github.com/mangeshchavan/office-ping.git && cd office-ping
-   sudo DOMAIN=ping.tejgyan.org APP_USER=$USER bash scripts/server-setup.sh
+   git clone https://github.com/coderworkbench/office-ping.git && cd office-ping
+   sudo DOMAIN=ping.example.com APP_USER=$USER bash scripts/server-setup.sh
    ```
    This installs Docker, nginx and certbot and adds the nginx site. Log out and
    back in afterwards, so your user can use Docker.
@@ -66,23 +66,23 @@ On a new Ubuntu server (any provider, or a spare machine on the office network):
 
 3. **Bring the data back**, with the newest backup file copied to the server:
    ```bash
-   DOMAIN=ping.tejgyan.org scripts/restore.sh ~/officeping-20261017-020000.sql.gz
+   DOMAIN=ping.example.com scripts/restore.sh ~/officeping-20261017-020000.sql.gz
    ```
    It creates `.env` with new secrets, restores the database, builds and starts
    the app (a few minutes the first time), then lists what's there: users,
    admins, templates, groups and pings. Type `restore` when asked.
 
-   **No backup?** Run `DOMAIN=ping.tejgyan.org scripts/fresh-install.sh`
+   **No backup?** Run `DOMAIN=ping.example.com scripts/fresh-install.sh`
    instead. It loads the templates from `backend/initial_data/templates.json`
    and asks for the first admin's username, email and password.
 
-4. **Point DNS at the new server** (BigRock: the A record for
-   `ping.tejgyan.org` → the new IP) and, once it resolves there, turn on HTTPS:
+4. **Point DNS at the new server** (at your DNS provider: the A record for
+   `ping.example.com` → the new IP) and, once it resolves there, turn on HTTPS:
    ```bash
-   sudo certbot --nginx -d ping.tejgyan.org --redirect
+   sudo certbot --nginx -d ping.example.com --redirect
    ```
 
-5. **Check:** open https://ping.tejgyan.org and sign in as the admin. Then set
+5. **Check:** open https://ping.example.com and sign in as the admin. Then set
    up the daily backup (above) on the new server.
 
 People's browsers reconnect by themselves. Because `.env` has new secrets,
@@ -94,7 +94,7 @@ A restore replaces the database of the copy you run it in. To practise without
 touching anything, use a separate folder and port on any machine with Docker:
 
 ```bash
-git clone https://github.com/mangeshchavan/office-ping.git op-test && cd op-test
+git clone https://github.com/coderworkbench/office-ping.git op-test && cd op-test
 printf 'services:\n  nginx:\n    ports: !override\n      - "127.0.0.1:8099:80"\n' > docker-compose.override.yml
 COMPOSE_PROJECT_NAME=op-test APP_PORT=8099 scripts/restore.sh ~/officeping-<date>.sql.gz
 # … check http://127.0.0.1:8099, then remove it:

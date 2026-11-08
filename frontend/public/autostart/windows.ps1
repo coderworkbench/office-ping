@@ -1,7 +1,7 @@
 # Office Ping: open automatically when you sign in to Windows.
 #
 #   Run:     right-click this file, then "Run with PowerShell"
-#     or in PowerShell:   irm https://ping.tejgyan.org/autostart/windows.ps1 | iex
+#     or in PowerShell:   $env:OFFICE_PING_URL='https://<your-site>'; irm https://<your-site>/autostart/windows.ps1 | iex
 #   Undo:    run it again with -Remove, or delete "Office Ping" from the
 #            Startup folder (Win+R, type  shell:startup , Enter).
 #
@@ -12,7 +12,6 @@
 param([switch]$Remove)
 $ErrorActionPreference = 'Stop'
 
-$url = if ($env:OFFICE_PING_URL) { $env:OFFICE_PING_URL.TrimEnd('/') } else { 'https://ping.tejgyan.org' }
 $link = Join-Path ([Environment]::GetFolderPath('Startup')) 'Office Ping.lnk'
 $ranAsFile = [bool]$MyInvocation.MyCommand.Path
 
@@ -25,6 +24,16 @@ function Finish([string]$message) {
 if ($Remove) {
   Remove-Item -LiteralPath $link -ErrorAction SilentlyContinue
   Finish 'Done. Office Ping will no longer open when you sign in.'
+  return
+}
+
+# The site's address comes from OFFICE_PING_URL (the Help page's command sets
+# it); the downloaded file asks for it.
+$url = $env:OFFICE_PING_URL
+if (-not $url) { $url = Read-Host 'Office Ping address (what you type in the browser, e.g. https://ping.example.com)' }
+$url = $url.Trim().TrimEnd('/')
+if ($url -notmatch '^https?://') {
+  Finish 'Please run this again and enter the full address, starting with http:// or https://.'
   return
 }
 

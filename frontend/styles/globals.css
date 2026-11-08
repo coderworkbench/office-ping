@@ -2,9 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Sunbeam design system (TGF) — see w-lms-platform UI_DESIGN_SYSTEM.md.
- * Values match khoji-connect styles/sunbeam.css, including its 2026-08 AA
- * contrast fixes (--ink-3, --success, --warn, --rose).
+/* Sunbeam design system: warm cream surfaces, gold accent, AA-contrast
+ * text colours (--ink-3, --success, --warn, --rose).
  * RGB triples so Tailwind can add alpha: bg-gold-fill/40. */
 :root {
   /* surfaces */

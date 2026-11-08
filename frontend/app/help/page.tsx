@@ -175,7 +175,7 @@ function BlockView({ block }: { block: Block }) {
 // A one-line command with a Copy button. {origin} is this site's address, so
 // the commands work wherever Office Ping is hosted.
 function CopyCommand({ command }: { command: string }) {
-  const [origin, setOrigin] = useState('https://ping.tejgyan.org');
+  const [origin, setOrigin] = useState('https://ping.example.com');  // replaced by the real address on load
   const [copied, setCopied] = useState(false);
   useEffect(() => { setOrigin(window.location.origin); }, []);
   const text = command.replaceAll('{origin}', origin);

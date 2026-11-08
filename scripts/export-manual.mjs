@@ -12,8 +12,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const manual = JSON.parse(readFileSync(join(root, 'frontend/content/manual.json'), 'utf8'));
 
 // Commands and downloads in the app use the address it's opened at; this
-// Markdown copy uses the production address.
-const ORIGIN = process.env.OFFICE_PING_URL || 'https://ping.tejgyan.org';
+// Markdown copy uses OFFICE_PING_URL, or a placeholder address.
+const ORIGIN = process.env.OFFICE_PING_URL || 'https://ping.example.com';
 
 const AUDIENCE = { all: 'For everyone', hr: 'For HR and admins', admin: 'For admins' };
 const slug = (s) => s.id;
